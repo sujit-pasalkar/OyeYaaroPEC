@@ -1,0 +1,47 @@
+1.make componenet folder and add reusable widget their.
+like im using logout function in 2 tabs pages.
+make logout widget as gaurav created.
+
+//sqlite operations
+1.chaltlist.dart--> 348,352
+
+
+//add data as get dont perform deleteall and then getAll operations 
+
+chatoperation modified done
+check for calling operations..7/5
+
+//checking with contains.mp3 .mp4 gives problem .....use msgType == 1 then show audio
+
+//camera image err
+I/flutter (29078): ══╡ EXCEPTION CAUGHT BY IMAGE RESOURCE SERVICE ╞════════════════════════════════════════════════════
+I/flutter (29078): The following FileSystemException was thrown resolving an image codec:
+I/flutter (29078): Cannot open file, path = '1' (OS Error: No such file or directory, errno = 2)
+
+
+/data/user/0/com.plmlogix.contacts_chat/databases/chat_db
+
+0 == not  uploaded
+1 uploaded
+
+//when you write add member functinality for group by admin keep in mind to add changes in:
+//1.add it to sqliet's addgroupmember table
+//2.add in firebase's group member table
+//3.send new message type to group
+
+chexk downlload imgggg
+add image and video compressions
+
+<meta-data
+                android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
+                android:value="true" />
+
+
+                1+
+                W/1.gpu   (10278): type=1400 audit(0.0:3751763): avc: denied { read } for name="u:object_r:vendor_default_prop:s0" dev="tmpfs" ino=15912 scontext=u:r:untrusted_app:s0:c154,c257,c512,c768 tcontext=u:object_r:vendor_default_prop:s0 tclass=file permissive=0
+E/libc    (10278): Access denied finding property "vendor.debug.egl.swapinterval"
+
+
+21/5
+working on showing profile pic in chat list
+changed private list history table ...add profileurl field to all privatechatlist getters
