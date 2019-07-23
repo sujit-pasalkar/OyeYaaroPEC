@@ -12,7 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // page
 import '../View/Personal/chat_list.dart';
 import '../View/Group/group_list.dart';
-import 'imageProcessor/dashboard.dart';
+import 'imageProcessor/dashboard2.dart';
 
 // mvp
 import '../Models/sharedPref.dart';
@@ -101,16 +101,16 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: WillPopScope(
-        child: buildBody(),
-        onWillPop: onBackPress,
-      ),
-      bottomNavigationBar:
-      //  !_isBottomBarVisible ? 
-      bottomBar() 
-      // : SizedBox(),
-    );
+        backgroundColor: Colors.white,
+        body: WillPopScope(
+          child: buildBody(),
+          onWillPop: onBackPress,
+        ),
+        bottomNavigationBar:
+            //  !_isBottomBarVisible ?
+            bottomBar()
+        // : SizedBox(),
+        );
   }
 
   buildBody() {
@@ -143,29 +143,34 @@ class _HomePageState extends State<HomePage> {
           key: groupsKey,
         );
         break;
+
+      case 4:
+        return ImageProcessor();
+        break;
     }
   }
 
   bottomBar() {
-    return
-        GradientBottomNavigationBar(
+    return GradientBottomNavigationBar(
       backgroundColorStart: Color(0xffb578de3).withOpacity(0.9),
       backgroundColorEnd: Color(0xffb4fcce0).withOpacity(0.9),
       currentIndex: pref.currentIndex,
-      type: BottomNavigationBarType.shifting,
+      type: BottomNavigationBarType.fixed,
+      fixedColor: Colors.white,
+      iconSize: 30,
       onTap: (int index) {
-        if (index == 4) {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => ImageProcessor()));
-        } else {
-          setState(() {
-            pref.currentIndex = index;
-          });
-        }
+        // if (index == 4) {
+        //   Navigator.of(context)
+        //       .push(MaterialPageRoute(builder: (context) => ImageProcessor()));
+        // } else {
+        setState(() {
+          pref.currentIndex = index;
+        });
+        // }
       },
       items: <BottomNavigationBarItem>[
+        // 1
         BottomNavigationBarItem(
-          //1
           icon: Icon(
             Icons.home,
             color: Colors.white,
@@ -173,13 +178,13 @@ class _HomePageState extends State<HomePage> {
           activeIcon: Icon(
             Icons.home,
             color: Colors.black,
-            size: 40.0,
           ),
           title: SizedBox(
             height: 0.0,
             width: 0.0,
           ),
         ),
+        // 2
         BottomNavigationBarItem(
           icon: Image(
             image: new AssetImage("assets/VIDEO_BACKGROUND.png"),
@@ -192,8 +197,8 @@ class _HomePageState extends State<HomePage> {
           activeIcon: Image(
             image: AssetImage("assets/VIDEO_BACKGROUND.png"),
             color: Colors.black,
-            width: 45.0,
-            height: 45.0,
+            width: 40.0,
+            height: 40.0,
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
           ),
@@ -202,8 +207,8 @@ class _HomePageState extends State<HomePage> {
             width: 0.0,
           ),
         ),
+        // 3
         BottomNavigationBarItem(
-          //3
           icon: Icon(
             Icons.person,
             color: Colors.white,
@@ -211,15 +216,14 @@ class _HomePageState extends State<HomePage> {
           activeIcon: Icon(
             Icons.person,
             color: Colors.black,
-            size: 40.0,
           ),
           title: SizedBox(
             height: 0.0,
             width: 0.0,
           ),
         ),
-        BottomNavigationBarItem(
           //4
+        BottomNavigationBarItem(
           icon: Image(
             image: new AssetImage("assets/GROUP.png"),
             color: Colors.white,
@@ -231,8 +235,8 @@ class _HomePageState extends State<HomePage> {
           activeIcon: Image(
             image: new AssetImage("assets/GROUP.png"),
             color: Colors.black,
-            width: 45.0,
-            height: 45.0,
+            width: 40.0,
+            height: 40.0,
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
           ),
@@ -241,16 +245,15 @@ class _HomePageState extends State<HomePage> {
             width: 0.0,
           ),
         ),
-        BottomNavigationBarItem(
           //5
+        BottomNavigationBarItem(
           icon: Icon(
             Icons.movie_filter,
             color: Colors.white,
           ),
           activeIcon: Icon(
-            Icons.group,
+            Icons.movie_filter,
             color: Colors.black,
-            size: 40.0,
           ),
           title: SizedBox(
             height: 0.0,

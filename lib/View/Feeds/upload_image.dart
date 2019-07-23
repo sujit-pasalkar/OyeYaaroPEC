@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Provider/Firebase/firebase_storage_operations.dart';
 import 'package:oye_yaaro_pec/Provider/MediaOperation/compressMedia.dart';
@@ -8,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class UploadImage extends StatefulWidget {
   final String tag;
@@ -20,15 +22,15 @@ class UploadImage extends StatefulWidget {
 class _UploadImage extends State<UploadImage> {
   File file;
   TextEditingController captionController = TextEditingController();
-  // final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool uploading = false;
 
-  // Privacy privacy = Privacy();
+  Privacy privacy = Privacy();
 
   @override
   initState() {
     super.initState();
-    // privacy.changePrivacy('Public');
+    privacy.changePrivacy('Public');
     captionController.text = widget.tag;
     _load();
   }
@@ -42,7 +44,7 @@ class _UploadImage extends State<UploadImage> {
     return Stack(
       children: <Widget>[
         Scaffold(
-          // key: _scaffoldKey,
+          key: _scaffoldKey,
           appBar: AppBar(
             title: Text("Post Feed"),
             flexibleSpace: FlexAppbar(),
@@ -77,49 +79,68 @@ class _UploadImage extends State<UploadImage> {
                       border: Border.all(color: Color(0xffb00bae3), width: 2.0),
                       color: Colors.grey[300],
                       shape: BoxShape.circle,
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: //CachedNetworkImageProvider //use fade in image
-                            NetworkImage(pref.profileUrl),
-                      ),
+                      // image: DecorationImage(
+                      //   fit: BoxFit.cover,
+                      //   image: NetworkImage(pref.profileUrl),
+                      // ),
                     ),
                     height: 50.0,
                     width: 50.0,
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        fit: BoxFit.cover,
+                        // imageBuilder: (context,img)=>Center(
+                        //   child: Text('data'),
+                        // ),
+                        imageUrl: pref.profileUrl,
+                        placeholder: (context, url) => Center(
+                          child: SizedBox(
+                              height: 20.0,
+                              width: 20.0,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 1.0)),
+                        ),
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.person,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
                   title: Text(
                     pref.name,
                     style: TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  // subtitle: Row(
-                  //   mainAxisSize: MainAxisSize.min,
-                  //   children: <Widget>[
-                  //     InkWell(
-                  //       child: Container(
-                  //         padding: EdgeInsets.only(
-                  //           top: 0.5,
-                  //           bottom: 0.5,
-                  //           left: 10.0,
-                  //           right: 5.0,
-                  //         ),
-                  //         margin: EdgeInsets.only(top: 4.0),
-                  //         decoration: BoxDecoration(
-                  //           border: Border.all(color: Colors.grey),
-                  //           borderRadius: BorderRadius.circular(5.0),
-                  //         ),
-                  //         child: Row(
-                  //           children: <Widget>[
-                  //             Text(privacy.visibility),
-                  //             SizedBox(
-                  //               width: 2.5,
-                  //             ),
-                  //             Icon(Icons.arrow_drop_down),
-                  //           ],
-                  //         ),
-                  //       ),
-                  //       // onTap: _changePrivacy,
-                  //     ),
-                  //   ],
-                  // ),
+                  subtitle: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      InkWell(
+                        child: Container(
+                          padding: EdgeInsets.only(
+                            top: 0.5,
+                            bottom: 0.5,
+                            left: 10.0,
+                            right: 5.0,
+                          ),
+                          margin: EdgeInsets.only(top: 4.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              Text(privacy.visibility),
+                              SizedBox(
+                                width: 2.5,
+                              ),
+                              Icon(Icons.arrow_drop_down),
+                            ],
+                          ),
+                        ),
+                        onTap: _changePrivacy,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               file != null
@@ -151,7 +172,6 @@ class _UploadImage extends State<UploadImage> {
                 child: file == null
                     ? Container(
                         alignment: Alignment.center,
-                        // height: 200.0,
                         color: Colors.white,
                         child: RaisedButton.icon(
                           color: Colors.green,
@@ -257,7 +277,6 @@ class _UploadImage extends State<UploadImage> {
                   if (imageFile != null) {
                     File compressedImageFile =
                         await cmprsMedia.compressImage(imageFile);
-
                     setState(() {
                       file = compressedImageFile;
                     });
@@ -284,7 +303,6 @@ class _UploadImage extends State<UploadImage> {
                   if (imageFile != null) {
                     File compressedImageFile =
                         await cmprsMedia.compressImage(imageFile);
-
                     setState(() {
                       file = compressedImageFile;
                     });
@@ -333,107 +351,99 @@ class _UploadImage extends State<UploadImage> {
     });
   }
 
-  // Future _changePrivacy() {
-  //   //
-  //   return showModalBottomSheet(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Container(
-  //         padding: EdgeInsets.all(15.0),
-  //         child: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: <Widget>[
-  //             Container(
-  //               alignment: Alignment.centerLeft,
-  //               padding: EdgeInsets.only(bottom: 10.0),
-  //               child: Text(
-  //                 "Share with...",
-  //                 style: TextStyle(
-  //                   fontSize: 16.0,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ),
-  //             FlatButton(
-  //               padding: EdgeInsets.symmetric(vertical: 10.0),
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Text("Class"),
-  //                   Spacer(),
-  //                   Icon(Icons.group),
-  //                 ],
-  //               ),
-  //               onPressed: () async {
-  //                 Navigator.pop(context);
-  //                 privacy.changePrivacy('Class');
-  //                 setState(() {});
-  //               },
-  //             ),
-  //             Divider(),
-  //             FlatButton(
-  //               padding: EdgeInsets.symmetric(vertical: 10.0),
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Text("College"),
-  //                   Spacer(),
-  //                   Icon(Icons.location_city),
-  //                 ],
-  //               ),
-  //               onPressed: () async {
-  //                 Navigator.pop(context);
-  //                 privacy.changePrivacy('College');
-  //                 setState(() {});
-  //               },
-  //             ),
-  //             Divider(),
-  //             FlatButton(
-  //               padding: EdgeInsets.symmetric(vertical: 10.0),
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Text("Public"),
-  //                   Spacer(),
-  //                   Icon(Icons.public),
-  //                 ],
-  //               ),
-  //               onPressed: () async {
-  //                 Navigator.pop(context);
-  //                 privacy.changePrivacy('Public');
-  //                 setState(() {});
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+  Future _changePrivacy() {
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(bottom: 10.0),
+                child: Text(
+                  "Share with...",
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  children: <Widget>[
+                    Text("Class"),
+                    Spacer(),
+                    Icon(Icons.group),
+                  ],
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  privacy.changePrivacy('Class');
+                  setState(() {});
+                },
+              ),
+              Divider(),
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  children: <Widget>[
+                    Text("College"),
+                    Spacer(),
+                    Icon(Icons.location_city),
+                  ],
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  privacy.changePrivacy('College');
+                  setState(() {});
+                },
+              ),
+              Divider(),
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  children: <Widget>[
+                    Text("Public"),
+                    Spacer(),
+                    Icon(Icons.public),
+                  ],
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  privacy.changePrivacy('Public');
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   _postFeed() async {
     try {
       setState(() {
         uploading = true;
       });
-
-      File compressedImage;
-      int fileSize = await file.length();
-      print("Original file size: " + (fileSize / 1024).toString() + " KB");
-
-      if ((fileSize / 1024) > 500) {
-        compressedImage = await FlutterNativeImage.compressImage(file.path,
-            percentage: 75, quality: 75);
-      } else {
-        compressedImage = file;
-      }
-
-      fileSize = await compressedImage.length();
-
-      print("Compressed file size: " + (fileSize / 1024).toString() + " KB");
-
       int timestamp = DateTime.now().millisecondsSinceEpoch;
-      // uuid = Uuid().v1();
+      // File compressedImage = await cmprsMedia.compressImage(file);
+
+      // put this file in path = 'ext.dir+"/OyeYaaro/.post/"+timestamp+".jpg"
+      // print('compress file path :${compressedImage.path}');
+      // print(file.lengthSync());
+      // print(compressedImage.lengthSync());
+
+      // if (file.lengthSync() == compressedImage.lengthSync()) {
+      //   print('same file');
+      // }
 
       String mediaUrl = await storage.uploadImage(
-          timestamp.toString(), compressedImage, true);
+          timestamp.toString(), file, true);
 
       print("mediaUrl: " + mediaUrl);
 
@@ -455,60 +465,61 @@ class _UploadImage extends State<UploadImage> {
     }
   }
 
-  Future<bool> saveToFireStore(
+  Future saveToFireStore(
       {String mediaUrl, String description, int timestamp}) async {
+    Completer _c = new Completer();
     print('in saveToFireStore()');
-    var reference = Firestore.instance.collection('insta_posts');
+    try {
+      var reference = Firestore.instance.collection('insta_posts');
 
-    DocumentReference tagReference =
-        Firestore.instance.collection('insta_tags').document("tags");
+      DocumentReference tagReference =
+          Firestore.instance.collection('insta_tags').document("tags");
 
-    // http.Response r/esponse = await http.get('http://oyeyaaroapi.plmlogix.com/time');
-    // int timestamp = DateTime.now().millisecondsSinceEpoch;
-    // int.parse(jsonDecode(response.body)['timestamp']);
+      List<String> hashtags = List<String>();
+      description
+          .replaceAll("\\n", " ")
+          .split(" ")
+          .where((value) {
+            value.replaceAll(" ", "");
+            return value.startsWith("#");
+          })
+          .toList()
+          .forEach((value) {
+            hashtags.add(value.replaceAll("#", "").toLowerCase());
+          });
 
-    List<String> hashtags = List<String>();
-    description
-        .replaceAll("\\n", " ")
-        .split(" ")
-        .where((value) {
-          value.replaceAll(" ", "");
-          return value.startsWith("#");
-        })
-        .toList()
-        .forEach((value) {
-          hashtags.add(value.replaceAll("#", "").toLowerCase());
-        });
+      reference.add({
+        "username": pref.name,
+        "likes": {},
+        "mediaUrl": mediaUrl,
+        "description": description,
+        "ownerId": pref.pin,
+        "visibility": privacy.visibleTo,
+        "timestamp": timestamp,
+        "tags": hashtags,
+      }).then((DocumentReference doc) {
+        String docId = doc.documentID;
+        reference.document(docId).updateData({"postId": docId});
+        print('post added to firestore :$docId --');
+      });
 
-    reference.add({
-      "username": pref.name,
-      "likes": {},
-      "mediaUrl": mediaUrl,
-      "description": description,
-      "ownerId": pref.phone,
-      "visibility": 'Public', //'privacy.visibleTo',
-      "timestamp": timestamp,
-      "tags": hashtags,
-    }).then((DocumentReference doc) {
-      String docId = doc.documentID;
-      reference.document(docId).updateData({"postId": docId});
-      print('post added to firestore :$docId --');
-    });
+      Map<String, bool> tags = Map<String, bool>();
+      hashtags.forEach((tag) {
+        tags.putIfAbsent(tag, () => true);
+      });
 
-    Map<String, bool> tags = Map<String, bool>();
-    hashtags.forEach((tag) {
-      tags.putIfAbsent(tag, () => true);
-    });
-
-    await tagReference.setData(tags, merge: true).then((onValue) {
-      print('tags added in tagReference');
-    });
-    return true;
+      await tagReference.setData(tags, merge: true).then((onValue) {
+        print('tags added in tagReference');
+      });
+      _c.complete(true);
+    } catch (e) {
+      _c.completeError(e);
+    }
+    return _c.future;
   }
 }
 
 class Privacy {
-  //
   String visibleTo;
   IconData icon;
   String visibility;
@@ -518,12 +529,12 @@ class Privacy {
   changePrivacy(String visibleTo) {
     switch (visibleTo) {
       case 'Class':
-        this.visibleTo = 'currentUser.groupId'; //
+        this.visibleTo = pref.groupId;
         this.icon = Icons.group;
         this.visibility = 'Class';
         break;
       case 'College':
-        this.visibleTo = 'currentUser.collegeName'; //
+        this.visibleTo = pref.collegeName;
         this.icon = Icons.location_city;
         this.visibility = 'College';
         break;

@@ -22,7 +22,9 @@ class DatabaseCreator {
       isUploaded TEXT NOT NULL,
       mediaUrl TEXT,
       thumbPath TEXT,
-      thumbUrl TEXT
+      thumbUrl TEXT,
+      senderPin TEXT NOT NULL,
+      receiverPin TEXT NOT NULL
    )""";
 
     String q2 = """CREATE TABLE groupChatTable ( 
@@ -36,7 +38,8 @@ class DatabaseCreator {
       mediaUrl TEXT,
       thumbPath TEXT,
       thumbUrl TEXT,
-      profileImg TEXT NOT NULL
+      profileImg TEXT NOT NULL,
+      senderPin TEXT NOT NULL
    )""";
 
     String q3 = """CREATE TABLE groupMembersTable ( 
@@ -44,7 +47,8 @@ class DatabaseCreator {
       memberPhone TEXT NOT NULL,
       memberName TEXT NOT NULL,
       profileUrl TEXT NOT NULL,
-      userType TEXT NOT NULL
+      userType TEXT NOT NULL,
+      memberPin TEXT NOT NULL
    )""";
 
     String q4 = """CREATE TABLE privateChatListTable ( 
@@ -54,7 +58,9 @@ class DatabaseCreator {
       chatListRecPhone TEXT NOT NULL,
       chatListLastMsgTime TEXT NOT NULL,
       chatListMsgCount TEXT NOT NULL,
-      chatListProfile TEXT NOT NULL
+      chatListProfile TEXT NOT NULL,
+      chatListSenderPin TEXT NOT NULL,
+      chatListRecPin TEXT NOT NULL
    )""";
 
     String q5 = """CREATE TABLE groupChatListTable ( 
@@ -63,15 +69,17 @@ class DatabaseCreator {
       chatListSenderPhone TEXT NOT NULL,
       chatListLastMsgTime TEXT NOT NULL,
       chatListMsgCount TEXT NOT NULL,
-      chatGroupName TEXT NOT NULL
+      chatGroupName TEXT NOT NULL,
+      chatListSenderPin TEXT NOT NULL
    )""";
     //get logo from chatid.png url
 
     String q6 = """CREATE TABLE contactsTable ( 
-      contactsPhone TEXT PRIMARY KEY,
-      contactsName TEXT,
+      contactsPhone TEXT PRIMARY KEY NOT NULL,
+      contactsName TEXT NOT NULL,
       contactRegistered TEXT NOT NULL,
-      profileUrl TEXT
+      profileUrl TEXT,
+      contactsPin TEXT
    )""";
 
     // the path is relative to the documents directory

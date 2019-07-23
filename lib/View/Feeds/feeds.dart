@@ -10,6 +10,7 @@ import 'feedBuilder.dart';
 import 'upload_image.dart';
 import 'upload_video.dart';
 import 'searchFeedByTag.dart';
+import '../../Models/url.dart';
 // plugins
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
@@ -72,21 +73,7 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
       tooltip: "Menu",
       onSelected: _onMenuItemSelect,
       itemBuilder: (BuildContext context) => [
-            // PopupMenuItem<String>(
-            //   value: 'Logout',
-            //   child: Padding(
-            //     padding: EdgeInsets.symmetric(horizontal: 5.0),
-            //     child: Row(
-            //       children: <Widget>[
-            //         Text("Logout"),
-            //         Spacer(),
-            //         Icon(Icons.power_settings_new),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-
-             PopupMenuItem<String>(
+        PopupMenuItem<String>(
               value: 'My Profile',
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.0),
@@ -105,10 +92,6 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
 
   _onMenuItemSelect(String option) {
     switch (option) {
-      // case 'Logout':
-      //   logout();
-      //   break;
-
         case 'Search':
         Navigator.push(
           context,
@@ -337,12 +320,14 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
     }
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String userId = pref.phone.toString();
-    String url = 'http://54.200.143.85:4000/getFeeds?userId=' + userId;
+    String userId = pref.pin.toString();
+    // print('userId:${pref.pin},phone : ${pref.phone}');
+    String uri = '${url.api}getFeeds?userId=' + userId;
     HttpClient httpClient = new HttpClient();
+    // print(uri);
 
     try {
-      HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
+      HttpClientRequest request = await httpClient.getUrl(Uri.parse(uri));
       HttpClientResponse response = await request.close();
       if (response.statusCode == 200) {
         String json = await response.transform(utf8.decoder).join();

@@ -5,7 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:simple_permissions/simple_permissions.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
 //pages
 import './Theme/theme.dart';
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         home: MainPage(),
         routes: <String, WidgetBuilder>{
           '/loginpage': (BuildContext context) => LoginPage(),
-          '/profile': (BuildContext context) => Profile(),
+          // '/profile': (BuildContext context) => Profile(),
           '/home': (BuildContext context) => HomePage(),
         });
   }
@@ -50,6 +50,7 @@ class _MainPageState extends State<MainPage> {
       const MethodChannel('com.plmlogix.contacts_chat/platform');
   bool isLoggedIn = false;
   bool permissionButton = true;
+  Map<PermissionGroup, PermissionStatus> permissions;
   var _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   DatabaseReference _onlineStatusReference;
@@ -59,9 +60,8 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     db.onReady.then((_) async {
       print("STATE: THE DATABASE IS READY");
-     await checkPermission();
+      await requestPermission();
       pref.getValues().then((onValue) {
-        // print('${pref.phone}');
         checkUserProfile();
       });
     });
@@ -86,23 +86,24 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
-  Future<String> checkPermission() async {
+  Future<void> requestPermission() async {
     try {
-      await SimplePermissions.requestPermission(Permission.ReadExternalStorage);
-      await SimplePermissions.requestPermission(
-          Permission.WriteExternalStorage);
-      await SimplePermissions.requestPermission(Permission.Camera);
-      await SimplePermissions.requestPermission(Permission.AccessFineLocation);
-      await SimplePermissions.requestPermission(Permission.RecordAudio);
-      await SimplePermissions.requestPermission(Permission.PhotoLibrary);
-      await SimplePermissions.requestPermission(Permission.ReadContacts);
-      await SimplePermissions.requestPermission(Permission.WriteContacts);
-      await SimplePermissions.requestPermission(Permission.ReadPhoneState);
 
-      return "result";
+      permissions = await PermissionHandler()
+          .requestPermissions([PermissionGroup.storage]);
+      await PermissionHandler().requestPermissions([PermissionGroup.camera]);
+      await PermissionHandler()
+          .requestPermissions([PermissionGroup.microphone]);
+      await PermissionHandler()
+          .requestPermissions([PermissionGroup.speech]); //ios
+      await PermissionHandler().requestPermissions([PermissionGroup.photos]);
+      await PermissionHandler()
+          .requestPermissions([PermissionGroup.mediaLibrary]); //ios
+      await PermissionHandler().requestPermissions([PermissionGroup.contacts]);
+      await PermissionHandler().requestPermissions([PermissionGroup.phone]);
+      await PermissionHandler().requestPermissions([PermissionGroup.sensors]);
     } catch (e) {
-      // print('Got Error while getting Permissions : $e');
-      return e;
+      print('Got Error while getting Permissions : $e');
     }
   }
 
@@ -111,29 +112,21 @@ class _MainPageState extends State<MainPage> {
   }
 
   grantPermission() async {
-    bool checkReadContacts =
-        await SimplePermissions.checkPermission(Permission.ReadContacts);
-    bool checkReadExternalStorage =
-        await SimplePermissions.checkPermission(Permission.ReadExternalStorage);
-    bool checkWriteExternalStorage = await SimplePermissions.checkPermission(
-        Permission.WriteExternalStorage);
+    PermissionStatus permission1 = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.contacts);
+    PermissionStatus permission2 = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.storage);
 
-    print("permission is " + checkReadContacts.toString());
-    if (!checkReadContacts ||
-        !checkReadExternalStorage ||
-        !checkWriteExternalStorage) {
+    // print("permission is :${permission1.value} ");
+    if (permission1.value == 0 || permission2.value == 0) {
       _scaffoldKey.currentState.showSnackBar(SnackBar(
         content: Text('App Permission not Granted.'),
-        duration: Duration(seconds: 3),
+        duration: Duration(seconds: 1),
       ));
       setState(() {
         permissionButton = false;
       });
     } else {
-      // setState(() {
-      //   permissionButton = true;
-      // });
-
       if (pref.phone != null) {
         print('Phone Verified.');
         if (pref.pin == null) {
@@ -143,13 +136,14 @@ class _MainPageState extends State<MainPage> {
               builder: (context) => Pin(),
             ),
           );
-        } else 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomePage(),
-            ),
-          );
+        } else
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => HomePage(),
+          //   ),
+          // );
+           Navigator.of(context).pushReplacementNamed('/home');
       } else {
         Navigator.of(context).pushReplacementNamed('/loginpage');
       }
@@ -226,13 +220,17 @@ class _MainPageState extends State<MainPage> {
                     icon: Icon(Icons.chevron_right),
                     label: Text('Allow Permission'),
                     onPressed: () async {
-                      await SimplePermissions.requestPermission(
-                          Permission.ReadExternalStorage);
+                      // await SimplePermissions.requestPermission(
+                      //     Permission.ReadExternalStorage);
 
-                      await SimplePermissions.requestPermission(
-                          Permission.WriteExternalStorage);
-                      await SimplePermissions.requestPermission(
-                          Permission.ReadContacts);
+                      // await SimplePermissions.requestPermission(
+                      //     Permission.WriteExternalStorage);
+                      // await SimplePermissions.requestPermission(
+                      //     Permission.ReadContacts);
+                      await PermissionHandler()
+                          .requestPermissions([PermissionGroup.contacts]);
+                      await PermissionHandler()
+                          .requestPermissions([PermissionGroup.storage]);
 
                       grantPermission();
                     },

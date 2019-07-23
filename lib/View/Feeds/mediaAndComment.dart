@@ -173,7 +173,7 @@ class _MediaAndCommentState extends State<MediaAndComment> {
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Container(
-                      child: widget.postOwner == pref.phone
+                      child: widget.postOwner == pref.pin
                           ? Container(
                               padding: EdgeInsets.all(1.0),
                               decoration: new BoxDecoration(

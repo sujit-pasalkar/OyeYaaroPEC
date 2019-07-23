@@ -10,6 +10,7 @@ import './userService.dart';
 import '../../View/home.dart';
 import 'package:oye_yaaro_pec/Provider/ContactOperations/contact_operations.dart';
 
+
 class Pin extends StatefulWidget {
   @override
   _PinState createState() => _PinState();
@@ -186,8 +187,10 @@ class _PinState extends State<Pin> {
                     String res = await UserService.checkUser(pin);
                     print('res:$res');
                     if (res == 'true') {
-                     String val = await co.getContacts();
-                      print('go to home:$val');
+                      // here check only reg contacts (and use getcontacts along side phone auth )
+                    //  String val = await co.getContacts();
+                    await co.updateRegisteredContacts();
+                    print('go to home');
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -206,7 +209,7 @@ class _PinState extends State<Pin> {
                   } catch (e) {
                     print('Error:$e');
                     _scaffoldKey.currentState.showSnackBar(SnackBar(
-                      content: Text("Error while login"),
+                      content: Text("Error while login:$e"),
                       backgroundColor: Colors.redAccent,
                     ));
                     setState(() {

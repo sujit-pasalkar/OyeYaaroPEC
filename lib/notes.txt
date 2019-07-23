@@ -45,3 +45,27 @@ E/libc    (10278): Access denied finding property "vendor.debug.egl.swapinterval
 21/5
 working on showing profile pic in chat list
 changed private list history table ...add profileurl field to all privatechatlist getters
+
+PEC web configuration
+ apiKey: "AIzaSyD3fO09SazEiJhke5NCWlhw-ie432n3E5o",
+    authDomain: "oyeyaaropec.firebaseapp.com",
+    databaseURL: "https://oyeyaaropec.firebaseio.com",
+    projectId: "oyeyaaropec",
+    storageBucket: "oyeyaaropec.appspot.com",
+    messagingSenderId: "727084435442",
+    appId: "1:727084435442:web:383b2b37491a711e"
+
+
+//mofdifing flutter connect yaar
+    {
+  "type": "service_account",//
+  "project_id": "oyeyaaropec",//
+  "private_key_id": "3c563eb1175e42b54be2a647c9f39761ea9ba56d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCn0EvazzWXNn9c\nNGSvsgHZ4dcq8zYkOyzHfQbYM/YOeIhI9W4n0uxebMNierqazARgzOIpq5RjAkex\nHA44biwE4kdHewEBLjJthgo2t1myPuOsED2MbqTL54MzTXFQMkVzkmrVonOdqFSw\nsfOc/yNc/5DOYIqSUUlRH7IJq1wXiEXa4Y+XosmkKmWbBQTTSC+dilSf4l2gc4n3\nKZ4VUmRfx6KJgRqH7LT9Mlv8jU61/xzu0Q4nmg4l3vcQQn+7ae1n3O8SjrkPhj1s\niBQ4HavqVNpMYYvcTUDcq/26bIIUt9Q8xkegbQyDO+6RkTnY7Vchf2mPPlDcxm/2\n1C2+w3lbAgMBAAECgf8bGlfq4Xi8c1W8DpLR9OQckWbqCOeryvaOBnIeZVmwwYu3\nd+whWw0M9/ogRjvw2AJ6jCZw9uyT/V35RqxAXTwNjeCmeY/hNJ61TL+A72qqt7iX\nfeCaTbqLDLuQNPuYFcGEQY3YQeR+Egpgf0ls4I0G0LX+xkoRQ+g62U/xtgBHLuQS\nnTzHSRrHLUErVKW96eJDv21EGfvZWr6OhH1Ig2wR3OqHJYhuxh0Qeb+D9SVIS03s\nAvhpFVeSiju3MMq2puoT+MW0j7GPQ2jvdmRQ9LlKKcHgw0oVSQLcKoN4P/EP72tg\nzPbv8wzPOBV5QJ9up81DkLHhl6NzZnS/oB57Rb0CgYEA6QVFh3nlHJAWjhQm96Jr\noTy84VWrJ4vkCuPZsIeIjZtIIxRdp+SFZTZWFbOyd8GQqcuE3rLncUJhyMMlqsgR\neeyepxmZt7kyuZ0/BlMPajruOXvYlzQpmCSVpeubpOJmM6OL/BwN3g0sQCJfktla\nQ+rEUj6OinITWBKJoMul+S0CgYEAuFzXUDj8FAmGL2aqy7rXusJW3LNMSa0EzBFz\n1vksHAcULypzUvNsgKT4G3mXKcUtI3O8xygpEkeGASOr6FuFntPSYNVQXL+cz/mD\nCgafgxTVjFF7TEsKi/Uk8Bc/MfKLm8z4Wf/IwXUcAruymmyWJoad0ShUchYomMG7\niLcPwacCgYEA4sUZlC2BVZm4CY79GTO8sM5uNpDrnvHZ/Ose+Ff+AWlj+5efSXvw\ngb4uarJVdYwvn76LUTskV6m1he68YoaP02r+Pzp/yTd3cQHhyuLcdpJhMhoff47p\nB8JazH0NHJqjwY9g9PnMWRPSw5twDXZvDPeVFUEB8SPxRV3NCGoH3QUCgYAOeevG\nNtNEV4Mb0bnziVZLKdtcNQ/2cQmBZJVt+d7GzJ9/HJw1lTud1lZNAf0moH7s27el\nA7hF4SvahwyGkDkrwYIxbE6FGd6cTgFGFkMMLeSewf8mfHX1i2g9GfYyW9Muhqex\nmW4QErwCUu6xRXl8yPE3bS1EUA0cAYpSL92i3QKBgQDHwTQ76+4RUvcgUeiyFKBW\nyO3KzVMkZpolcXxMhcLAM6fNXkbKRnTpqycdnKoALQPO8GKG+zkIyXdIkNyTOHgS\n6yc5zzYOwc1GWANSDHL4p6fUBBOoIGzIyzChbJzjmBAPk33ANXrqjpMaC9/M4Rg1\na1Nvwh3nIj4gmQwCXC0dug==\n-----END PRIVATE KEY-----\n",
+  "client_email": "oyeyaaropec@appspot.gserviceaccount.com",//
+  "client_id": "111746287094011570461",//
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",//
+  "token_uri": "https://oauth2.googleapis.com/token",//
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",//
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/oyeyaaropec%40appspot.gserviceaccount.com"//
+}

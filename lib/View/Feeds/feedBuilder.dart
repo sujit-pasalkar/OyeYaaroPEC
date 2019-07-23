@@ -252,8 +252,8 @@ class _FeedBuilder extends State<FeedBuilder> {
                         timestamp: timestamp,
                         posterPhone: widget.ownerId),
                     onTap: () {
-                      // _showImage(1);
-                      print('S3Image:$mediaUrl');
+                      _showImage(1);
+                      // print('S3Image:$mediaUrl');
                     },
                     onDoubleTap: _likePost,
                   )
@@ -287,8 +287,7 @@ class _FeedBuilder extends State<FeedBuilder> {
                             ),
                             iconSize: 80.0,
                             onPressed: () {
-                              // _showImage(2);
-                              print('Video:$mediaUrl');
+                              _showImage(2);
                             },
                           ),
                         ),

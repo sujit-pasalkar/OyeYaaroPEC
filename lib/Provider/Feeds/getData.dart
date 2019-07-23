@@ -1,10 +1,7 @@
 
 import 'package:http/http.dart' as http;
-// import 'user.dart';
 import 'dart:convert';
-// import 'dart:io';
-// import 'package:flutter/services.dart';
-// import 'package:async/async.dart';
+import '../../Models/url.dart';
 
 final _DataService dataService = _DataService();
 
@@ -42,7 +39,7 @@ class _DataService {
     try {
       print('in _getAllTags()');
       http.Response response = await http.get(
-        "http://54.200.143.85:4000/getTags",//
+        "${url.api}getTags",//
         headers: headers,
       );
       if (response.statusCode == 200) {

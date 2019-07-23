@@ -834,12 +834,12 @@ class _ProfileState extends State<MyProfile> {
       });
     }
 
-    String url =
-        'http://54.200.143.85:4000/getFeeds?userId=' + widget.phone.toString();
+    String uri =
+        '${url.api}getFeeds?userId=' + widget.phone.toString();
     HttpClient httpClient = new HttpClient();
 
     try {
-      HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
+      HttpClientRequest request = await httpClient.getUrl(Uri.parse(uri));
       HttpClientResponse response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();

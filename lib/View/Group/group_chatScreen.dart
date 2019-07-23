@@ -417,7 +417,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   void onComplete() {
-    //on audioplaying complete
     setState(() {
       playerState = PlayerState.stopped;
       isPlaying = false;
@@ -429,8 +428,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     audioPlayer.stop();
     _groupMessagesSubscription.cancel();
     _profileSubscription.cancel();
-    // Navigator.of(context).popUntil((route) => route.isFirst);
-    print('dispose');
+    // print('dispose');
     super.dispose();
   }
 
@@ -476,7 +474,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           },
           child: Text(widget.groupName),
         ),
-        // Text(widget.groupName),
         actions: <Widget>[
           _menuBuilder(),
         ],
@@ -2193,7 +2190,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                           }
                         },
                         onTap: () {
-                          // print('ontapp.');
                           setState(() {
                             this.isSearching = true;
                           });
@@ -2517,7 +2513,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               builder: (context) => ConfirmSendVid(
                     img: vid,
                   )));
-      // print('im back with images*************:$val');
       if (val == 'ok') {
         sendVid(vid);
       }
@@ -2816,7 +2811,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   //send video
   void sendVid(File vid) async {
     try {
-      // print('org path :${vid.path}');
       int timestamp = DateTime.now().millisecondsSinceEpoch;
 
 //vid thum folder
@@ -2826,7 +2820,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           videoFile: vid.path,
           imageType: ThumbFormat.JPEG,
           quality: 30);
-      // print('sendVid thumbPath: $thumbPath');
 
       //1. rename default thumbnail name to desired
       File newThumb = await File(thumbPath).rename(
@@ -3014,9 +3007,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       String thumbUrl =
           await storage.uploadImage(timestamp.toString(), File(thumbPath));
 
-      // print('videos thumbUrl : $thumbUrl ................');
       storage.uploadVideo(timestamp.toString(), vidFile).then((firebaseUrl) {
-        // print('firebase VideoUrl : $firebaseUrl');
 
         setState(() {
           uploading = false;

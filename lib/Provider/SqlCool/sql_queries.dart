@@ -4,7 +4,8 @@ import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
 SqlQuery sqlQuery = new SqlQuery();
 
 class SqlQuery {
-  Future<int> addContacts(Map<String, dynamic> row, isRegistered) async {
+  Future addContacts(Map<String, dynamic> row, isRegistered) async {
+    Completer _c = Completer();
     int val;
     try {
       bool exists = await db.exists(
@@ -18,19 +19,19 @@ class SqlQuery {
               row: row,
               where: "contactsPhone=${row['contactsPhone']}",
               verbose: false);
-          return val;
+          _c.complete(val);
         } else {
-          return 1;
+          _c.complete(1);
         }
       } else {
         print('${row['contactsPhone']} not exist');
         val = await db.insert(table: "contactsTable", row: row, verbose: false);
-        return val;
+        _c.complete(val);
       }
     } catch (e) {
       val = 1;
       print('Exception in addContacts($row) : $e');
-      return val;
+      _c.complete(val);
     }
   }
 
@@ -395,18 +396,36 @@ class SqlQuery {
   Future getContactRow(String phone) async {
     Completer _completer = new Completer();
     try {
-      print(phone);
       // check is phone exists logic(need to change wayfor groupInfo.dart and privatechatlist.dart)
       List<Map<String, dynamic>> rows = await db.select(
           table: "contactsTable",
           columns: "*",
           where: "contactsPhone='$phone'",
           verbose: false);
-      print('select contactsName from  contactsTable :$rows');
+      // print('select contactsName from  contactsTable :$rows');
       _completer.complete(rows);
     } catch (e) {
       _completer.completeError(e);
       print('err while getting name :$e');
+    }
+    return _completer.future;
+  }
+
+  //update conatcts row
+  Future updateContactRow(Map<String, dynamic> row) async {
+    Completer _completer = new Completer();
+    try {
+      int val = await db.update(
+          table: "contactsTable",
+          row: row,
+          where: "contactsPhone='${row['contactsPhone']}'",
+          verbose: false
+          );
+      print('updated res-- :$val');
+      _completer.complete(1);
+    } catch (e) {
+      _completer.completeError(e);
+      print('err while updating conatct :$e');
     }
     return _completer.future;
   }
@@ -422,7 +441,25 @@ class SqlQuery {
           // where: "contactsPhone='$phone'",
           orderBy: "contactsName",
           verbose: false);
-      print('select * from  contactsTable :$rows');
+      // print('select * from  contactsTable :$rows');
+      _completer.complete(rows);
+    } catch (e) {
+      _completer.completeError(e);
+      print('err while getting name :$e');
+    }
+    return _completer.future;
+  }
+
+  // get only phones from contacts
+   Future getPhonesfromContact() async {
+    Completer _completer = new Completer();
+    try {
+      List<Map<String, dynamic>> rows = await db.select(
+          table: "contactsTable",
+          columns: "contactsPhone",
+          orderBy: "contactsName",
+          verbose: false);
+      // print('select * from  contactsTable :$rows');
       _completer.complete(rows);
     } catch (e) {
       _completer.completeError(e);

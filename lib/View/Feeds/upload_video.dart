@@ -1,3 +1,5 @@
+
+//Error while compressing video (ffmpeg error)
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Provider/Firebase/firebase_storage_operations.dart';
 import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
@@ -9,8 +11,9 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:thumbnails/thumbnails.dart';
-// import 'package:cached_network_image/cached_network_image.dart';
-
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../Provider/MediaOperation/compressMedia.dart';
+import 'package:path_provider/path_provider.dart';
 
 class UploadVideo extends StatefulWidget {
   final String tag;
@@ -28,9 +31,10 @@ class _UploadVideo extends State<UploadVideo> {
 
   bool uploading = false;
 
-  // Privacy privacy = Privacy();
+  Privacy privacy = Privacy();
 
   File videoFile;
+  Directory extDir;
 
   @override
   initState() {
@@ -40,13 +44,14 @@ class _UploadVideo extends State<UploadVideo> {
     //   _controller = VideoPlayerController.file(videoFile);
     //   await _controller.initialize();
     // }
-    // privacy.changePrivacy('Public');
+    privacy.changePrivacy('Public');
     captionController.text = widget.tag;
     _load();
   }
 
   _load() async {
     await Future.delayed(Duration(milliseconds: 50));
+      extDir = await getExternalStorageDirectory();
     _pickVideo();
   }
 
@@ -56,10 +61,8 @@ class _UploadVideo extends State<UploadVideo> {
         Scaffold(
           appBar: AppBar(
             title: Text("Post Feed"),
-            // backgroundColor: Color(0xffb00bae3),
             flexibleSpace: FlexAppbar(),
           ),
-          // backgroundColor: Colors.grey.shade400,
           bottomNavigationBar: FlatButton(
             padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
             color: Color(0xffb578de3),
@@ -90,49 +93,68 @@ class _UploadVideo extends State<UploadVideo> {
                       border: Border.all(color: Color(0xffb00bae3), width: 2.0),
                       color: Colors.grey[300],
                       shape: BoxShape.circle,
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: //CachedNetworkImageProvider(pref.profileUrl), //use fade in image
-                            NetworkImage(pref.profileUrl),
-                      ),
+                      // image: DecorationImage(
+                      //   fit: BoxFit.cover,
+                      //   image: NetworkImage(pref.profileUrl),
+                      // ),
                     ),
                     height: 50.0,
                     width: 50.0,
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        fit: BoxFit.cover,
+                        // imageBuilder: (context,img)=>Center(
+                        //   child: Text('data'),
+                        // ),
+                        imageUrl: pref.profileUrl,
+                        placeholder: (context, url) => Center(
+                          child: SizedBox(
+                              height: 20.0,
+                              width: 20.0,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 1.0)),
+                        ),
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.person,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
                   title: Text(
                     pref.name,
                     style: TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  // subtitle: Row(
-                  //   mainAxisSize: MainAxisSize.min,
-                  //   children: <Widget>[
-                  //     InkWell(
-                  //       child: Container(
-                  //         padding: EdgeInsets.only(
-                  //           top: 0.5,
-                  //           bottom: 0.5,
-                  //           left: 10.0,
-                  //           right: 5.0,
-                  //         ),
-                  //         margin: EdgeInsets.only(top: 4.0),
-                  //         decoration: BoxDecoration(
-                  //           border: Border.all(color: Colors.grey),
-                  //           borderRadius: BorderRadius.circular(5.0),
-                  //         ),
-                  //         child: Row(
-                  //           children: <Widget>[
-                  //             Text(privacy.visibility),
-                  //             SizedBox(
-                  //               width: 2.5,
-                  //             ),
-                  //             Icon(Icons.arrow_drop_down),
-                  //           ],
-                  //         ),
-                  //       ),
-                  //       // onTap: _changePrivacy,
-                  //     ),
-                  //   ],
-                  // ),
+                  subtitle: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      InkWell(
+                        child: Container(
+                          padding: EdgeInsets.only(
+                            top: 0.5,
+                            bottom: 0.5,
+                            left: 10.0,
+                            right: 5.0,
+                          ),
+                          margin: EdgeInsets.only(top: 4.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              Text(privacy.visibility),
+                              SizedBox(
+                                width: 2.5,
+                              ),
+                              Icon(Icons.arrow_drop_down),
+                            ],
+                          ),
+                        ),
+                        onTap: _changePrivacy,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               videoFile != null
@@ -165,7 +187,6 @@ class _UploadVideo extends State<UploadVideo> {
                 child: _controller == null
                     ? Container(
                         alignment: Alignment.center,
-                        // height: 200.0,
                         color: Colors.white,
                         child: RaisedButton.icon(
                           color: Colors.green,
@@ -365,79 +386,79 @@ class _UploadVideo extends State<UploadVideo> {
     });
   }
 
-  // Future _changePrivacy() {
-  //   return showModalBottomSheet(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Container(
-  //         padding: EdgeInsets.all(15.0),
-  //         child: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: <Widget>[
-  //             Container(
-  //               alignment: Alignment.centerLeft,
-  //               padding: EdgeInsets.only(bottom: 10.0),
-  //               child: Text(
-  //                 "Share with...",
-  //                 style: TextStyle(
-  //                   fontSize: 16.0,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ),
-  //             FlatButton(
-  //               padding: EdgeInsets.symmetric(vertical: 10.0),
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Text("Class"),
-  //                   Spacer(),
-  //                   Icon(Icons.group),
-  //                 ],
-  //               ),
-  //               onPressed: () async {
-  //                 Navigator.pop(context);
-  //                 privacy.changePrivacy('Class');
-  //                 setState(() {});
-  //               },
-  //             ),
-  //             Divider(),
-  //             FlatButton(
-  //               padding: EdgeInsets.symmetric(vertical: 10.0),
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Text("College"),
-  //                   Spacer(),
-  //                   Icon(Icons.location_city),
-  //                 ],
-  //               ),
-  //               onPressed: () async {
-  //                 Navigator.pop(context);
-  //                 privacy.changePrivacy('College');
-  //                 setState(() {});
-  //               },
-  //             ),
-  //             Divider(),
-  //             FlatButton(
-  //               padding: EdgeInsets.symmetric(vertical: 10.0),
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Text("Public"),
-  //                   Spacer(),
-  //                   Icon(Icons.public),
-  //                 ],
-  //               ),
-  //               onPressed: () async {
-  //                 Navigator.pop(context);
-  //                 privacy.changePrivacy('Public');
-  //                 setState(() {});
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+  Future _changePrivacy() {
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(bottom: 10.0),
+                child: Text(
+                  "Share with...",
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  children: <Widget>[
+                    Text("Class"),
+                    Spacer(),
+                    Icon(Icons.group),
+                  ],
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  privacy.changePrivacy('Class');
+                  setState(() {});
+                },
+              ),
+              Divider(),
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  children: <Widget>[
+                    Text("College"),
+                    Spacer(),
+                    Icon(Icons.location_city),
+                  ],
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  privacy.changePrivacy('College');
+                  setState(() {});
+                },
+              ),
+              Divider(),
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  children: <Widget>[
+                    Text("Public"),
+                    Spacer(),
+                    Icon(Icons.public),
+                  ],
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  privacy.changePrivacy('Public');
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   _postFeed() async {
     try {
@@ -445,38 +466,32 @@ class _UploadVideo extends State<UploadVideo> {
         uploading = true;
       });
 
-      File compressedVideo;
-      int fileSize = await videoFile.length();
       int timestamp = DateTime.now().millisecondsSinceEpoch;
+       File compressedVideo ;
 
-      print("Original file size: " + (fileSize / 1024).toString() + " KB");
-
-      // if ((fileSize / 1024) > 2048) {
-        // print('compressing your post video..');
-        // cmprsMedia
-        //     .compressVideo(
-        //         videoFile,
-        //         '/storage/emulated/0/OyeYaaro/Posts/.vid/',
-        //         '$timestamp')
-        //     .then((compressedVideoFile) {
-        //   compressedVideo = compressedVideoFile;
-        // });
+      // if ((videoFile.lengthSync() / 1024) > 2048) {
+      //   print('compressing your post video..');
+      //   compressedVideo = await cmprsMedia
+      //       .compressVideo(
+      //           videoFile,
+      //           extDir.path+'/OyeYaaro/.posts/vid',
+      //           '$timestamp');
       // } else {
         compressedVideo = videoFile;
       // }
 
-      fileSize = await compressedVideo.length();
+      // fileSize = await compressedVideo.length();
 
       // print("Compressed file size: " + (fileSize / 1024).toString() + " KB");
       // print('Compressed file ${compressedVideo.path}');
 
-      // String uuid = Uuid().v1();
       String mediaUrl = await storage.uploadVideo(
           timestamp.toString(), compressedVideo, true);
       print('video uploaded to fb storage');
+      print("mediaUrl: " + mediaUrl);
 
       String thumb = await Thumbnails.getThumbnail(
-          thumbnailFolder: '/storage/emulated/0/OyeYaaro/.thumbnails',
+          thumbnailFolder: extDir.path+'/OyeYaaro/.thumbnails',
           videoFile: compressedVideo.path,
           imageType: ThumbFormat.PNG,
           quality: 30);
@@ -484,7 +499,6 @@ class _UploadVideo extends State<UploadVideo> {
       await storage.uploadImage(timestamp.toString(), File(thumb), true);
       print('video thumbnail uploaded to fb');
 
-      print("mediaUrl: " + mediaUrl);
 
       await saveToFireStore(
           mediaUrl: mediaUrl,
@@ -531,8 +545,8 @@ class _UploadVideo extends State<UploadVideo> {
       "likes": {},
       "mediaUrl": mediaUrl,
       "description": description,
-      "ownerId": pref.phone,
-      "visibility": 'Public', // privacy.visibleTo,
+      "ownerId": pref.pin,
+      "visibility": privacy.visibleTo,
       "timestamp": timestamp,
       "tags": hashtags,
     }).then((DocumentReference doc) {
@@ -560,12 +574,12 @@ class Privacy {
   changePrivacy(String visibleTo) {
     switch (visibleTo) {
       case 'Class':
-        this.visibleTo = 'currentUser.groupId'; //
+        this.visibleTo = pref.groupId; 
         this.icon = Icons.group;
         this.visibility = 'Class';
         break;
       case 'College':
-        this.visibleTo = 'currentUser.collegeName'; //
+        this.visibleTo = pref.collegeName; 
         this.icon = Icons.location_city;
         this.visibility = 'College';
         break;

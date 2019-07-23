@@ -14,19 +14,19 @@ class CompressMedia {
     Completer _c = new Completer();
     try {
       File compressedImageFile;
-      int fileSize = await f.length();
-      print('fileSize : $fileSize');
-      print('path : ${f.path}');
+      // print('org fileSize : ${f.lengthSync()}');
+      // print('path : ${f.path}');
 
-      if ((fileSize / 1024) > 400) {
+      if ((f.lengthSync() / 1024) > 400) {
         compressedImageFile = await FlutterNativeImage.compressImage(f.path,
             percentage: 75, quality: 75);
-        print('compressedImageFile path1 :${compressedImageFile.toString()}');
-        // final String path = compressedImageFile.path;
+      //   print('compressedImageFile path1 :${compressedImageFile.toString()}');
+      // print('cmpr fileSize : ${compressedImageFile.lengthSync()}');
+
         _c.complete(compressedImageFile);
       } else {
         compressedImageFile = f;
-        print('compressedImageFile path2 :${compressedImageFile.toString()}');
+        // print('compressedImageFile path2 :${compressedImageFile.toString()}');
         // final String path = compressedImageFile.path;
         _c.complete(compressedImageFile);
       }

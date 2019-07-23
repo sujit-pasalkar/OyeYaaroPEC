@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'upload_image.dart';
 import 'upload_video.dart';
+import '../../Models/url.dart';
 
 class FeedByTag extends StatefulWidget {
   final String tag;
@@ -254,11 +255,11 @@ class _FeedByTag extends State<FeedByTag> {
       });
     }
 
-    String url = 'http://54.200.143.85:4000/getFeedsByTag?tag=' + widget.tag;
+    String uri = '${url.api}getFeedsByTag?tag=' + widget.tag;
     HttpClient httpClient = new HttpClient();
 
     try {
-      HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
+      HttpClientRequest request = await httpClient.getUrl(Uri.parse(uri));
       HttpClientResponse response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();

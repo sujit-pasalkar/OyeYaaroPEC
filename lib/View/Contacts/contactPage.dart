@@ -5,7 +5,6 @@ import 'package:oye_yaaro_pec/View/Personal/personal_chatScreen.dart';
 import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../Models/url.dart';
@@ -18,7 +17,7 @@ class Contacts extends StatefulWidget {
 }
 
 class _ContactsState extends State<Contacts> {
-  bool _isLoading = false, searchContacts = false, reGetContacts = true;
+  bool _isLoading = false, searchContacts = false;// reGetContacts = true;
   List<Map<String, dynamic>> records = new List<Map<String, dynamic>>();
   List<Map<String, dynamic>> showRecords = new List<Map<String, dynamic>>();
 
@@ -228,39 +227,41 @@ class _ContactsState extends State<Contacts> {
     );
   }
 
-  getAllContacts() async {
-    // get
-    co.getContacts().then((onValue) {
-      print('i got contacts supplys');
-      getSqlContacts();
-      setState(() {
-        reGetContacts = false;
-      });
-    }, onError: (e) {
-      print('Error from co.getContacts():$e');
-    });
-  }
+// call this functioin on refresh
+  // getAllContacts() async {
+  //   // get
+  //   co.getContacts().then((onValue) {
+  //     print('i got contacts supplys');
+  //     getSqlContacts();
+  //     setState(() {
+  //       reGetContacts = false;
+  //     });
+  //   }, onError: (e) {
+  //     print('Error from co.getContacts():$e');
+  //   });
+  // }
 
   getSqlContacts() async {
     sqlQuery.selectContact().then((onValue) {
-      // print('sqlQuery.selectContact() : $onValue');
-      // print('**: $onValue');
-      if (onValue.length == 0) {
-        print('no record found');
-        if (reGetContacts) {
-          getAllContacts();
-        }
-      } else {
-        setState(() {
+      if (onValue.length != 0) {
+        // print('no record found');
+        // if (reGetContacts) {
+        //   getAllContacts();
+        // }
+
+         setState(() {
           records = onValue;
           showRecords = records;
           _isLoading = false;
         });
         //again for new
-        if (reGetContacts) {
-          getAllContacts();
-        }
-      }
+        // if (reGetContacts) {
+        //   getAllContacts();
+        // }
+      } 
+      // else {
+       
+      // }
     }, onError: (e) {
       print('Error from sqlQuery.selectContact():$e');
       setState(() {

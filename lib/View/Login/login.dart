@@ -1,15 +1,16 @@
 //flutter
 import 'dart:async';
 import 'dart:ui';
-import 'package:flutter/cupertino.dart' as prefix0;
-import 'package:oye_yaaro_pec/Components/loader.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:oye_yaaro_pec/Components/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // plugins
 import 'package:firebase_auth/firebase_auth.dart';
 // pages
 import 'pin.dart';
+import 'package:oye_yaaro_pec/Provider/ContactOperations/contact_operations.dart';
+
 // models
 import '../../Models/sharedPref.dart';
 
@@ -55,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           value: '+91'),
     );
-    
+
     _countryCodes.add(new DropdownMenuItem(
         child: new Text(
           'United States',
@@ -73,107 +74,141 @@ class _LoginPageState extends State<LoginPage> {
     _timer = Timer.periodic(
       oneSec,
       (Timer timer) => setState(
-            () {
-              if (_start < 1) {
-                timer.cancel();
-              } else {
-                _start = _start - 1;
-                print('time remain $_start');
-              }
-            },
-          ),
+        () {
+          if (_start < 1) {
+            timer.cancel();
+          } else {
+            _start = _start - 1;
+            print('time remain $_start');
+          }
+        },
+      ),
     );
   }
 
-  Future<void> verifyPhone() async {
-    final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
-      this.verificationId = verId;
-      print('**.AutoRetrivalTimeOut**');
-    };
-
-    final PhoneCodeSent smsCodeSent =
-        (String verId, [int forceCodeResend]) async {
-      this.verificationId = verId;
-      print("2.smsSent_verifyid" + this.verificationId);
-      setState(() {
-        this.loading = false;
-        this.smsCodeSent = true;
-      });
-      timer();
-    };
-
-    final PhoneVerificationCompleted verifiedSuccess = (FirebaseUser user) {
-      // print('**4.verified**');
-      setState(() {
-        this.loading = false;
-      });
+  void _verifyPhoneNumber() async {
+    final PhoneVerificationCompleted verificationCompleted =
+        (AuthCredential phoneAuthCredential) {
+      FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
       register();
     };
 
-    final PhoneVerificationFailed veriFailed = (AuthException exception) {
-      // print('*5*Err ${exception.message}');
+    final PhoneVerificationFailed verificationFailed =
+        (AuthException authException) {
       setState(() {
         this.loading = false;
       });
-      final snackBar = SnackBar(
-        content: Text(exception.message),
-      );
-      _scaffoldKey.currentState.showSnackBar(snackBar);
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text('Verification Failed'
+            // authException.message
+            ),
+      ));
     };
 
-    await FirebaseAuth.instance
-        .verifyPhoneNumber(
-            phoneNumber: this._countryCode + this.phoneNo,
-            codeAutoRetrievalTimeout: autoRetrieve,
-            codeSent: smsCodeSent,
-            timeout: const Duration(seconds: 45),
-            verificationCompleted: verifiedSuccess,
-            verificationFailed: veriFailed)
-        .then((value) {
-      // print('AFTER Verification');
-    });
-  }
+    final PhoneCodeSent codeSent =
+        (String verificationId, [int forceResendingToken]) async {
+      setState(() {
+        this.loading = false;
+        this.smsCodeSent = true;
+        this.verificationId = verificationId;
+      });
+      print('verification id:$verificationId');
+      timer();
+    };
 
- 
+    final PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
+        (String verificationId) {
+      setState(() {
+        this.verificationId = verificationId;
+      });
+    };
 
-  Future<void> register() async {
-    print('register $phoneNo');
-    _timer.cancel();
-    pref.setPhone(int.parse(phoneNo));
-
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text(
-        '$_countryCode $phoneNo Verified Successfully.',
-        style: TextStyle(color: Colors.white),
-      ),
-      duration: Duration(seconds: 2),
-      backgroundColor: Colors.green[400],
-    ));
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Pin(),
-      ),
-    );
-  }
-
-  signIn(String smscode) async {
     FirebaseAuth.instance
-        .signInWithPhoneNumber(verificationId: verificationId, smsCode: smscode)
-        .then((user) {
-      print('auth user is ----> $user');
-      this.register();
-    }, onError: (e) {
-      print('incorrect otp :$e');
-      final snackBar = SnackBar(
-          content: Text('We couldn\'t verify your code, please try again!'),
-          backgroundColor: Colors.redAccent);
-      _scaffoldKey.currentState.showSnackBar(snackBar);
+      ..verifyPhoneNumber(
+          phoneNumber: this._countryCode + phoneNo,
+          timeout: const Duration(seconds: 5),
+          verificationCompleted: verificationCompleted,
+          verificationFailed: verificationFailed,
+          codeSent: codeSent,
+          codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
+  }
+
+  void _signInWithPhoneNumber() async {
+    try {
+      print(verificationId);
+
+      final AuthCredential credential = PhoneAuthProvider.getCredential(
+        verificationId: verificationId,
+        smsCode: smsCode,
+      );
+      print('in signinwithphone-- code:$smsCode,id:$verificationId');
+      print(' credential: $credential');
+
+      final FirebaseUser user =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      print('user: $user');
+      final FirebaseUser currentUser =
+          await FirebaseAuth.instance.currentUser();
+      print('currentUser: $currentUser');
+      assert(user.uid == currentUser.uid);
+      setState(() {
+        if (user != null) {
+          print('Successfully signed in');
+          register();
+        } else {
+          print('throw exception');
+          throw Exception('We couldn\'t verify your code, please try again!');
+        }
+      });
+    } catch (e) {
+      print('error: $e');
+      _scaffoldKey.currentState.showSnackBar(
+          SnackBar(content: Text(e), backgroundColor: Colors.redAccent));
       setState(() {
         this.loading = false;
       });
-    });
+    }
+  }
+
+  Future<void> register() async {
+     setState(() {
+        this.loading = true;
+      });
+    try {
+      _timer.cancel();
+      // set contacts
+      await co.getContacts();
+       setState(() {
+        this.loading = false;
+      });
+
+      pref.setPhone(int.parse(phoneNo));
+
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text(
+          '$_countryCode $phoneNo Verified Successfully.',
+          style: TextStyle(color: Colors.white),
+        ),
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.green[400],
+      ));
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Pin(),
+        ),
+      );
+    } catch (e) {
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text(
+          'Error while login : $e',
+          style: TextStyle(color: Colors.white),
+        ),
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.red[400],
+      ));
+    }
   }
 
   phoneConfirmAlert() async {
@@ -189,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
           verifybtn = false;
         });
         formKey.currentState.save();
-        verifyPhone();
+        _verifyPhoneNumber();
       }
     } else
       print("invalid form");
@@ -450,7 +485,7 @@ class _LoginPageState extends State<LoginPage> {
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
-                                      fontStyle: prefix0.FontStyle.italic,
+                                      fontStyle: FontStyle.italic,
                                     ),
                                   ),
                                 ],
@@ -478,6 +513,7 @@ class _LoginPageState extends State<LoginPage> {
                               setState(() {
                                 smsCode = otp;
                               });
+                              print(verificationId);
                             },
                           ),
                           Padding(
@@ -500,7 +536,7 @@ class _LoginPageState extends State<LoginPage> {
                                             setState(() {
                                               _start = 45;
                                             });
-                                            verifyPhone();
+                                            _verifyPhoneNumber();
                                           }
                                         : null),
                                 RaisedButton(
@@ -512,27 +548,26 @@ class _LoginPageState extends State<LoginPage> {
                                         fontStyle: FontStyle.italic),
                                   ),
                                   onPressed: () {
+                                    print(verificationId);
                                     if (smsCode.length == 6) {
                                       setState(() {
-                                      loading = true;
-                                    });
+                                        loading = true;
+                                      });
 
                                       FirebaseAuth.instance
                                           .currentUser()
                                           .then((user) {
                                         print('user $user');
+                                        print(verificationId);
                                         if (user != null) {
                                           register();
                                           print('user:$user');
                                           print("phone" + this.phoneNo);
                                         } else {
-                                          signIn(this.smsCode);
+                                          _signInWithPhoneNumber();
                                         }
                                       });
                                     } else {
-                                      // setState(() {
-                                      //   this.loading = false;
-                                      // });
                                       final snackBar = SnackBar(
                                         content: Text("Enter 6-digit OTP"),
                                         backgroundColor: Colors.redAccent,
@@ -571,14 +606,9 @@ class _LoginPageState extends State<LoginPage> {
                         setState(() {
                           verifybtn = false;
                         });
-                        // print('${this._countryCode}-$phoneNo');
                       } else if (verifybtn) {
-                        // print('${this._countryCode}-$phoneNo');
                         phoneConfirmAlert();
-                      } 
-                      // else {
-                      //   print('${this._countryCode}-$phoneNo');
-                      // }
+                      }
                     },
                   ),
                 ),

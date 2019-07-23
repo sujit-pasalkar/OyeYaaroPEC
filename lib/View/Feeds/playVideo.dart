@@ -27,7 +27,7 @@ class _PlayScreenState extends State<PlayVideo> {
   @override
   void initState() {
     super.initState();
-    print('in play video');
+    // print('in play video');
     initialize();
   }
 
@@ -43,7 +43,7 @@ class _PlayScreenState extends State<PlayVideo> {
 
     Directory extDir = await getExternalStorageDirectory();
     File downloadedFile = File(
-        extDir.path + "/OyeYaaro/.posts/" + widget.timestamp.toString()+".mp4");
+        extDir.path + "/OyeYaaro/.posts/vid/" + widget.timestamp.toString()+".mp4");
     bool fileExist = await downloadedFile.exists();
 
     if (fileExist) {

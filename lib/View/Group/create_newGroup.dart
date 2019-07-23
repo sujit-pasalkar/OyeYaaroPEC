@@ -11,6 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../Models/sharedPref.dart';
+import '../../Models/url.dart';
 
 class CreateGroupWithName extends StatefulWidget {
   final List<Map<String, String>> addMembers;
@@ -283,7 +284,7 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
         "admin_id": pref.phone.toString()
       });
       await http
-          .post("http://54.200.143.85:4000/createContactsGroup",
+          .post("${url.api}createContactsGroup",
               headers: {"Content-Type": "application/json"}, body: body)
           .then((res) {
         var data = jsonDecode(res.body);

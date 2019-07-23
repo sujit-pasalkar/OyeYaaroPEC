@@ -103,9 +103,9 @@ class _S3Image extends State<S3Image> {
         image: DecorationImage(fit: BoxFit.cover, image: FileImage(file)),
         // ),
       ),
-      child:
+      // child:
       // Image.file(file)
-      Text('${file.path}')
+      // Text('${file.path}')
       /*  Image(
           alignment:
               widget.alignment != null ? widget.alignment : Alignment.center,

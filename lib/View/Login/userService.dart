@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import '../../Models/sharedPref.dart';
+import '../../Models/url.dart';
 
 class UserService {
   static const platform = MethodChannel('com.plmlogix.oye_yaaro_pec/platform');
@@ -20,17 +21,15 @@ class UserService {
         var result = jsonDecode(response.body);
         print('result:$result');
         if (result['success'] == true) {
-
             // 1.setUser
           setUserToken(result,pin);
-
           //2.make invite 'true'
-          await http.post("http://oyeyaaroapi.plmlogix.com/setMember",
+          await http.post("${url.api}setMember",
               headers: {"Content-Type": "application/json"},
               body: jsonEncode({"pin": '$pin'}));
 
           //3.setUser verified phone number
-          await http.post("http://oyeyaaroapi.plmlogix.com/setNumber",
+          await http.post("${url.api}setNumber",
               headers: {"Content-Type": "application/json"},
               body: jsonEncode(
                 {"pin": '$pin', 'mobile': '${pref.phone.toString()}'},
@@ -86,5 +85,6 @@ class UserService {
     pref.setName(result['data'][0]['Name']);
     pref.setGroupId(result['data'][0]['Groups'][0]['dialog_id']);
     pref.setCollege(result['data'][0]['College']);
+    pref.setProfile("${url.api}profile/now/" + pin + ".jpg");
   }
 }
