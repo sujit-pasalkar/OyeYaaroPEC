@@ -1,4 +1,4 @@
-// show your's and others profile 
+// show your's and others profile
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -24,8 +24,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
 class MyProfile extends StatefulWidget {
-  final int phone;
-  MyProfile({@required this.phone});
+  final int pin, phone;
+  MyProfile({@required this.pin, @required this.phone});
 
   @override
   _ProfileState createState() => _ProfileState();
@@ -35,11 +35,11 @@ class _ProfileState extends State<MyProfile> {
   static const platform =
       const MethodChannel('com.plmlogix.oye_yaaro_pec/platform');
 
-      final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   // profile
-  DatabaseReference _profileReference;
+  // DatabaseReference _profileReference;
   TextEditingController _textEditingController = new TextEditingController();
-  String photoPath, firebaseUrl = '';
+  String photoPath;// firebaseUrl = '';
   bool _isLoading = false, edit = false, textEdit = false;
   int postCount;
 
@@ -57,8 +57,8 @@ class _ProfileState extends State<MyProfile> {
   void initState() {
     // print('${pref.phone} and ${widget.phone}');
     // profile
-    _profileReference =
-        database.reference().child('profiles').child(widget.phone.toString());
+    // _profileReference =
+    //     database.reference().child('profiles').child(widget.pin.toString());
 
     // post
     hideButtonController = new ScrollController();
@@ -74,11 +74,11 @@ class _ProfileState extends State<MyProfile> {
           key: _scaffoldKey,
           appBar: AppBar(
             title: Text(
-              pref.phone == widget.phone ? 'Your Profile' : 'Profile Info',
+              pref.pin == widget.pin ? 'Your Profile' : 'Profile Info',
               style: TextStyle(color: Colors.white),
             ),
             actions: <Widget>[
-              pref.phone == widget.phone
+              pref.pin == widget.pin
                   ? !edit
                       ? IconButton(
                           icon: Icon(Icons.edit),
@@ -91,17 +91,17 @@ class _ProfileState extends State<MyProfile> {
                       : IconButton(
                           icon: Icon(Icons.check),
                           onPressed: () {
-                            upload(context);
+                            // upload(context);
                           },
                         )
                   : SizedBox(),
-                  // IconButton(
-                    //   icon: Icon(Icons.call),
-                    //   onPressed: () {
-                    //     audioCall();
-                    //   },
-                    // ),
-              pref.phone != widget.phone
+              // IconButton(
+              //   icon: Icon(Icons.call),
+              //   onPressed: () {
+              //     audioCall();
+              //   },
+              // ),
+              pref.pin != widget.pin
                   ? IconButton(
                       icon: Icon(Icons.message),
                       onPressed: () async {
@@ -131,155 +131,152 @@ class _ProfileState extends State<MyProfile> {
               children: <Widget>[
                 Column(
                   children: <Widget>[
-                    StreamBuilder(
-                      stream: _profileReference.onValue,
-                      builder: (context, snap) {
-                        if (snap.hasData &&
-                            !snap.hasError &&
-                            snap.data.snapshot.value != null) {
-                          // has data old user
-                          firebaseUrl =
-                              snap.data.snapshot.value['profileImg'].toString();
-                          if (!textEdit) {
-                            _textEditingController.text =
-                                snap.data.snapshot.value['name'].toString();
-                          }
-                          textEdit = true;
-                          return Container(
-                            height: MediaQuery.of(context).size.height / 3,
-                            padding: EdgeInsets.fromLTRB(10, 15, 10, 25),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                edit
-                                    ? Expanded(
-                                        child: Container(
-                                          padding: EdgeInsets.all(15),
-                                          child: TextField(
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                            autofocus: !_isLoading,
-                                            cursorColor: Colors.white,
-                                            maxLength: 25,
-                                            textCapitalization:
-                                                TextCapitalization.sentences,
-                                            controller: _textEditingController,
-                                            decoration: InputDecoration(
-                                              hintText: "Type your name here",
-                                              hintStyle: TextStyle(
-                                                  color: Colors.white70),
-                                            ),
-                                            onChanged: (messageText) {
-                                              print(messageText);
-                                            },
-                                            onTap: () {
-                                              print('ontapp.');
-                                            },
-                                          ),
-                                        ),
-                                      )
-                                    : Expanded(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            Text(
-                                              '${_textEditingController.text}',
-                                              softWrap: true,
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 30),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 20),
-                                              child: Text(
-                                                '${widget.phone}',
-                                                softWrap: true,
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w400,
-                                                    fontSize: 20),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                GestureDetector(
-                                    onTap: edit
-                                        ? () {
-                                            openBottomSheet();
-                                          }
-                                        : (){
-                                          print('firebaseUrl : $firebaseUrl');
-                                        },
-                                    child: photoPath != null
-                                        ? Container(
-                                            // padding: EdgeInsets.zero,
-                                            height: 150,
-                                            width: 150,
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Color(0xffb00bae3),
-                                                  width: 2.0),
-                                              color: Colors.grey[300],
-                                              shape: BoxShape.circle,
-                                              image: DecorationImage(
-                                                  fit: BoxFit.cover,
-                                                  image: //CachedNetworkImageProvider
-                                                      FileImage(
-                                                          File(photoPath))),
-                                            ),
-                                          )
-                                        : firebaseUrl != ''
-                                            ? Container(
-                                                height: 150,
-                                                width: 150,
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color: Color(0xffb00bae3),
-                                                      width: 2.0),
-                                                  color: Colors.grey[300],
-                                                  shape: BoxShape.circle,
-                                                  image: DecorationImage(
-                                                    fit: BoxFit.cover,
-                                                    image: //CachedNetworkImageProvider //use fade in image
-                                                        NetworkImage(
-                                                            firebaseUrl),
-                                                  ),
-                                                ),
-                                              )
-                                            : Container(
-                                                height: 150,
-                                                width: 150,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.grey[300],
-                                                    shape: BoxShape.circle,
-                                                    border: Border.all(
-                                                        color:
-                                                            Color(0xffb00bae3),
-                                                        width: 2.0)),
-                                                child: Icon(
-                                                  Icons.person,
-                                                  color: Colors.white,
-                                                  size: 90,
-                                                ),
-                                              ),),
-                              ],
-                            ),
-                          );
-                        } else {
-                          // no data new user
-                          return Center(
-                            child: Text(
-                              'Something Went Wrong \n found snap.data.snapshot.value == null',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          );
-                        }
-                      },
-                    ),
+                    // StreamBuilder(
+                    //   stream: _profileReference.onValue,
+                    //   builder: (context, snap) {
+                    //     if (snap.hasData &&
+                    //         !snap.hasError &&
+                    //         snap.data.snapshot.value != null) {
+                    //       // has data old user
+                    //       firebaseUrl =
+                    //           snap.data.snapshot.value['profileImg'].toString();
+                    //       if (!textEdit) {
+                    //         _textEditingController.text =
+                    //             snap.data.snapshot.value['name'].toString();
+                    //       }
+                    //       textEdit = true;
+                    //       return Container(
+                    //         height: MediaQuery.of(context).size.height / 3,
+                    //         padding: EdgeInsets.fromLTRB(10, 15, 10, 25),
+                    //         child: Row(
+                    //           mainAxisAlignment: MainAxisAlignment.center,
+                    //           children: <Widget>[
+                    //             edit
+                    //                 ? Expanded(
+                    //                     child: Container(
+                    //                       padding: EdgeInsets.all(15),
+                    //                       child: TextField(
+                    //                         style:
+                    //                             TextStyle(color: Colors.white),
+                    //                         autofocus: !_isLoading,
+                    //                         cursorColor: Colors.white,
+                    //                         maxLength: 25,
+                    //                         textCapitalization:
+                    //                             TextCapitalization.sentences,
+                    //                         controller: _textEditingController,
+                    //                         decoration: InputDecoration(
+                    //                           hintText: "Type your name here",
+                    //                           hintStyle: TextStyle(
+                    //                               color: Colors.white70),
+                    //                         ),
+                    //                         onChanged: (messageText) {
+                    //                           print(messageText);
+                    //                         },
+                    //                         onTap: () {
+                    //                           print('ontapp.');
+                    //                         },
+                    //                       ),
+                    //                     ),
+                    //                   )
+                    //                 : Expanded(
+                    //                     child: Column(
+                    //                       mainAxisAlignment:
+                    //                           MainAxisAlignment.center,
+                    //                       children: <Widget>[
+                    //                         Text(
+                    //                           '${_textEditingController.text}',
+                    //                           softWrap: true,
+                    //                           style: TextStyle(
+                    //                               color: Colors.white,
+                    //                               fontWeight: FontWeight.bold,
+                    //                               fontSize: 30),
+                    //                         ),
+                    //                         Padding(
+                    //                           padding: const EdgeInsets.only(
+                    //                               top: 20),
+                    //                           child: Text(
+                    //                             '${widget.phone}',
+                    //                             softWrap: true,
+                    //                             style: TextStyle(
+                    //                                 color: Colors.white,
+                    //                                 fontWeight: FontWeight.w400,
+                    //                                 fontSize: 20),
+                    //                           ),
+                    //                         ),
+                    //                       ],
+                    //                     ),
+                    //                   ),
+                    //             GestureDetector(
+                    //               onTap: edit
+                    //                   ? () {
+                    //                       openBottomSheet();
+                    //                     }
+                    //                   : () {
+                    //                       print('firebaseUrl : $firebaseUrl');
+                    //                     },
+                    //               child: photoPath != null
+                    //                   ? Container(
+                    //                       height: 150,
+                    //                       width: 150,
+                    //                       decoration: BoxDecoration(
+                    //                         border: Border.all(
+                    //                             color: Color(0xffb00bae3),
+                    //                             width: 2.0),
+                    //                         color: Colors.grey[300],
+                    //                         shape: BoxShape.circle,
+                    //                         image: DecorationImage(
+                    //                             fit: BoxFit.cover,
+                    //                             image:
+                    //                                 FileImage(File(photoPath))),
+                    //                       ),
+                    //                     )
+                    //                   : firebaseUrl != ''
+                    //                       ? Container(
+                    //                           height: 150,
+                    //                           width: 150,
+                    //                           decoration: BoxDecoration(
+                    //                             border: Border.all(
+                    //                                 color: Color(0xffb00bae3),
+                    //                                 width: 2.0),
+                    //                             color: Colors.grey[300],
+                    //                             shape: BoxShape.circle,
+                    //                             image: DecorationImage(
+                    //                               fit: BoxFit.cover,
+                    //                               image: //CachedNetworkImageProvider //use fade in image
+                    //                                   NetworkImage(firebaseUrl),
+                    //                             ),
+                    //                           ),
+                    //                         )
+                    //                       : Container(
+                    //                           height: 150,
+                    //                           width: 150,
+                    //                           decoration: BoxDecoration(
+                    //                               color: Colors.grey[300],
+                    //                               shape: BoxShape.circle,
+                    //                               border: Border.all(
+                    //                                   color: Color(0xffb00bae3),
+                    //                                   width: 2.0)),
+                    //                           child: Icon(
+                    //                             Icons.person,
+                    //                             color: Colors.white,
+                    //                             size: 90,
+                    //                           ),
+                    //                         ),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       );
+                    //     } else {
+                    //       // no data new user
+                    //       return Center(
+                    //         child: Text(
+                    //           'Something Went Wrong \n found snap.data.snapshot.value == null',
+                    //           style: TextStyle(color: Colors.white),
+                    //         ),
+                    //       );
+                    //     }
+                    //   },
+                    // ),
                     buildFeed()
                   ],
                 ),
@@ -372,20 +369,20 @@ class _ProfileState extends State<MyProfile> {
       tooltip: "Menu",
       onSelected: _onMenuItemSelect,
       itemBuilder: (BuildContext context) => [
-            PopupMenuItem<String>(
-              value: 'Logout',
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5.0),
-                child: Row(
-                  children: <Widget>[
-                    Text("Logout"),
-                    Spacer(),
-                    Icon(Icons.power_settings_new),
-                  ],
-                ),
-              ),
+        PopupMenuItem<String>(
+          value: 'Logout',
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0),
+            child: Row(
+              children: <Widget>[
+                Text("Logout"),
+                Spacer(),
+                Icon(Icons.power_settings_new),
+              ],
             ),
-          ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -488,18 +485,18 @@ class _ProfileState extends State<MyProfile> {
         });
   }
 
-  audioCall() async {
-    var sendMap = <String, dynamic>{
-      'to': widget.phone.toString(),
-      'from': pref.phone.toString()
-    };
-    try {
-      String result;
-      result = await platform.invokeMethod('audioCall', sendMap);
-    } on PlatformException catch (e) {
-      print(e);
-    }
-  }
+  // audioCall() async {
+  //   var sendMap = <String, dynamic>{
+  //     'to': widget.phone.toString(),
+  //     'from': pref.phone.toString()
+  //   };
+  //   try {
+  //     String result;
+  //     result = await platform.invokeMethod('audioCall', sendMap);
+  //   } on PlatformException catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   chat(String name) async {
     setState(() {
@@ -509,8 +506,8 @@ class _ProfileState extends State<MyProfile> {
     try {
       print('receiverNumber:${widget.phone.toString()}');
       String body = jsonEncode({
-        "senderPhone": pref.phone.toString(),
-        "receiverPhone": widget.phone.toString()
+        "senderPhone": pref.pin.toString(), //
+        "receiverPhone": widget.pin.toString()
       });
 
       http
@@ -520,16 +517,18 @@ class _ProfileState extends State<MyProfile> {
         var res = jsonDecode(response.body)["data"][0];
         var chatId = res["chat_id"];
 
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatScreen(
-                  chatId: chatId,
-                  chatType: 'private',
-                  receiverName: name,
-                  receiverPhone: widget.phone.toString(),
-                  profileUrl: firebaseUrl),
-            ));
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => ChatScreen(
+        //         chatId: chatId,
+        //         chatType: 'private',
+        //         receiverName: name,
+        //         receiverPhone: widget.phone.toString(),
+        //         // profileUrl: firebaseUrl
+        //         receiverPin: widget.pin),
+        //   ),
+        // );
 
         setState(() {
           _isLoading = false;
@@ -546,8 +545,6 @@ class _ProfileState extends State<MyProfile> {
   buildFeed() {
     if (feedData == null || feedData.isEmpty) {
       return Expanded(
-        // child: ListView(
-        // children: <Widget>[
         child: Container(
           width: double.infinity,
           color: Colors.white,
@@ -586,8 +583,6 @@ class _ProfileState extends State<MyProfile> {
             ],
           ),
         ),
-        // ],
-        // ),
       );
     } else {
       return Expanded(
@@ -625,135 +620,135 @@ class _ProfileState extends State<MyProfile> {
     return _staggeredTiles;
   }
 
-  Future uploadImg(imgPath) async {
-    Completer c = new Completer();
-    try {
-      File imageFile;
-      int fileSize =
-          await File(imgPath).length(); //make compresser common function
-      print('original img file size : $fileSize');
+  // Future uploadImg(imgPath) async {
+  //   Completer c = new Completer();
+  //   try {
+  //     File imageFile;
+  //     int fileSize =
+  //         await File(imgPath).length(); //make compresser common function
+  //     print('original img file size : $fileSize');
 
-      if ((fileSize / 1024) > 500) {
-        print('compressing img');
-        imageFile = await FlutterNativeImage.compressImage(imgPath,
-            percentage: 75, quality: 75);
-        int fileSize = await imageFile.length();
-        print('compress img file size : $fileSize');
-      } else {
-        print('no img compression');
-        imageFile = File(imgPath);
-      }
+  //     if ((fileSize / 1024) > 500) {
+  //       print('compressing img');
+  //       imageFile = await FlutterNativeImage.compressImage(imgPath,
+  //           percentage: 75, quality: 75);
+  //       int fileSize = await imageFile.length();
+  //       print('compress img file size : $fileSize');
+  //     } else {
+  //       print('no img compression');
+  //       imageFile = File(imgPath);
+  //     }
 
-      // storage
-      storage.uploadImage(pref.phone.toString(), imageFile).then((url) {
-        print('prfile url----------------------------: $url');
-        c.complete(url);
-      }, onError: (e) {
-        print('Error while uploading profile image throw:$e');
-        throw e;
-      });
-    } catch (e) {
-      print('Error while uploading profile image :$e');
-      c.completeError(e);
-    }
-    return c.future;
-  }
+  //     // storage
+  //     storage.uploadImage(pref.phone.toString(), imageFile).then((url) {
+  //       print('prfile url----------------------------: $url');
+  //       c.complete(url);
+  //     }, onError: (e) {
+  //       print('Error while uploading profile image throw:$e');
+  //       throw e;
+  //     });
+  //   } catch (e) {
+  //     print('Error while uploading profile image :$e');
+  //     c.completeError(e);
+  //   }
+  //   return c.future;
+  // }
 
-  upload(BuildContext context) async {
-    print('img path:$photoPath');
-    print('name : ${_textEditingController.text}');
-    if (_textEditingController.text.trim() == '') {
-      Fluttertoast.showToast(msg: 'Enter your name ');
-    } else {
-      setState(() {
-        _isLoading = true;
-      });
-      if (photoPath != null) {
-        uploadImg(photoPath).then((url) {
-          var data = {
-            "name": _textEditingController.text,
-            "profileImg": url.toString()
-          };
-          try {
-            _profileReference.set(data).then((onValue) {
-              print('profile info uploaded to fb ');
+  // upload(BuildContext context) async {
+  //   print('img path:$photoPath');
+  //   print('name : ${_textEditingController.text}');
+  //   if (_textEditingController.text.trim() == '') {
+  //     Fluttertoast.showToast(msg: 'Enter your name ');
+  //   } else {
+  //     setState(() {
+  //       _isLoading = true;
+  //     });
+  //     if (photoPath != null) {
+  //       uploadImg(photoPath).then((url) {
+  //         var data = {
+  //           "name": _textEditingController.text,
+  //           "profileImg": url.toString()
+  //         };
+  //         try {
+  //           _profileReference.set(data).then((onValue) {
+  //             print('profile info uploaded to fb ');
 
-              //instag
-              CollectionReference ref =
-                  Firestore.instance.collection('insta_users');
-              ref.document(pref.phone.toString()).setData({
-                "userId": pref.phone,
-                "username": _textEditingController.text,
-                "photoUrl": url,
-                "following": {
-                  "Public": true,
-                },
-              }).then((onValue) {
-                setState(() {
-                  _isLoading = false;
-                  edit = !edit;
-                  firebaseUrl = url;
-                  pref.setName(_textEditingController.text);
-                  pref.setProfile(firebaseUrl.toString());
-                });
-              Fluttertoast.showToast(msg: 'profile Updated');
-              });
-            });
-          } catch (e) {
-            print('err while setting profile info $e : ');
-              Fluttertoast.showToast(msg: 'Try Again');
-            
-            setState(() {
-              _isLoading = false;
-              edit = !edit;
-            });
-            throw e; //not throwing
-          }
-        }, onError: (e) {
-          print('Error: $e');
-          setState(() {
-            _isLoading = false;
-            edit = !edit;
-          });
-        });
-      } else {
-        var data = {
-          "name": _textEditingController.text,
-          "profileImg": firebaseUrl
-        };
-        try {
-          _profileReference.set(data).then((onValue) {
-            print('profile info uploaded to fb :$firebaseUrl');
-            //instag
-            CollectionReference ref =
-                Firestore.instance.collection('insta_users');
-            ref.document(pref.phone.toString()).setData({
-              "userId": pref.phone,
-              "username": _textEditingController.text,
-              "photoUrl": '',
-              "following": {
-                "Public": true,
-              },
-            }).then((onValue) {
-              setState(() {
-                _isLoading = false;
-                edit = !edit;
-                pref.setName(_textEditingController.text);
-                pref.setProfile(firebaseUrl);
-              });
-              Fluttertoast.showToast(msg: 'profile Updated');
-            });
-          });
-        } catch (e) {
-          print('err while updatingrpfile info new:$e');
-          setState(() {
-            _isLoading = false;
-            edit = !edit;
-          });
-        }
-      }
-    }
-  }
+  //             //instag
+  //             CollectionReference ref =
+  //                 Firestore.instance.collection('insta_users');
+  //             ref.document(pref.phone.toString()).setData({
+  //               "userId": pref.phone,
+  //               "username": _textEditingController.text,
+  //               "photoUrl": url,
+  //               "following": {
+  //                 "Public": true,
+  //               },
+  //             }).then((onValue) {
+  //               setState(() {
+  //                 _isLoading = false;
+  //                 edit = !edit;
+  //                 firebaseUrl = url;
+  //                 pref.setName(_textEditingController.text);
+  //                 pref.setProfile(firebaseUrl.toString());
+  //               });
+  //             Fluttertoast.showToast(msg: 'profile Updated');
+  //             });
+  //           });
+  //         } catch (e) {
+  //           print('err while setting profile info $e : ');
+  //             Fluttertoast.showToast(msg: 'Try Again');
+
+  //           setState(() {
+  //             _isLoading = false;
+  //             edit = !edit;
+  //           });
+  //           throw e; //not throwing
+  //         }
+  //       }, onError: (e) {
+  //         print('Error: $e');
+  //         setState(() {
+  //           _isLoading = false;
+  //           edit = !edit;
+  //         });
+  //       });
+  //     } else {
+  //       var data = {
+  //         "name": _textEditingController.text,
+  //         "profileImg": firebaseUrl
+  //       };
+  //       try {
+  //         _profileReference.set(data).then((onValue) {
+  //           print('profile info uploaded to fb :$firebaseUrl');
+  //           //instag
+  //           CollectionReference ref =
+  //               Firestore.instance.collection('insta_users');
+  //           ref.document(pref.phone.toString()).setData({
+  //             "userId": pref.phone,
+  //             "username": _textEditingController.text,
+  //             "photoUrl": '',
+  //             "following": {
+  //               "Public": true,
+  //             },
+  //           }).then((onValue) {
+  //             setState(() {
+  //               _isLoading = false;
+  //               edit = !edit;
+  //               pref.setName(_textEditingController.text);
+  //               pref.setProfile(firebaseUrl);
+  //             });
+  //             Fluttertoast.showToast(msg: 'profile Updated');
+  //           });
+  //         });
+  //       } catch (e) {
+  //         print('err while updatingrpfile info new:$e');
+  //         setState(() {
+  //           _isLoading = false;
+  //           edit = !edit;
+  //         });
+  //       }
+  //     }
+  //   }
+  // }
 
   //
   openBottomSheet() {
@@ -807,7 +802,7 @@ class _ProfileState extends State<MyProfile> {
   }
 
   getImg(File f) {
-     // compress file
+    // compress file
     cmprsMedia.compressImage(f).then((compressedImageFile) {
       print('comress:${compressedImageFile.path}');
       setState(() {
@@ -834,8 +829,7 @@ class _ProfileState extends State<MyProfile> {
       });
     }
 
-    String uri =
-        '${url.api}getFeeds?userId=' + widget.phone.toString();
+    String uri = '${url.api}getFeeds?userId=' + widget.pin.toString();
     HttpClient httpClient = new HttpClient();
 
     try {
@@ -867,7 +861,7 @@ class _ProfileState extends State<MyProfile> {
     List<UserFeedBuilder> listOfPosts = [];
     for (Map<String, dynamic> postData in originalData) {
       print('for---->>$postData');
-      if (postData['ownerId'] == widget.phone) {
+      if (postData['ownerId'] == widget.pin) {
         listOfPosts.add(UserFeedBuilder.fromJSON(postData));
       }
     }

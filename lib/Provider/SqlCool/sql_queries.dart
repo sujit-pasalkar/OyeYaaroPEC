@@ -469,32 +469,34 @@ class SqlQuery {
   }
 
   //add into Groupchatlist table
-  Future addGroupChatList(String chatId, String lastMsg, String senderPhone,
-      String timestamp, String count, String gName) async {
+  Future addGroupChatList( Map<String,dynamic> obj,) async {
     Completer _completer = new Completer();
     try {
       Map<String, String> chatListRow = {
-        "chatId": chatId,
-        "chatListLastMsg": lastMsg,
-        "chatListSenderPhone": senderPhone,
-        "chatListLastMsgTime": timestamp,
-        "chatListMsgCount": count,
-        "chatGroupName": gName
+        "chatId": obj['chatId'],
+        "chatListLastMsg": obj['chatListLastMsg'],
+        "chatListSenderPhone": obj['chatListSenderPhone'],
+        "chatListLastMsgTime": obj['chatListLastMsgTime'],
+        "chatListMsgCount": obj['chatListMsgCount'],
+        "chatGroupName": obj['chatGroupName'],
+        "chatListSenderPin": obj['chatListSenderPin']
       };
       print('in add group chat list');
 
       bool exists = await db.exists(
-          table: "groupChatListTable", where: "chatId='$chatId'");
+          table: "groupChatListTable", where: "chatId='${obj['chatId']}'");
 
       if (exists) {
+        // print('$gName is exist');
         final result = await db.update(
             table: "groupChatListTable",
             row: chatListRow,
-            where: "chatId='$chatId'",
+            where: "chatId='${obj['chatId']}'",
             verbose: false);
         print('updated result grouplist: $result');
         _completer.complete('added');
       } else {
+        // print('$gName is not exist');
         final result = await db.insert(
             table: "groupChatListTable", row: chatListRow, verbose: false);
         print('inserted result grouplist: $result');
@@ -507,6 +509,7 @@ class SqlQuery {
   }
 
 //add into GroupchatlistHistory table
+// you will get error as 'chatListSenderPin' new field added in groupChatListTable table check addGroupChatList() method for reference
   Future addGroupChatListHistory(String chatId, String lastMsg,
       String senderPhone, String timestamp, String count, String gName) async {
     Completer _completer = new Completer();

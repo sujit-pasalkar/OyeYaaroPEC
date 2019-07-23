@@ -1,4 +1,4 @@
-import 'package:oye_yaaro_pec/Provider/ContactOperations/contact_operations.dart';
+// import 'package:oye_yaaro_pec/Provider/ContactOperations/contact_operations.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
 import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
 import 'package:oye_yaaro_pec/View/Personal/personal_chatScreen.dart';
@@ -10,6 +10,7 @@ import 'dart:convert';
 import '../../Models/url.dart';
 import '../../Models/sharedPref.dart';
 import 'package:share/share.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class Contacts extends StatefulWidget {
   @override
@@ -17,7 +18,7 @@ class Contacts extends StatefulWidget {
 }
 
 class _ContactsState extends State<Contacts> {
-  bool _isLoading = false, searchContacts = false;// reGetContacts = true;
+  bool _isLoading = false, searchContacts = false; // reGetContacts = true;
   List<Map<String, dynamic>> records = new List<Map<String, dynamic>>();
   List<Map<String, dynamic>> showRecords = new List<Map<String, dynamic>>();
 
@@ -126,14 +127,15 @@ class _ContactsState extends State<Contacts> {
     return GestureDetector(
       onTap: () {},
       child: ListTile(
-        leading: r['profileUrl'] != ''
+        leading: r['contactRegistered'] == "1"
             ? GestureDetector(
                 onTap: () {
+                  print(r['contactsPin']);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => MyProfile(
-                            phone: int.parse(r['contactsPhone']),
+                            phone: int.parse(r['contactsPin']),
                           ),
                     ),
                   );
@@ -143,8 +145,25 @@ class _ContactsState extends State<Contacts> {
                   decoration: BoxDecoration(
                       color: Color(0xffb00bae3), shape: BoxShape.circle),
                   child: CircleAvatar(
-                    backgroundImage: NetworkImage(r['profileUrl']),
-                    backgroundColor: Colors.grey[300], // ,
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        fit: BoxFit.cover,
+                        imageUrl:
+                            'http://54.200.143.85:4200/profiles/now/${r['contactsPin']}.jpg',
+                        placeholder: (context, url) => Center(
+                          child: SizedBox(
+                            height: 20.0,
+                            width: 20.0,
+                            child: CircularProgressIndicator(strokeWidth: 1.0),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Image.network(
+                          'http://54.200.143.85:4200/profiles/then/${r['contactsPin']}.jpg',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    backgroundColor: Colors.grey[300],
                     radius: 25,
                   ),
                 ),
@@ -155,7 +174,7 @@ class _ContactsState extends State<Contacts> {
                   color: Colors.white,
                   size: 35,
                 ),
-                backgroundColor: Colors.grey[300], // Color(0xffb00bae3),
+                backgroundColor: Colors.grey[300],
                 radius: 25,
               ),
         title: Text(r['contactsName']),
@@ -203,7 +222,8 @@ class _ContactsState extends State<Contacts> {
                       _isLoading = false;
                     });
                   } catch (e) {
-                    Fluttertoast.showToast(msg:'Check your internet connection');
+                    Fluttertoast.showToast(
+                        msg: 'Check your internet connection');
                     print('error while calling getchild');
                     setState(() {
                       _isLoading = false;
@@ -249,7 +269,7 @@ class _ContactsState extends State<Contacts> {
         //   getAllContacts();
         // }
 
-         setState(() {
+        setState(() {
           records = onValue;
           showRecords = records;
           _isLoading = false;
@@ -258,9 +278,9 @@ class _ContactsState extends State<Contacts> {
         // if (reGetContacts) {
         //   getAllContacts();
         // }
-      } 
+      }
       // else {
-       
+
       // }
     }, onError: (e) {
       print('Error from sqlQuery.selectContact():$e');

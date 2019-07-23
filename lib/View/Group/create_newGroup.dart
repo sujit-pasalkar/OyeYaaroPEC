@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../Models/sharedPref.dart';
 import '../../Models/url.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CreateGroupWithName extends StatefulWidget {
   final List<Map<String, String>> addMembers;
@@ -31,9 +32,9 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
   @override
   void initState() {
     super.initState();
-    print(pref.phone);
-    // print('addInGroup :${widget.addMembers}');
-    // print('membs :${widget.checkAddMembers}');
+    print(pref.pin);
+    print('addInGroup :${widget.addMembers}');
+    print('membs :${widget.checkAddMembers}');
   }
 
   @override
@@ -84,39 +85,49 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
                       ListTile(
                         leading: GestureDetector(
                             onTap: () {
-                              print(widget.addMembers);
-                               Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MyProfile(
-                            phone: int.parse(widget.addMembers[i]['phone']),
-                          ),
-                    ),
-                  );
+                              // print(widget.addMembers);
+                              //              Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => MyProfile(
+                              //           pin: int.parse(widget.addMembers[i]['pin']),
+                              //         ),
+                              //   ),
+                              // );
                             },
-                            child: widget.addMembers[i]['profileUrl'] != ''
-                                ? Container(
-                                    padding: EdgeInsets.all(1),
-                                    decoration: BoxDecoration(
-                                        color: Color(0xffb00bae3),
-                                        shape: BoxShape.circle),
-                                    child: CircleAvatar(
-                                      backgroundColor: Colors.grey[300],
-                                      radius: 25,
-                                      backgroundImage: NetworkImage(widget
-                                          .addMembers[i]['profileUrl']
-                                          .toString()),
+                            child:
+                                // widget.addMembers[i]['profileUrl'] != ''
+                                //     ?
+                                Container(
+                              padding: EdgeInsets.all(1),
+                              decoration: BoxDecoration(
+                                  color: Color(0xffb00bae3),
+                                  shape: BoxShape.circle),
+                              child: CircleAvatar(
+                                backgroundColor: Colors.grey[300],
+                                radius: 25,
+                                child: ClipOval(
+                                  child: CachedNetworkImage(
+                                    fit: BoxFit.cover,
+                                    imageUrl:
+                                        'http://54.200.143.85:4200/profiles/now/${widget.addMembers[i]['pin']}.jpg',
+                                    placeholder: (context, url) => Center(
+                                      child: SizedBox(
+                                        height: 20.0,
+                                        width: 20.0,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 1.0),
+                                      ),
                                     ),
-                                  )
-                                : CircleAvatar(
-                                    child: Icon(
-                                      Icons.person,
-                                      color: Colors.white,
-                                      size: 35,
+                                    errorWidget: (context, url, error) =>
+                                        Image.network(
+                                      'http://54.200.143.85:4200/profiles/then/${widget.addMembers[i]['pin']}.jpg',
+                                      // fit: BoxFit.cover,
                                     ),
-                                    backgroundColor: Colors.grey[300],
-                                    radius: 25,
-                                  )),
+                                  ),
+                                ),
+                              ),
+                            )),
                         title: Text(
                           '${widget.addMembers[i]['name']}',
                         ),
@@ -131,18 +142,19 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
             ])
           : Center(
               child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                CircularProgressIndicator(
-                    valueColor:
-                        new AlwaysStoppedAnimation<Color>(Color(0xffb00bae3))),
-                Padding(
-                  padding: EdgeInsets.only(top: 10),
-                ),
-              ],
-            )),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  CircularProgressIndicator(
+                      valueColor: new AlwaysStoppedAnimation<Color>(
+                          Color(0xffb00bae3))),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10),
+                  ),
+                ],
+              ),
+            ),
       floatingActionButton: !showLoading
-          ? new FloatingActionButton(
+          ? FloatingActionButton(
               backgroundColor: Color(0xffb00bae3),
               child: Icon(
                 Icons.check,
@@ -172,11 +184,8 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
       groupMembersRef.push().set(<String, dynamic>{
         'groupName': _groupName.text,
         'members': widget.checkAddMembers,
-        'admin': pref.phone.toString(),
+        'admin': pref.pin.toString(),
       });
-      // .catchError((onError){
-      //   throw onError;
-      // });
       _c.complete('done');
     } catch (e) {
       print('Error in addMemberInFbGroup()');
@@ -200,7 +209,7 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
       //2.add into fb groupchatlist
       await fbGroupChatList(
         res['msg']['dialog_id'],
-        pref.phone.toString(),
+        pref.pin.toString(),
         'created by @${pref.name}',
         DateTime.now().millisecondsSinceEpoch.toString(),
         "0",
@@ -209,25 +218,29 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
       print('await fbGroupChatList res ok');
 
       //3.now add this group info to grouplist table
-      await sqlQuery.addGroupChatList(
-          //change start msg
-          res['msg']['dialog_id'],
-          'created by @${pref.name}',
-          '${pref.phone.toString()}',
-          DateTime.now().millisecondsSinceEpoch.toString(),
-          '0',
-          _groupName.text);
+      Map<String,dynamic> obj = {
+        "chatId": res['msg']['dialog_id'],
+        "chatListLastMsg": 'created by @${pref.name}', //change last msg
+        "chatListSenderPhone": pref.pin.toString(),
+        "chatListLastMsgTime": DateTime.now().millisecondsSinceEpoch.toString(),
+        "chatListMsgCount": '0',
+        "chatGroupName": _groupName.text,
+        "chatListSenderPin": pref.pin.toString()
+      };
+      await sqlQuery.addGroupChatList(obj);
       print('await addGroupChatList res ok');
 
-      //4. now navigate to group chat screen
+      // 4. now navigate to group chat screen
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => GroupChatScreen(
-                    chatId: res['msg']['dialog_id'],
-                    chatType: 'group', //
-                    groupName: _groupName.text,
-                  )));
+        context,
+        MaterialPageRoute(
+          builder: (context) => GroupChatScreen(
+            chatId: res['msg']['dialog_id'],
+            chatType: 'group', //
+            groupName: _groupName.text,
+          ),
+        ),
+      );
 
       setState(() {
         showLoading = false;
@@ -242,7 +255,7 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
     }
   }
 
-  Future fbGroupChatList(String chatId, String senderPhone, String msg,
+  Future fbGroupChatList(String chatId, String senderPin, String msg,
       String timestamp, String count, String gName) async {
     Completer _c = new Completer();
     try {
@@ -252,13 +265,13 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
 
       var data = {
         "chatId": chatId,
-        "senderPhone": senderPhone,
+        "senderPin": senderPin,
         "msg": msg,
         "timestamp": timestamp,
         "count": count,
         "groupName": gName,
         "members": widget.checkAddMembers,
-        "admin": senderPhone
+        "admin": senderPin
       };
       // privateChatRef.update(data);
       privateChatRef.set(data).then((onValue) {
@@ -281,7 +294,7 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
       String body = jsonEncode({
         "group_name": name,
         "occupants_ids": widget.checkAddMembers,
-        "admin_id": pref.phone.toString()
+        "admin_id": pref.pin.toString()
       });
       await http
           .post("${url.api}createContactsGroup",

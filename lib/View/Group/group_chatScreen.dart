@@ -2653,7 +2653,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         // print('sendername : $senderName');
         //add sender's msg as last msg to privatechatlisttable sqlite
         sqlQuery
-            .addGroupChatList(widget.chatId, messageText, pref.phone.toString(),
+            .addGroupChatList(widget.chatId, messageText, pref.phone.toString(),//obj
                 timestamp, '0', widget.groupName)
             .then((onValue) {
           // print('entry added in sqflite addchatlist');

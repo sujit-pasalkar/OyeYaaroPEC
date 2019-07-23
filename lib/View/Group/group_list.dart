@@ -70,7 +70,7 @@ class _GroupListState extends State<GroupList> {
         //chek condition
         print('conatains');
         sqlQuery
-            .addGroupChatList(
+            .addGroupChatList(//obj
                 event.snapshot.value['chatId'],
                 event.snapshot.value['msg'],
                 event.snapshot.value['senderPhone'],

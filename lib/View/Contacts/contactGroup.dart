@@ -4,8 +4,8 @@ import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
 import 'package:oye_yaaro_pec/View/Group/create_newGroup.dart';
 import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 import 'package:flutter/material.dart';
-
 import 'package:share/share.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ContactsGroup extends StatefulWidget {
   @override
@@ -18,10 +18,9 @@ class _ContactsGroupState extends State<ContactsGroup> {
 
   List<Map<String, dynamic>> records = new List<Map<String, dynamic>>();
 
-  bool isLoading = false, searchContacts = false, reGetContacts = true;
+  bool isLoading = false, searchContacts = false;
 
   List<String> addInGroup = new List<String>();
-  // List<Map<String, String>> cl = List<Map<String, String>>();
 
   final TextEditingController _textEditingController =
       new TextEditingController();
@@ -45,20 +44,24 @@ class _ContactsGroupState extends State<ContactsGroup> {
       if (records[i]['contactsName']
           .toLowerCase()
           .contains(searchText.toLowerCase())) {
-        if (addInGroup.contains(records[i]['contactsPhone'].toString())) {
-          searched.add(ContactDetails(
-              name: records[i]['contactsName'],
-              phone: records[i]['contactsPhone'].toString(),
-              registered: int.parse(records[i]['contactRegistered']),
-              checked: true,
-              profileUrl: records[i]['profileUrl']));
+        if (addInGroup.contains(records[i]['contactsPin'].toString())) {
+          searched.add(
+            ContactDetails(
+                name: records[i]['contactsName'],
+                phone: records[i]['contactsPhone'].toString(),
+                registered: int.parse(records[i]['contactRegistered']),
+                checked: true,
+                // profileUrl: records[i]['profileUrl'],
+                contactsPin: records[i]['contactsPin']),
+          );
         } else {
           searched.add(ContactDetails(
               name: records[i]['contactsName'],
               phone: records[i]['contactsPhone'].toString(),
               registered: int.parse(records[i]['contactRegistered']),
               checked: false,
-              profileUrl: records[i]['profileUrl']));
+              // profileUrl: records[i]['profileUrl']
+              contactsPin: records[i]['contactsPin']));
         }
       }
     }
@@ -108,22 +111,30 @@ class _ContactsGroupState extends State<ContactsGroup> {
                                 List<ContactDetails> l = List<ContactDetails>();
                                 records.forEach((f) {
                                   if (addInGroup.contains(
-                                      f['contactsPhone'].toString())) {
-                                    l.add(ContactDetails(
+                                      f['contactsPin'].toString())) {
+                                    l.add(
+                                      ContactDetails(
                                         name: f['contactsName'],
                                         phone: f['contactsPhone'].toString(),
                                         registered:
                                             int.parse(f['contactRegistered']),
                                         checked: true,
-                                        profileUrl: f['profileUrl']));
+                                        // profileUrl: f['profileUrl']
+                                        contactsPin: f['contactsPin'],
+                                      ),
+                                    );
                                   } else {
-                                    l.add(ContactDetails(
+                                    l.add(
+                                      ContactDetails(
                                         name: f['contactsName'],
                                         phone: f['contactsPhone'].toString(),
                                         registered:
                                             int.parse(f['contactRegistered']),
                                         checked: false,
-                                        profileUrl: f['profileUrl']));
+                                        // profileUrl: f['profileUrl']
+                                        contactsPin: f['contactsPin'],
+                                      ),
+                                    );
                                   }
                                 });
                                 l.sort((a, b) => a.name.compareTo(b.name));
@@ -141,11 +152,12 @@ class _ContactsGroupState extends State<ContactsGroup> {
                           List<Map<String, String>> cl =
                               List<Map<String, String>>();
                           phoneBookCopy.forEach((f) {
-                            if (addInGroup.contains(f.phone)) {
+                            if (addInGroup.contains(f.contactsPin)) {
                               cl.add({
                                 'name': f.name,
                                 'phone': f.phone,
-                                'profileUrl': f.profileUrl
+                                // 'profileUrl': f.profileUrl
+                                'pin':f.contactsPin
                               });
                             }
                           });
@@ -179,7 +191,7 @@ class _ContactsGroupState extends State<ContactsGroup> {
                 child: Center(
                   child: CircularProgressIndicator(
                     valueColor:
-                        new AlwaysStoppedAnimation<Color>(Color(0xffb00bae3)),
+                         AlwaysStoppedAnimation<Color>(Color(0xffb00bae3)),
                   ),
                 ))
             : SizedBox(),
@@ -196,16 +208,16 @@ class _ContactsGroupState extends State<ContactsGroup> {
             i.checked = !i.checked;
           });
           if (i.checked) {
-            addInGroup.add(i.phone);
+            addInGroup.add(i.contactsPin);
           } else {
-            addInGroup.remove(i.phone);
+            addInGroup.remove(i.contactsPin);
           }
         } else {
           print('not registered');
         }
       },
       child: ListTile(
-        leading: i.profileUrl != ''
+        leading: i.registered == 1
             ?
             // CircleAvatar(
             //   backgroundImage: NetworkImage(i.profileUrl),
@@ -214,22 +226,40 @@ class _ContactsGroupState extends State<ContactsGroup> {
             // )
             GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MyProfile(
-                            phone: int.parse(i.phone),
-                          ),
-                    ),
-                  );
+                  print(i.contactsPin);
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => MyProfile(
+                  //           pin: i.contactsPin,
+                  //         ),
+                  //   ),
+                  // );
                 },
                 child: Container(
                   padding: EdgeInsets.all(1),
                   decoration: BoxDecoration(
                       color: Color(0xffb00bae3), shape: BoxShape.circle),
                   child: CircleAvatar(
-                    backgroundImage: NetworkImage(i.profileUrl),
-                    backgroundColor: Colors.grey[300],
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        fit: BoxFit.cover,
+                        imageUrl:
+                            'http://54.200.143.85:4200/profiles/now/${i.contactsPin}.jpg',
+                        placeholder: (context, url) => Center(
+                          child: SizedBox(
+                            height: 20.0,
+                            width: 20.0,
+                            child: CircularProgressIndicator(strokeWidth: 1.0),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Image.network(
+                          'http://54.200.143.85:4200/profiles/then/${i.contactsPin}.jpg',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                       backgroundColor: Colors.grey[300],
                     radius: 25,
                   ),
                 ),
@@ -261,9 +291,9 @@ class _ContactsGroupState extends State<ContactsGroup> {
                           i.checked = !i.checked;
                         });
                         if (i.checked) {
-                          addInGroup.add(i.phone);
+                          addInGroup.add(i.contactsPin);
                         } else {
-                          addInGroup.remove(i.phone);
+                          addInGroup.remove(i.contactsPin);
                         }
                       } else {
                         print('not registered');
@@ -284,9 +314,9 @@ class _ContactsGroupState extends State<ContactsGroup> {
                           i.checked = !i.checked;
                         });
                         if (i.checked) {
-                          addInGroup.add(i.phone);
+                          addInGroup.add(i.contactsPin);
                         } else {
-                          addInGroup.remove(i.phone);
+                          addInGroup.remove(i.contactsPin);
                         }
                       } else {
                         print('not registered');
@@ -310,33 +340,21 @@ class _ContactsGroupState extends State<ContactsGroup> {
     );
   }
 
+// refresh contact
   getAllContacts() async {
     // get
     co.getContacts().then((onValue) {
       print('i got contacts supply');
       getSqlContacts();
-      setState(() {
-        reGetContacts = false;
-      });
     }, onError: (e) {
       print('Error from co.getContacts():$e');
     });
   }
 
   getSqlContacts() async {
-    // setState(() {
-    //   isLoading = true;
-    // });
-    List<ContactDetails> l = List<ContactDetails>();
-
     sqlQuery.selectContact().then((onValue) {
-      print('sqlQuery.selectContact() : $onValue');
-      if (onValue.length == 0) {
-        print('no record found');
-        if (reGetContacts) {
-          getAllContacts();
-        }
-      } else {
+      // print('sqlQuery.selectContact() : $onValue');
+      if (onValue.length != 0) {
         records = onValue;
         records.forEach((f) {
           phoneBookCopy.add(
@@ -345,7 +363,8 @@ class _ContactsGroupState extends State<ContactsGroup> {
                 phone: f['contactsPhone'].toString(),
                 registered: int.parse(f['contactRegistered']),
                 checked: false,
-                profileUrl: f['profileUrl']),
+                // profileUrl: f['profileUrl'],
+                contactsPin: f['contactsPin']),
           );
         });
         // print('now phonebook : $phoneBook');
@@ -354,12 +373,11 @@ class _ContactsGroupState extends State<ContactsGroup> {
           phoneBook = phoneBookCopy;
         });
         print('now phonebook : $phoneBook');
+      } else {
+        print('phone contacts is empty');
       }
     }, onError: (e) {
       print('Error from sqlQuery.selectContact():$e');
-      // setState(() {
-      //   isLoading = false;
-      // });
     });
   }
 
@@ -371,10 +389,10 @@ class _ContactsGroupState extends State<ContactsGroup> {
 }
 
 class ContactDetails {
-  String name, profileUrl;
-  String phone;
+  String name; //contactsPin
+  String phone, contactsPin;
   int registered;
   bool checked;
   ContactDetails(
-      {this.name, this.phone, this.checked, this.registered, this.profileUrl});
+      {this.name, this.phone, this.checked, this.registered, this.contactsPin});
 }

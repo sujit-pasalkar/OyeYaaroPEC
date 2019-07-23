@@ -70,7 +70,7 @@ class ContactOperation {
   }
 
   Future updateRegisteredContacts() async {
-    print('in updateRegisteredContacts :');
+    // print('in updateRegisteredContacts :');
     Completer _c = new Completer();
     try {
       List<Map<String, dynamic>> row = await sqlQuery.getPhonesfromContact();
@@ -78,32 +78,28 @@ class ContactOperation {
       row.forEach((f) {
         contactsList.add(f['contactsPhone'].toString());
       });
-      print('after for:${contactsList.length}');
+      // print('after for:${contactsList.length}');
 
-    // need changes in service response res = [{phone:'',pin:''}]
+      // need changes in service response res = [{phone:'',pin:''}]
       http.Response res = await http.post('${url.api}matchPhoneContacts',
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({"contacts": contactsList}));
 
       if (res.statusCode == 200) {
         var result = jsonDecode(res.body);
-        // print('result:$result');
 
+        // for on object
         for (var number in result['matching']) {
           List<Map<String, dynamic>> rows =
-              await sqlQuery.getContactRow(number);
+              await sqlQuery.getContactRow(number['contact']);
           Map<String, String> update = {
             "contactsPhone": rows[0]['contactsPhone'],
             "contactsName": rows[0]['contactsName'],
             "contactRegistered": '1',
             "profileUrl": '',
-            "contactsPin": ''
+            "contactsPin": number['pin']
           };
           await sqlQuery.updateContactRow(update);
-          // check
-          // List<Map<String, dynamic>> updatedRow =
-          //     await sqlQuery.getContactRow(number);
-          // print('updated row:$updatedRow');
         }
         _c.complete('res');
       } else
