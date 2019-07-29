@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void timer() {
-    print('in timer');
+    // print('in timer');
     setState(() {
       _start = 45;
     });
@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
             timer.cancel();
           } else {
             _start = _start - 1;
-            print('time remain $_start');
+            // print('time remain $_start');
           }
         },
       ),
@@ -112,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
         this.smsCodeSent = true;
         this.verificationId = verificationId;
       });
-      print('verification id:$verificationId');
+      // print('verification id:$verificationId');
       timer();
     };
 
@@ -135,14 +135,14 @@ class _LoginPageState extends State<LoginPage> {
 
   void _signInWithPhoneNumber() async {
     try {
-      print(verificationId);
+      // print(verificationId);
 
       final AuthCredential credential = PhoneAuthProvider.getCredential(
         verificationId: verificationId,
         smsCode: smsCode,
       );
       print('in signinwithphone-- code:$smsCode,id:$verificationId');
-      print(' credential: $credential');
+      // print(' credential: $credential');
 
       final FirebaseUser user =
           await FirebaseAuth.instance.signInWithCredential(credential);
@@ -161,9 +161,9 @@ class _LoginPageState extends State<LoginPage> {
         }
       });
     } catch (e) {
-      print('error: $e');
+      print('Error: $e');
       _scaffoldKey.currentState.showSnackBar(
-          SnackBar(content: Text(e), backgroundColor: Colors.redAccent));
+          SnackBar(content: Text('Invalid OTP'), backgroundColor: Colors.redAccent));
       setState(() {
         this.loading = false;
       });
@@ -424,7 +424,7 @@ class _LoginPageState extends State<LoginPage> {
                                           ),
                                           keyboardType: TextInputType.number,
                                           onChanged: (input) {
-                                            print(input);
+                                            // print(input);
                                             if (input.length == 10) {
                                               setState(() {
                                                 verifybtn = true;
@@ -513,7 +513,6 @@ class _LoginPageState extends State<LoginPage> {
                               setState(() {
                                 smsCode = otp;
                               });
-                              print(verificationId);
                             },
                           ),
                           Padding(
@@ -548,7 +547,7 @@ class _LoginPageState extends State<LoginPage> {
                                         fontStyle: FontStyle.italic),
                                   ),
                                   onPressed: () {
-                                    print(verificationId);
+                                    // print(verificationId);
                                     if (smsCode.length == 6) {
                                       setState(() {
                                         loading = true;
@@ -557,12 +556,12 @@ class _LoginPageState extends State<LoginPage> {
                                       FirebaseAuth.instance
                                           .currentUser()
                                           .then((user) {
-                                        print('user $user');
+                                        print('currentUser: $user');
                                         print(verificationId);
                                         if (user != null) {
                                           register();
-                                          print('user:$user');
-                                          print("phone" + this.phoneNo);
+                                          // print('user:$user');
+                                          // print("phone" + this.phoneNo);
                                         } else {
                                           _signInWithPhoneNumber();
                                         }

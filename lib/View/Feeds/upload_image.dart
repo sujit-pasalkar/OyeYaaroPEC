@@ -89,9 +89,6 @@ class _UploadImage extends State<UploadImage> {
                     child: ClipOval(
                       child: CachedNetworkImage(
                         fit: BoxFit.cover,
-                        // imageBuilder: (context,img)=>Center(
-                        //   child: Text('data'),
-                        // ),
                         imageUrl: pref.profileUrl,
                         placeholder: (context, url) => Center(
                           child: SizedBox(

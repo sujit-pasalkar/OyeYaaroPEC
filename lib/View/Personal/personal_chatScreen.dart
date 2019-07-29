@@ -26,6 +26,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:thumbnails/thumbnails.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
 //pages
 import '../../Components/imageViwer.dart';
 import '../../Components/videoPlayer.dart';
@@ -36,24 +38,23 @@ import '../InheritedWidget/chatVideoDownloaded.dart';
 enum PlayerState { stopped, playing, paused }
 
 class ChatScreen extends StatefulWidget {
-  final String chatId, receiverName, chatType, receiverPhone, profileUrl;
+  final String chatId, receiverName, chatType, receiverPhone, recPin;
 
-  ChatScreen(
-      {Key key,
-      @required this.chatId,
-      @required this.chatType,
-      @required this.receiverName,
-      @required this.receiverPhone,
-      @optionalTypeArgs this.profileUrl})
-      : super(key: key);
+  ChatScreen({
+    Key key,
+    @required this.chatId,
+    @required this.chatType,
+    @required this.receiverName,
+    @required this.receiverPhone,
+    @required this.recPin,
+  }) : super(key: key);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  static const platform =
-      const MethodChannel('com.plmlogix.oye_yaaro_pec/platform');
+  // static const platform = const MethodChannel('com.plmlogix.oye_yaaro_pec/platform');
   SelectBloc bloc;
 
   DatabaseReference _messagesreference;
@@ -87,18 +88,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // seeChat() async {
-  //   print(' p chatId : ${widget.chatId}');
-  //   sqlQuery.selectprivateChat().then((onValue) {
-  //     print(' p chat : $onValue');
-  //   }, onError: (e) {
-  //     print('Error while gettin p chat : $e');
-  //   });
-  // }
-
   @override
   initState() {
-    print('pref----->${pref.hideMedia}');
+    print('pref----->${pref.hideMedia},${widget.recPin}');
     this.bloc = SelectBloc(
       table: "privateChatTable",
       orderBy: "timestamp",
@@ -111,7 +103,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
     getDir();
 
-    print('rec name: ${widget.receiverName}');
     // firebase chat
     _messagesreference = database
         .reference()
@@ -119,30 +110,15 @@ class _ChatScreenState extends State<ChatScreen> {
         .child('private')
         .child('${widget.chatId}'); //.equalTo(false, key: "read");
     _messagesreference.keepSynced(true);
+
     _messagesSubscription =
         _messagesreference.onChildAdded.listen((Event event) {
       if (screenOpened) {
-        //download img thumb
-        //  if (event.snapshot.value['senderPhone'] == pref.phone.toString()) {
-        //   print('dont get thumb');
-        // }
-        // else
-        // {
-        //   if(event.snapshot.value['msgType'] == '1'){
-        //   print('checking thumb');
-        //   checkThumbs(event);
-
-        //   }
-        // }
-
-        print('1st time get all');
-
-        // download song
+        print('1st time get all:screenOpened');
+        // 1.download song
         if (event.snapshot.value['msgType'] == '3') {
-          //put cond if user ! pref.user
           Common.isSongDownloaded(event.snapshot.value['msgMedia'], '3');
         } else if (event.snapshot.value['msgType'] == '4') {
-          // && event.snapshot.value['senderPhone'] != pref.phone.toString()
           Common.isSongDownloaded(event.snapshot.value['msgMedia'], '4');
         }
 
@@ -159,22 +135,25 @@ class _ChatScreenState extends State<ChatScreen> {
           event.snapshot.value['mediaUrl'],
           event.snapshot.value['thumbPath'],
           event.snapshot.value['thumbUrl'],
+          event.snapshot.value['senderPin'],
+          event.snapshot.value['recPin'],
         )
             .then((onValue) {
-          print('after adding into sqlchat: $onValue');
+          // print('after adding into sqlchat: $onValue');
         }, onError: (e) {
-          print('show error message if addChat fails : $e');
+          print(
+              'Error while adding onChildAdded event values into addPrivateChat():1st : $e');
         });
       } else {
-        print('2nd time just add');
-        // download song
+        print('2nd time just add:onChildAdded');
+        // download song //make one function
         if (event.snapshot.value['msgType'] == '3') {
           Common.isSongDownloaded(event.snapshot.value['msgMedia'], '3');
         } else if (event.snapshot.value['msgType'] == '4') {
           Common.isSongDownloaded(event.snapshot.value['msgMedia'], '4');
         }
 
-        if (event.snapshot.value['senderPhone'] == pref.phone.toString()) {
+        if (event.snapshot.value['senderPin'] == pref.pin.toString()) {
           print('dont add this msg to firebase');
         } else {
           print('add this msg to sqflite');
@@ -191,6 +170,8 @@ class _ChatScreenState extends State<ChatScreen> {
             event.snapshot.value['mediaUrl'],
             event.snapshot.value['thumbPath'],
             event.snapshot.value['thumbUrl'],
+            event.snapshot.value['senderPin'],
+            event.snapshot.value['recPin'],
           )
               .then((onValue) {}, onError: (e) {
             print('show error message if addChat fails: $e');
@@ -231,6 +212,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   getDir() async {
     extDir = await getExternalStorageDirectory();
+    print("getExternalStorageDirectory(): $extDir");
   }
 
   void _initAudioPlayer() {
@@ -274,7 +256,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
     audioPlayer.stop();
     _messagesSubscription.cancel();
-    print('personal chat dispose');
+    // print('personal chat dispose');
   }
 
   getSongs() async {
@@ -297,18 +279,18 @@ class _ChatScreenState extends State<ChatScreen> {
     return Future.value(false);
   }
 
-  audioCall() async {
-    var sendMap = <String, dynamic>{
-      'to': widget.receiverPhone,
-      'from': pref.phone.toString()
-    };
-    try {
-      String result;
-      result = await platform.invokeMethod('audioCall', sendMap);
-    } on PlatformException catch (e) {
-      print(e);
-    }
-  }
+  // audioCall() async {
+  //   var sendMap = <String, dynamic>{
+  //     'to': widget.receiverPhone,
+  //     'from': pref.phone.toString()
+  //   };
+  //   try {
+  //     String result;
+  //     result = await platform.invokeMethod('audioCall', sendMap);
+  //   } on PlatformException catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -383,7 +365,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         // the select query has results
                         return ListView.builder(
                             reverse: true,
-                            // shrinkWrap: true,
                             controller: listScrollController,
                             padding: EdgeInsets.all(10.0),
                             itemCount: snapshot.data.length,
@@ -415,20 +396,12 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               songList(width),
               songList2(width),
-              // new Divider(height: 1.0),
               Container(
                 decoration: BoxDecoration(color: Theme.of(context).cardColor),
                 child: _buildTextComposer(context),
               ),
             ],
           ),
-          // decoration: Theme.of(context).platform == TargetPlatform.iOS
-          //     ? BoxDecoration(
-          //         border: Border(
-          //             top: BorderSide(
-          //         color: Colors.grey[200],
-          //       )))
-          //     : null,
         ),
       ),
     );
@@ -443,31 +416,30 @@ class _ChatScreenState extends State<ChatScreen> {
       tooltip: "Menu",
       onSelected: _onMenuItemSelect,
       itemBuilder: (BuildContext context) => [
-            PopupMenuItem<String>(
-              value: 'Hide Media',
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5.0),
-                child: Row(
-                  children: <Widget>[
-                    Text(pref.hideMedia == false || pref.hideMedia == null
-                        ? "Hide Media"
-                        : "Show Media"),
-                    Spacer(),
-                    Icon(pref.hideMedia == false || pref.hideMedia == null
-                        ? Icons.visibility_off
-                        : Icons.remove_red_eye),
-                  ],
-                ),
-              ),
+        PopupMenuItem<String>(
+          value: 'Hide Media',
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0),
+            child: Row(
+              children: <Widget>[
+                Text(pref.hideMedia == false || pref.hideMedia == null
+                    ? "Hide Media"
+                    : "Show Media"),
+                Spacer(),
+                Icon(pref.hideMedia == false || pref.hideMedia == null
+                    ? Icons.visibility_off
+                    : Icons.remove_red_eye),
+              ],
             ),
-          ],
+          ),
+        ),
+      ],
     );
   }
 
   _onMenuItemSelect(String option) {
     switch (option) {
       case 'Hide Media':
-        print('Hide show media');
         hideShow();
         break;
     }
@@ -483,12 +455,11 @@ class _ChatScreenState extends State<ChatScreen> {
         pref.hideMedia = false;
       });
     }
-    print('now :${pref.hideMedia}');
   }
 
   Widget buildChatList(int index, Map<String, dynamic> snap) {
     //msg from this chatId
-    if (snap['senderPhone'] == pref.phone.toString()) {
+    if (snap['senderPin'] == pref.pin.toString()) {
       return Stack(
         children: <Widget>[
           Row(
@@ -561,7 +532,6 @@ class _ChatScreenState extends State<ChatScreen> {
                             padding: EdgeInsets.all(8),
                             margin: EdgeInsets.fromLTRB(2.0, 1.0, 2.0, 15.0),
                             decoration: BoxDecoration(
-                                // border: BoxBorder.
                                 color: Color(0xffb00bae3),
                                 borderRadius: BorderRadius.circular(30.0)),
                             constraints:
@@ -591,8 +561,8 @@ class _ChatScreenState extends State<ChatScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ImageViewer(
-                                      imageUrl: snap['msgMedia'],
-                                    ),
+                                  imageUrl: snap['msgMedia'],
+                                ),
                               ),
                             );
                           },
@@ -667,8 +637,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                       margin: EdgeInsets.fromLTRB(
                                           2.0, 1.0, 2.0, 15.0),
                                       decoration: BoxDecoration(
-                                        border:
-                                            new Border.all(color: Colors.grey),
+                                        border: Border.all(color: Colors.grey),
                                         borderRadius:
                                             BorderRadius.circular(25.0),
                                         color: Colors.white,
@@ -715,26 +684,27 @@ class _ChatScreenState extends State<ChatScreen> {
                                                         .withOpacity(0.5),
                                                     textColor: Colors.white,
                                                     shape:
-                                                        new RoundedRectangleBorder(
+                                                        RoundedRectangleBorder(
                                                             borderRadius:
-                                                                new BorderRadius
-                                                                        .circular(
-                                                                    30.0)),
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        30.0)),
                                                     child: Text('RETRY'),
                                                     onPressed: () {
-                                                      print('add retry logic');
                                                       uploadImage(
                                                               widget.chatId,
                                                               snap['msgMedia'],
                                                               '1',
                                                               snap['timestamp'],
-                                                              pref
-                                                                  .name, //user profile name
+                                                              pref.name,
                                                               pref.phone
                                                                   .toString(),
                                                               widget
                                                                   .receiverPhone
-                                                                  .toString())
+                                                                  .toString(),
+                                                              pref.pin
+                                                                  .toString(),
+                                                              widget.recPin)
                                                           .then((onValue) {
                                                         print(
                                                             'image uploaded successfully');
@@ -766,8 +736,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => PlayVideo(
-                                          videoUrl: snap['msgMedia'],
-                                        ),
+                                      videoUrl: snap['msgMedia'],
+                                    ),
                                   ),
                                 );
                               },
@@ -847,8 +817,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                           margin: EdgeInsets.fromLTRB(
                                               2.0, 1.0, 2.0, 15.0),
                                           decoration: BoxDecoration(
-                                            border: new Border.all(
-                                                color: Colors.grey),
+                                            border:
+                                                Border.all(color: Colors.grey),
                                             borderRadius:
                                                 BorderRadius.circular(25.0),
                                             color: Colors.white,
@@ -905,15 +875,13 @@ class _ChatScreenState extends State<ChatScreen> {
                                                         color: Colors.black
                                                             .withOpacity(0.5),
                                                         textColor: Colors.white,
-                                                        shape: new RoundedRectangleBorder(
+                                                        shape: RoundedRectangleBorder(
                                                             borderRadius:
-                                                                new BorderRadius
-                                                                        .circular(
-                                                                    30.0)),
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        30.0)),
                                                         child: Text('RETRY'),
                                                         onPressed: () {
-                                                          print(
-                                                              'add retry logic');
                                                           uploadVideo(
                                                                   widget.chatId,
                                                                   File(snap[
@@ -921,15 +889,17 @@ class _ChatScreenState extends State<ChatScreen> {
                                                                   '2',
                                                                   snap[
                                                                       'timestamp'],
-                                                                  pref
-                                                                      .name, //user profile name
+                                                                  pref.name,
                                                                   pref.phone
                                                                       .toString(),
                                                                   widget
                                                                       .receiverPhone
                                                                       .toString(),
                                                                   snap[
-                                                                      'thumbPath'])
+                                                                      'thumbPath'],
+                                                                  pref.pin
+                                                                      .toString(),
+                                                                  widget.recPin)
                                                               .then((onValue) {
                                                             print(
                                                                 'image uploaded successfully');
@@ -1246,7 +1216,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                         LayoutBuilder(builder:
                                                             (context,
                                                                 constraint) {
-                                                          return new Icon(
+                                                          return Icon(
                                                             Icons.pause,
                                                             size: 40.0,
                                                             color: Colors.white,
@@ -1270,7 +1240,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                         LayoutBuilder(builder:
                                                             (context,
                                                                 constraint) {
-                                                          return new Icon(
+                                                          return Icon(
                                                             Icons.music_note,
                                                             size: 40.0,
                                                             color: Colors.white,
@@ -1292,39 +1262,50 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       );
     } else {
-      // Left (peer message)
+      // Left(peer message)
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             children: <Widget>[
               (snap['msgType'] == '1' || snap['msgType'] == '2') &&
-                      (pref.hideMedia == true )
+                      (pref.hideMedia == true)
                   ? SizedBox(
                       width: 35,
                     )
+                    // add in gesure detectore//
                   : Container(
                       margin: EdgeInsets.only(right: 8),
                       padding: EdgeInsets.all(1.0),
-                      decoration: new BoxDecoration(
+                      decoration: BoxDecoration(
                         color: Color(0xffb4fcce0),
                         shape: BoxShape.circle,
                       ),
-                      child: widget.profileUrl == ''
-                          ? CircleAvatar(
-                              child: Icon(
-                                Icons.person,
-                                color: Color(0xffb00bae3),
-                                size: 35,
+                      child: ClipOval(
+                        child: CircleAvatar(
+                          backgroundColor: Colors.grey[300],
+                          radius: 25,
+                          child: CachedNetworkImage(
+                            fit: BoxFit.cover,
+                            imageUrl:
+                                'http://54.200.143.85:4200/profiles/now/${widget.recPin}.jpg',
+                            placeholder: (context, url) => Center(
+                              child: SizedBox(
+                                height: 20.0,
+                                width: 20.0,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 1.0),
                               ),
-                              backgroundColor: Colors.grey[300],
-                              radius: 25,
-                            )
-                          : CircleAvatar(
-                              backgroundImage: NetworkImage(widget.profileUrl),
-                              backgroundColor: Colors.grey[300],
-                              radius: 20,
                             ),
+                            errorWidget: (context, url, error) => 
+                              FadeInImage.assetNetwork(
+                                placeholder: 'assets/loading.gif',
+                                image:
+                                    'http://54.200.143.85:4200/profiles/then/${widget.recPin}.jpg',
+                              ),
+                          ),
+                        ),
+                      ),
                     ),
               snap['msgType'] == '0' //text
                   ? Column(
@@ -1586,7 +1567,6 @@ class _ChatScreenState extends State<ChatScreen> {
                                       ),
                                     ],
                                   ),
-                                  // ),/
                                 )
                               : //song2
                               snap['msgType'] == '4'
@@ -1719,7 +1699,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                         LayoutBuilder(builder:
                                                             (context,
                                                                 constraint) {
-                                                          return new Icon(
+                                                          return Icon(
                                                             Icons.pause,
                                                             size: 40.0,
                                                             color: Colors.white,
@@ -1743,7 +1723,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                         LayoutBuilder(builder:
                                                             (context,
                                                                 constraint) {
-                                                          return new Icon(
+                                                          return Icon(
                                                             Icons.music_note,
                                                             size: 40.0,
                                                             color: Colors.white,
@@ -1765,8 +1745,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   CupertinoButton getIOSSendButton() {
-    return new CupertinoButton(
-      child: new Text("Send"),
+    return CupertinoButton(
+      child: Text("Send"),
       onPressed: _isComposingMessage
           ? () => _textMessageSubmitted(_textEditingController.text.trim())
           : null,
@@ -1774,8 +1754,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   IconButton getDefaultSendButton() {
-    return new IconButton(
-      icon: new Icon(Icons.send, color: Colors.white),
+    return IconButton(
+      icon: Icon(Icons.send, color: Colors.white),
       onPressed: _isComposingMessage
           ? () => _textMessageSubmitted(_textEditingController.text.trim())
           : null,
@@ -1806,7 +1786,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           listData);
                 },
                 onLongPress: () {
-                  print("onLongPress snedin toast");
+                  print("onLongPress sneding toast");
                   Fluttertoast.showToast(
                       msg: 'sent ${listData.replaceAll('.mp3', '')}');
                   sendsong(
@@ -1816,8 +1796,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     senderPhone: pref.phone.toString(),
                     receiverPhone: widget.receiverPhone.toString(),
                     type: '3',
-                    timestamp:
-                        new DateTime.now().millisecondsSinceEpoch.toString(),
+                    timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
+                    senderPin: pref.pin.toString(),
+                    recPin: widget.recPin.toString(),
                   );
                 },
                 child: Row(
@@ -1829,8 +1810,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         ? position != null && duration != null
                             ? Icon(Icons.pause_circle_outline)
                             : SizedBox(
-                                child: new CircularProgressIndicator(
-                                    valueColor: new AlwaysStoppedAnimation(
+                                child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation(
                                         Color(0xffb00bae3)),
                                     strokeWidth: 1.0),
                                 height: 20.0,
@@ -1879,8 +1860,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       ? position != null && duration != null
                           ? Icon(Icons.pause_circle_outline)
                           : SizedBox(
-                              child: new CircularProgressIndicator(
-                                  valueColor: new AlwaysStoppedAnimation(
+                              child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation(
                                       Color(0xffb00bae3)),
                                   strokeWidth: 1.0),
                               height: 20.0,
@@ -1920,8 +1901,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   senderPhone: pref.phone.toString(),
                   receiverPhone: widget.receiverPhone.toString(),
                   type: '4',
-                  timestamp:
-                      new DateTime.now().millisecondsSinceEpoch.toString(),
+                  timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
+                  senderPin: pref.pin.toString(),
+                  recPin: widget.recPin.toString(),
                 );
               },
             );
@@ -1965,7 +1947,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         textCapitalization: TextCapitalization.sentences,
                         controller: _textEditingController,
                         onChanged: (String messageText) {
-                          print(messageText.trim().length);
+                          // print(messageText.trim().length);
                           setState(() {
                             _isComposingMessage = messageText.trim().length > 0;
                           });
@@ -1974,7 +1956,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           }
                         },
                         onTap: () {
-                          print('ontapp.');
+                          // print('ontapp.');
                           setState(() {
                             this.isSearching = true;
                           });
@@ -2017,7 +1999,6 @@ class _ChatScreenState extends State<ChatScreen> {
       for (int i = 0; i < _songList1.length; i++) {
         String data = _songList1[i];
         if (data.toLowerCase().contains(searchText.toLowerCase())) {
-          // String changed =  data.replaceAll('.mp3', '');
           searchresult.add(data); //remove .mp4  nt here
         }
       }
@@ -2187,7 +2168,6 @@ class _ChatScreenState extends State<ChatScreen> {
                           ],
                         ),
                       ),
-
                       GestureDetector(
                         onTap: () {
                           Navigator.pop(context);
@@ -2223,8 +2203,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: null,
-                        child: Column(
+                        onTap: (){
+                          Navigator.pop(context);
+                        },                        child: Column(
                           children: <Widget>[
                             Container(
                               padding: EdgeInsets.all(15),
@@ -2284,7 +2265,7 @@ class _ChatScreenState extends State<ChatScreen> {
               builder: (context) => ConfirmSendImg(
                     img: img,
                   )));
-      print('im back with images*************:$val');
+      // print('im back with images*************:$val');
       if (val == 'ok') {
         sendImg(img);
       }
@@ -2300,7 +2281,7 @@ class _ChatScreenState extends State<ChatScreen> {
               builder: (context) => ConfirmSendVid(
                     img: vid,
                   )));
-      print('im back with images*************:$val');
+      // print('im back with images*************:$val');
       if (val == 'ok') {
         sendVid(vid);
       }
@@ -2316,7 +2297,7 @@ class _ChatScreenState extends State<ChatScreen> {
               builder: (context) => ConfirmSendVid(
                     img: vid,
                   )));
-      print('im back with images*************:$val');
+      // print('im back with images*************:$val');
       if (val == 'ok') {
         sendVid(vid);
       }
@@ -2331,13 +2312,14 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     sendText(
-      messageText: text,
-      senderName: pref.name,
-      senderPhone: pref.phone.toString(),
-      receiverPhone: widget.receiverPhone.toString(),
-      type: '0',
-      timestamp: new DateTime.now().millisecondsSinceEpoch.toString(),
-    );
+        messageText: text,
+        senderName: pref.name,
+        senderPhone: pref.phone.toString(),
+        receiverPhone: widget.receiverPhone.toString(),
+        type: '0',
+        timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
+        senderPin: pref.pin.toString(),
+        recPin: widget.recPin.toString());
   }
 
   //send song
@@ -2350,6 +2332,8 @@ class _ChatScreenState extends State<ChatScreen> {
     String timestamp,
     // int isUploaded,
     // String chatId
+    String senderPin,
+    String recPin,
   }) async {
     print('msg: $songurl');
     try {
@@ -2367,7 +2351,9 @@ class _ChatScreenState extends State<ChatScreen> {
               '0', //isuploded
               "senderUrl",
               "thumbpath",
-              "thumburl")
+              "thumburl",
+              senderPin,
+              recPin)
           .then((onValue) {
         // setState(() {
         //   future = getAllChat(widget.chatId);
@@ -2375,20 +2361,31 @@ class _ChatScreenState extends State<ChatScreen> {
         //add sender's msg as last msg to privatechatlisttable sqlite
         sqlQuery
             .addPrivateChatList(widget.chatId, 'Audio', senderPhone,
-                receiverPhone, timestamp, '0', widget.profileUrl)
+                receiverPhone, timestamp, '0', senderPin, recPin)
             .then((onValue) {
-          print('entry added in sqflite addchatlist');
+          print('entry added in sqlite addchatlist');
         }, onError: (e) {
           print('show error message if addChatlist fails : $e');
         });
         print('sendername : $senderName');
         //add into fb privatechat
-        addChatFb(senderName, songurl, senderPhone, type, receiverPhone,
-                timestamp, '1', "senderUrl", "thumbpath", "thumburl")
+        addChatFb(
+                senderName,
+                songurl,
+                senderPhone,
+                type,
+                receiverPhone,
+                timestamp,
+                '1',
+                "senderUrl",
+                "thumbpath",
+                "thumburl",
+                senderPin,
+                recPin)
             .then((sent) {
           print('uploaded to fb');
           addChatFbChatList(widget.chatId, senderPhone, 'Audio', timestamp,
-                  receiverPhone, "1")
+                  receiverPhone, "1", senderPin, recPin)
               .then((sent) {
             print('entry added in fb addchatlist');
           });
@@ -2405,17 +2402,17 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
 //send text
-  void sendText({
-    String messageText,
-    String senderName,
-    String senderPhone,
-    String receiverPhone,
-    String type,
-    String timestamp,
-  }) async {
-    print('msg: $messageText');
+  void sendText(
+      {String messageText,
+      String senderName,
+      String senderPhone,
+      String receiverPhone,
+      String type,
+      String timestamp,
+      String senderPin,
+      String recPin}) async {
+    print('recPin: $recPin');
     // print('timestamp: $timestamp');
-
     try {
       sqlQuery
           .addPrivateChat(
@@ -2429,7 +2426,9 @@ class _ChatScreenState extends State<ChatScreen> {
               '1',
               "senderUrl",
               "thumbpath",
-              "thumburl")
+              "thumburl",
+              senderPin,
+              recPin)
           .then((onValue) {
         // setState(() {
         //   future = getAllChat(widget.chatId);
@@ -2444,19 +2443,31 @@ class _ChatScreenState extends State<ChatScreen> {
                 receiverPhone,
                 timestamp,
                 '0',
-                widget.profileUrl)
+                senderPin,
+                recPin)
             .then((onValue) {
           print('entry added in sqflite addchatlist');
         }, onError: (e) {
           print('show error message if addChatlist fails : $e');
         });
 
-        addChatFb(senderName, messageText, senderPhone, type, receiverPhone,
-                timestamp, '1', "meadiaUrl", "thumbpath", "thumburl")
+        addChatFb(
+                senderName,
+                messageText,
+                senderPhone,
+                type,
+                receiverPhone,
+                timestamp,
+                '1',
+                "meadiaUrl",
+                "thumbpath",
+                "thumburl",
+                senderPin,
+                recPin)
             .then((sent) {
           print('uploaded to fb');
           addChatFbChatList(widget.chatId, senderPhone, messageText, timestamp,
-                  receiverPhone, "1")
+                  receiverPhone, "1", senderPin, recPin)
               .then((sent) {
             print('entry added in fb addchatlist');
           });
@@ -2478,7 +2489,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
       sqlQuery
           .addPrivateChat(
-              //1st show original img path..after upload change to compressed path and change isUpload to 1
               widget.chatId,
               img.path, //org path
               "1", //msgType
@@ -2489,7 +2499,9 @@ class _ChatScreenState extends State<ChatScreen> {
               "0", //isUpload
               "mediaUrl", //firebase url.here no need
               "thumbpath",
-              "thumburl")
+              "thumburl",
+              pref.pin.toString(),
+              widget.recPin)
           .then((onValue) {
         print('senderName : ${pref.name}');
         //2.add privateChatListTable sqlite
@@ -2501,7 +2513,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 widget.receiverPhone,
                 timestamp.toString(),
                 '0',
-                widget.profileUrl)
+                pref.pin.toString(),
+                widget.recPin)
             .then((onValue) {
           print('entry added in sqflite addchatlist:img');
         }, onError: (e) {
@@ -2533,7 +2546,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     "0", //isUpload
                     "mediaUrl", //firebase url.here no need
                     "thumbpath",
-                    "thumburl")
+                    "thumburl",
+                    pref.pin.toString(),
+                    widget.recPin)
                 .then((onValue) {
               print('updated res:$onValue');
             }, onError: (e) {
@@ -2549,7 +2564,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     timestamp.toString(),
                     pref.name, //user profile name
                     pref.phone.toString(),
-                    widget.receiverPhone.toString())
+                    widget.receiverPhone,
+                    pref.pin.toString(),
+                    widget.recPin)
                 .then((onValue) {
               print('image uploaded successfully');
             }, onError: (e) {
@@ -2580,7 +2597,7 @@ class _ChatScreenState extends State<ChatScreen> {
 //vid thum folder
       String thumbPath = await Thumbnails.getThumbnail(
           thumbnailFolder:
-              '/storage/emulated/0/OyeYaaro/Media/Thumbs/.${widget.chatId}', //$timestamp.jpg
+              '${extDir.path}/OyeYaaro/Media/Thumbs/.${widget.chatId}', //$timestamp.jpg
           videoFile: vid.path,
           imageType: ThumbFormat.JPEG,
           quality: 30);
@@ -2588,7 +2605,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       //1. rename default thumbnail name to desired
       File newThumb = await File(thumbPath).rename(
-        '/storage/emulated/0/OyeYaaro/Media/Thumbs/.${widget.chatId}/$timestamp.jpg',
+        '${extDir.path}/OyeYaaro/Media/Thumbs/.${widget.chatId}/$timestamp.jpg',
       );
       print('sendVid thumbPath(rename): ${newThumb.path}'); //same
 
@@ -2605,7 +2622,9 @@ class _ChatScreenState extends State<ChatScreen> {
               '0',
               "mediaUrl",
               newThumb.path,
-              "thumbUrl")
+              "thumbUrl",
+              pref.pin.toString(),
+              widget.recPin)
           .then((onValue) {
         // show loading
         setState(() {
@@ -2621,7 +2640,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 widget.receiverPhone,
                 timestamp.toString(),
                 '0',
-                widget.profileUrl)
+                pref.pin.toString(),
+                widget.recPin)
             .then((onValue) {
           print('entry added in sqflite addchatlist');
         }, onError: (e) {
@@ -2632,12 +2652,13 @@ class _ChatScreenState extends State<ChatScreen> {
         cmprsMedia
             .compressVideo(
                 vid,
-                '/storage/emulated/0/OyeYaaro/Media/Vid/.${widget.chatId}',
+                '${extDir.path}/OyeYaaro/Media/Vid/.${widget.chatId}',
                 '$timestamp')
             .then((compressedVideoFile) {
           print('org img file path:${vid.path}');
           print(
               'compressedImageFile path :${compressedVideoFile.path}'); //compressed and copied to desired path
+
           //5.change previous path of privateChat table with desire path
           sqlQuery
               .updatePrivateChat(
@@ -2651,7 +2672,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   "0", //isUpload
                   "mediaUrl", //firebase url.here no need
                   newThumb.path,
-                  "thumburl")
+                  "thumburl",
+                  pref.pin.toString(),
+                  widget.recPin)
               .then((onValue) {
             print('updated to compressed vid path:$onValue');
           }, onError: (e) {
@@ -2668,7 +2691,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   pref.name,
                   pref.phone.toString(),
                   widget.receiverPhone.toString(),
-                  newThumb.path)
+                  newThumb.path,
+                  pref.pin.toString(),
+                  widget.recPin)
               .then((onValue) {
             print('Video uploaded successfully');
           }, onError: (e) {
@@ -2693,7 +2718,9 @@ class _ChatScreenState extends State<ChatScreen> {
       String timestamp,
       String senderName,
       String senderPhone,
-      String receiverPhone) async {
+      String receiverPhone,
+      String senderPin,
+      String recPin) async {
     try {
       setState(() {
         uploading = true;
@@ -2716,8 +2743,19 @@ class _ChatScreenState extends State<ChatScreen> {
           uploadingTimestamp = 0;
         });
         //add url to fb
-        addChatFb(senderName, imgPath, senderPhone, type, receiverPhone,
-                timestamp, '1', firebaseUrl.toString(), "", "")
+        addChatFb(
+                senderName,
+                imgPath,
+                senderPhone,
+                type,
+                receiverPhone,
+                timestamp,
+                '1',
+                firebaseUrl.toString(),
+                "",
+                "",
+                senderPin,
+                recPin)
             .then((sent) {
           print('img path uploaded to fb');
           //now update query for isUploaded = 1 on this chatId row
@@ -2733,7 +2771,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   '1',
                   firebaseUrl.toString(),
                   "",
-                  "")
+                  "",
+                  senderPin,
+                  recPin)
               .then((onValue) async {
             print('updated data timestamp: $timestamp');
           }, onError: (e) {
@@ -2742,7 +2782,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
           //add image as last msg to fb chatlist
           addChatFbChatList(widget.chatId, senderPhone, 'Image', timestamp,
-                  receiverPhone, "1")
+                  receiverPhone, "1", senderPin, recPin)
               .then((sent) {
             print('entry added in fb addchatlist');
           });
@@ -2763,7 +2803,9 @@ class _ChatScreenState extends State<ChatScreen> {
       String senderName,
       String senderPhone,
       String receiverPhone,
-      String thumbPath) async {
+      String thumbPath,
+      String senderPin,
+      String recPin) async {
     try {
       setState(() {
         uploading = true;
@@ -2795,8 +2837,19 @@ class _ChatScreenState extends State<ChatScreen> {
         });
 
         //add url to fb
-        addChatFb(senderName, vidFile.path, senderPhone, type, receiverPhone,
-                timestamp, '1', firebaseUrl.toString(), thumbPath, thumbUrl)
+        addChatFb(
+                senderName,
+                vidFile.path,
+                senderPhone,
+                type,
+                receiverPhone,
+                timestamp,
+                '1',
+                firebaseUrl.toString(),
+                thumbPath,
+                thumbUrl,
+                senderPin,
+                recPin)
             .then((sent) {
           print('vid path uploaded to fb:$thumbPath');
           //now update query for isUploaded = 1 on this chatId row
@@ -2812,7 +2865,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   '1',
                   firebaseUrl.toString(),
                   thumbPath,
-                  thumbUrl)
+                  thumbUrl,
+                  senderPin,
+                  recPin)
               .then((onValue) async {
             print('updated data vid timestamp: $timestamp');
           }, onError: (e) {
@@ -2821,13 +2876,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
           // add to fb chatlist
           addChatFbChatList(widget.chatId, senderPhone, 'Video', timestamp,
-                  receiverPhone, "1")
+                  receiverPhone, "1", senderPin, recPin)
               .then((sent) {
             print('entry added in fb addchatlist');
           });
         });
       }, onError: (e) {
         print('error while uploading to fb_storage : $e');
+        // throw e//change whole send video function structure with completer
       });
     } catch (e) {
       print('Err in getCameraImage: ' + e);
@@ -2835,8 +2891,19 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
 // put this fun in provider to make common for Pchat and sharedVideo
-  Future addChatFb(senderName, messageText, senderPhone, type, receiverPhone,
-      timestamp, isUploaded, mediaUrl, thumbPath, thumbUrl) async {
+  Future addChatFb(
+      senderName,
+      messageText,
+      senderPhone,
+      type,
+      receiverPhone,
+      timestamp,
+      isUploaded,
+      mediaUrl,
+      thumbPath,
+      thumbUrl,
+      senderPin,
+      recPin) async {
     print('thumbPath : $thumbPath');
     //make common
     _messagesreference.push().set(<String, String>{
@@ -2851,12 +2918,21 @@ class _ChatScreenState extends State<ChatScreen> {
       'mediaUrl': mediaUrl,
       'thumbPath': thumbPath,
       'thumbUrl': thumbUrl,
-      'chatType': 'private'
+      'chatType': 'private',
+      'senderPin': senderPin,
+      'recPin': recPin
     });
   }
 
-  Future addChatFbChatList(String chatId, String senderPhone, String msg,
-      String timestamp, String receiverPhone, String count) async {
+  Future addChatFbChatList(
+      String chatId,
+      String senderPhone,
+      String msg,
+      String timestamp,
+      String receiverPhone,
+      String count,
+      String senderPin,
+      String recPin) async {
     print('in addChatFbChatList():');
     DatabaseReference privateChatRef = FirebaseDatabase.instance
         .reference()
@@ -2869,7 +2945,9 @@ class _ChatScreenState extends State<ChatScreen> {
       "msg": msg,
       "timestamp": timestamp,
       'recPhone': receiverPhone,
-      "count": count
+      "count": count,
+      "senderPin": senderPin,
+      "recPin": recPin
     };
     try {
       privateChatRef.set(data).then((onValue) {

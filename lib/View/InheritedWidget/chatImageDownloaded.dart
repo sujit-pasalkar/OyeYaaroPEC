@@ -293,7 +293,8 @@ class _ChatImageState extends State<ChatImage> {
   checkThumbs() async {
     print('in checkThumb()..');
     try {
-      extDir = await getExternalStorageDirectory();
+      // extDir = await getExternalStorageDirectory();
+      
 
       File isThumbFile = File(extDir.path +
           "/OyeYaaro/Media/Thumbs/.${widget.snap['chatId']}/${widget.snap['timestamp'].toString()}.jpg");

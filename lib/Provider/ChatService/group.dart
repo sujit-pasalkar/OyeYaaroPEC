@@ -9,7 +9,7 @@ class Group {
     Completer _c = new Completer();
     var arr = [];
     print('you are in fetch GroupChat: ${pref.phone.toString()} ');
-    var body = jsonEncode({"senderPhone": "${pref.phone.toString()}"});
+    var body = jsonEncode({"senderPhone": "${pref.pin.toString()}"});
 
     try {
       final response = await http.post("${url.api}getContactsGroups",

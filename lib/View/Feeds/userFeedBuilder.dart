@@ -2,7 +2,7 @@ import 'package:oye_yaaro_pec/Components/feeds_image.dart';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
 import 'package:oye_yaaro_pec/View/Feeds/mediaAndComment.dart';
-// import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
+import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/painting.dart';
@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'comments.dart';
 import 'playVideo.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class UserFeedBuilder extends StatefulWidget {
   final String username;
@@ -79,7 +80,7 @@ class _FeedBuilder extends State<UserFeedBuilder> {
   Map likes;
   int likeCount;
 
-  String profileUrl;
+  // String profileUrl;
 
   bool liked;
   bool showHeart = false;
@@ -101,7 +102,7 @@ class _FeedBuilder extends State<UserFeedBuilder> {
   @override
   void initState() {
     time = _calculateTime();
-    getProfileUrl();
+    // getProfileUrl();
 
     super.initState();
   }
@@ -111,24 +112,24 @@ class _FeedBuilder extends State<UserFeedBuilder> {
     super.dispose();
   }
 
-  getProfileUrl() async {
-    print('in feedbuilder-$username');
-    try {
-      sqlQuery.getContactRow(widget.ownerId.toString()).then((onValue) {
-        if (onValue.length == 0) {
-          setState(() {
-            profileUrl = 'add';
-          });
-        } else {
-          setState(() {
-            profileUrl = onValue[0]['profileUrl'];
-          });
-        }
-      });
-    } catch (e) {
-      print('Error in getProfileUrl() :$e');
-    }
-  }
+  // getProfileUrl() async {
+  //   print('in feedbuilder-$username');
+  //   try {
+  //     sqlQuery.getContactRow(widget.ownerId.toString()).then((onValue) {
+  //       if (onValue.length == 0) {
+  //         setState(() {
+  //           profileUrl = 'add';
+  //         });
+  //       } else {
+  //         setState(() {
+  //           profileUrl = onValue[0]['profileUrl'];
+  //         });
+  //       }
+  //     });
+  //   } catch (e) {
+  //     print('Error in getProfileUrl() :$e');
+  //   }
+  // }
 
   _likePost() async {
     if (!_processing) {
@@ -208,7 +209,7 @@ class _FeedBuilder extends State<UserFeedBuilder> {
             postOwner: ownerId,
             postId: postId,
             description: description,
-            profileUrl: profileUrl,
+            // profileUrl: profileUrl,
             type: type),
       ),
     );
@@ -341,99 +342,56 @@ class _FeedBuilder extends State<UserFeedBuilder> {
           Row(
             children: <Widget>[
               Container(
-                  margin: EdgeInsets.fromLTRB(8, 2, 2, 2),
-                  padding: EdgeInsets.all(1.0),
-                  decoration: new BoxDecoration(
-                    color: Color(0xffb00bae3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: widget.ownerId == pref.phone
-                      ?
-                      //  GestureDetector(
-                      //     onTap: () {
-                      //       Navigator.push(
-                      //         context,
-                      //         MaterialPageRoute(
-                      //           builder: (context) => MyProfile(
-                      //                 phone: widget.ownerId,
-                      //               ),
-                      //         ),
-                      //       );
-                      //     },
-                      //     child:
-                           CircleAvatar(
-                            backgroundImage: NetworkImage(pref.profileUrl),
-                            backgroundColor: Colors.grey[300],
-                            radius: 18,
-                          )
-                        // )
-                      : profileUrl == '' || profileUrl == null
-                          ? 
-                          // GestureDetector(
-                          //     onTap: () {
-                          //       Navigator.push(
-                          //         context,
-                          //         MaterialPageRoute(
-                          //           builder: (context) => MyProfile(
-                          //                 phone: widget.ownerId,
-                          //               ),
-                          //         ),
-                          //       );
-                          //     },
-                          //     child: 
-                              CircleAvatar(
-                                child: Icon(
-                                  Icons.person,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                backgroundColor: Colors.grey[300],
-                                radius: 18,
+                margin: EdgeInsets.fromLTRB(8, 2, 2, 2),
+                padding: EdgeInsets.all(1.0),
+                decoration: new BoxDecoration(
+                  color: Color(0xffb00bae3),
+                  shape: BoxShape.circle,
+                ),
+                child: widget.ownerId == pref.phone
+                    ? GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MyProfile(
+                                pin: widget.ownerId,
+                              ),
+                            ),
+                          );
+                        },
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(pref.profileUrl),
+                          backgroundColor: Colors.grey[300],
+                          radius: 18,
+                        ))
+                    :
+                    CircleAvatar(
+                        backgroundColor: Colors.grey[300],
+                        radius: 18,
+                        child: CachedNetworkImage(
+                          fit: BoxFit.cover,
+                          imageUrl:
+                              'http://54.200.143.85:4200/profiles/now/${widget.ownerId}.jpg',
+                          placeholder: (context, url) => Center(
+                            child: SizedBox(
+                              height: 40.0,
+                              width: 40.0,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2.0),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => 
+                           FadeInImage.assetNetwork(
+                                placeholder: 'assets/loading.gif',
+                                image:
+                                    'http://54.200.143.85:4200/profiles/then/${widget.ownerId}.jpg',
                               )
-                            // )
-                          : profileUrl == 'add'
-                              ? GestureDetector(
-                                  onTap: () {
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) => MyProfile(
-                                    //           phone: widget.ownerId,
-                                    //         ),
-                                    //   ),
-                                    // );
-                                    print('Add user logic');
-                                  },
-                                  child: CircleAvatar(
-                                    child: Icon(
-                                      Icons.person_add,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    backgroundColor: Colors.grey[300],
-                                    radius: 18,
-                                  ),
-                                )
-                              : 
-                              // GestureDetector(
-                              //     onTap: () {
-                              //       Navigator.push(
-                              //         context,
-                              //         MaterialPageRoute(
-                              //           builder: (context) => MyProfile(
-                              //                 phone: widget.ownerId,
-                              //               ),
-                              //         ),
-                              //       );
-                              //     },
-                              //     child:
-                                   CircleAvatar(
-                                    backgroundImage: NetworkImage(profileUrl),
-                                    backgroundColor: Colors.grey[300],
-                                    radius: 18,
-                                  ),
-                                // ),
-                                ),
+                          // Image.network(
+                          //     'http://54.200.143.85:4200/profiles/then/${widget.ownerId}.jpg'),
+                        ),
+                      ),
+              ),
               Flexible(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(5, 2, 2, 2),
@@ -461,33 +419,33 @@ class _FeedBuilder extends State<UserFeedBuilder> {
       tooltip: "Menu",
       onSelected: _onMenuItemSelect,
       itemBuilder: (BuildContext context) => [
-            PopupMenuItem<String>(
-              value: 'Delete Post',
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5.0),
-                child: Row(
-                  children: <Widget>[
-                    Text("Delete Post"),
-                    Spacer(),
-                    Icon(Icons.delete),
-                  ],
-                ),
-              ),
+        PopupMenuItem<String>(
+          value: 'Delete Post',
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0),
+            child: Row(
+              children: <Widget>[
+                Text("Delete Post"),
+                Spacer(),
+                Icon(Icons.delete),
+              ],
             ),
-            PopupMenuItem<String>(
-              value: 'Copy',
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5.0),
-                child: Row(
-                  children: <Widget>[
-                    Text("Copy Link"),
-                    Spacer(),
-                    Icon(Icons.content_copy),
-                  ],
-                ),
-              ),
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'Copy',
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0),
+            child: Row(
+              children: <Widget>[
+                Text("Copy Link"),
+                Spacer(),
+                Icon(Icons.content_copy),
+              ],
             ),
-          ],
+          ),
+        ),
+      ],
     );
   }
 

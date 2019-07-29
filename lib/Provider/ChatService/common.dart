@@ -59,12 +59,10 @@ class Common {
     print('url : $url');
     String s1;
     if (type == '3') {
-      s1 = url
-          .replaceAll('http://oyeyaaroapi.plmlogix.com/AudioChat/', '');
+      s1 = url.replaceAll('http://oyeyaaroapi.plmlogix.com/AudioChat/', '');
       print('song 3: $s1 ');
     } else {
-      s1 = url
-          .replaceAll('http://oyeyaaroapi.plmlogix.com/Audio/', '');
+      s1 = url.replaceAll('http://oyeyaaroapi.plmlogix.com/Audio/', '');
       print('song 4: $s1 ');
     }
 
@@ -76,19 +74,13 @@ class Common {
       File downloadedFile = File(extDir.path + "/OyeYaaro/audio/.$type/" + s1);
       print('downloadedFile path : ${downloadedFile.path}');
       bool fileExist = await downloadedFile.exists();
-      if (fileExist) {
-        // print('song exist');
-      } else {
-        // print('song not found');
-        //  download
+      if (!fileExist) {
         await downloadedFile.create(recursive: true);
-        // String dir = downloadedFile.path;
-        // print(
-        //     'i have created file as its nt exist path : ${downloadedFile.path}');
         downloadFile(url, downloadedFile);
       }
     } catch (e) {
       print('Error in downloadFile() throwed: $e');
+      // add toast 'Error while downloading song'
     }
   }
 
@@ -99,7 +91,7 @@ class Common {
       var request = await http.get(
         url,
       );
-      var bytes =  request.bodyBytes; //close();
+      var bytes = request.bodyBytes; //close();
       await file.writeAsBytes(bytes);
       print("downloaded file" + file.path);
     } catch (e) {
@@ -107,5 +99,4 @@ class Common {
       throw e;
     }
   }
-  
 }

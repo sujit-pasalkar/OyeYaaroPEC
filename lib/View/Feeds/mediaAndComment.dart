@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 class MediaAndComment extends StatefulWidget {
   final int timestamp, postOwner, type;
-  final String imageUrl, postId, description, profileUrl;
+  final String imageUrl, postId, description; //profileUrl;
 
   MediaAndComment(
       {@required this.timestamp,
@@ -18,7 +18,7 @@ class MediaAndComment extends StatefulWidget {
       @required this.postOwner,
       @required this.postId,
       @required this.description,
-      @required this.profileUrl,
+      // @required this.profileUrl,
       @required this.type});
 
   @override
@@ -110,7 +110,7 @@ class _MediaAndCommentState extends State<MediaAndComment> {
       "comment": comment,
       "timestamp": DateTime.now().toString(),
       "avatarUrl": pref.profileUrl,
-      "userId": pref.phone.toString()
+      "userId": pref.pin.toString()
     });
     setState(() {});
 
@@ -120,7 +120,7 @@ class _MediaAndCommentState extends State<MediaAndComment> {
         .collection("items")
         .add({
       "username": pref.name,
-      "userId": pref.phone.toString(),
+      "userId": pref.pin.toString(),
       "type": "comment",
       "userProfileImg": pref.profileUrl,
       "commentData": comment,
@@ -143,7 +143,7 @@ class _MediaAndCommentState extends State<MediaAndComment> {
       ),
       expandedHeight: 550.0, //use screen mediaQuery
       pinned: true,
-      flexibleSpace:  FlexibleSpaceBar(
+      flexibleSpace: FlexibleSpaceBar(
           background: f == null
               ? Center(
                   child: SizedBox(
@@ -163,7 +163,8 @@ class _MediaAndCommentState extends State<MediaAndComment> {
     );
   }
 
-  commentInput() { //and Description
+  commentInput() {
+    //and Description
     return SliverList(
       delegate: SliverChildListDelegate(
         [
@@ -184,55 +185,48 @@ class _MediaAndCommentState extends State<MediaAndComment> {
                                 backgroundImage: NetworkImage(pref.profileUrl),
                                 backgroundColor: Colors.grey[300],
                                 radius: 18,
+                                // child: Text('${pref.profileUrl}'),
                               ),
                             )
-                          : widget.profileUrl == '' || widget.profileUrl == null
-                              ? Container(
-                                  padding: EdgeInsets.all(1.0),
-                                  decoration: new BoxDecoration(
-                                    color: Color(0xffb00bae3),
-                                    shape: BoxShape.circle,
+                          : Container(
+                              padding: EdgeInsets.all(1.0),
+                              decoration: new BoxDecoration(
+                                color: Color(0xffb00bae3),
+                                shape: BoxShape.circle,
+                              ),
+                              child:
+                                  // CircleAvatar(
+                                  //   child: Icon(
+                                  //     Icons.person,
+                                  //     color: Colors.white,
+                                  //     size: 20,
+                                  //   ),
+                                  //   backgroundColor: Colors.grey[300],
+                                  //   radius: 25,
+                                  // ),
+
+                                  CachedNetworkImage(
+                                fit: BoxFit.cover,
+                                imageUrl:
+                                    'http://54.200.143.85:4200/profiles/now/${widget.postOwner}.jpg',
+                                placeholder: (context, url) => Center(
+                                  child: SizedBox(
+                                    height: 40.0,
+                                    width: 40.0,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2.0),
                                   ),
-                                  child: CircleAvatar(
-                                    child: Icon(
-                                      Icons.person,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    backgroundColor: Colors.grey[300],
-                                    radius: 25,
-                                  ),
-                                )
-                              : widget.profileUrl == 'add'
-                                  ? Container(
-                                      padding: EdgeInsets.all(1.0),
-                                      decoration: new BoxDecoration(
-                                        color: Color(0xffb00bae3),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: CircleAvatar(
-                                        child: Icon(
-                                          Icons.person_add,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                        backgroundColor: Colors.grey[300],
-                                        radius: 25,
-                                      ),
-                                    )
-                                  : Container(
-                                      padding: EdgeInsets.all(1.0),
-                                      decoration: new BoxDecoration(
-                                        color: Color(0xffb00bae3),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: CircleAvatar(
-                                        backgroundImage:
-                                            NetworkImage(widget.profileUrl),
-                                        backgroundColor: Colors.grey[300],
-                                        radius: 25,
-                                      ),
-                                    ),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                 FadeInImage.assetNetwork(
+                                placeholder: 'assets/loading.gif',
+                                image:
+                                    'http://54.200.143.85:4200/profiles/then/${widget.postOwner}.jpg',
+                              )
+                                //  Image.network(
+                                //     'http://54.200.143.85:4200/profiles/then/${widget.postOwner}.jpg'),
+                              ),
+                            ),
                     ),
                   ),
                   Expanded(
@@ -286,14 +280,13 @@ class _MediaAndCommentState extends State<MediaAndComment> {
             ),
           ),
           Divider(height: 0.0),
-          
         ],
       ),
     );
   }
 
   _textMessageSubmitted(String text) {
-    print('send comment : $text');
+    // print('send comment : $text');
     addComment(_commentController.text.trim());
     setState(() {
       _isComposingMessage = false;
@@ -367,12 +360,30 @@ class Comment extends StatelessWidget {
                   color: Color(0xffb00bae3),
                   shape: BoxShape.circle,
                 ),
-                child: CircleAvatar(
-                  backgroundImage:
-                  // NetworkImage(avatarUrl),
-                  CachedNetworkImageProvider(avatarUrl),
-                  radius: 20.0,
-                  backgroundColor: Colors.grey,
+                child: 
+                GestureDetector(
+                  onTap: (){
+                    print('avatar:$avatarUrl');
+                    print('userId:$userId');
+                  },
+                  child: CircleAvatar(
+                    radius: 20.0,
+                    backgroundColor: Colors.grey[300],
+                    child: CachedNetworkImage(
+                      fit: BoxFit.cover,
+                      imageUrl:
+                          'http://54.200.143.85:4200/profiles/now/$userId.jpg',
+                      placeholder: (context, url) => Center(
+                        child: SizedBox(
+                          height: 10.0,
+                          width: 10.0,
+                          child: CircularProgressIndicator(strokeWidth: 2.0),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Image.network(
+                          'http://54.200.143.85:4200/profiles/then/$userId.jpg'),
+                    ),
+                  ),
                 ),
               ),
               Container(

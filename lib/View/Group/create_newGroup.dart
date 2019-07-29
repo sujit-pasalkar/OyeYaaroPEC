@@ -84,50 +84,49 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
                     return Column(children: <Widget>[
                       ListTile(
                         leading: GestureDetector(
-                            onTap: () {
-                              // print(widget.addMembers);
-                              //              Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) => MyProfile(
-                              //           pin: int.parse(widget.addMembers[i]['pin']),
-                              //         ),
-                              //   ),
-                              // );
-                            },
-                            child:
-                                // widget.addMembers[i]['profileUrl'] != ''
-                                //     ?
-                                Container(
-                              padding: EdgeInsets.all(1),
-                              decoration: BoxDecoration(
-                                  color: Color(0xffb00bae3),
-                                  shape: BoxShape.circle),
+                          onTap: () {
+                            print(widget.addMembers);
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => MyProfile(
+                            //       pin: int.parse(widget.addMembers[i]['pin']),
+                            //     ),
+                            //   ),
+                            // );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(1),
+                            decoration: BoxDecoration(
+                                color: Color(0xffb00bae3),
+                                shape: BoxShape.circle),
+                            child: ClipOval(
                               child: CircleAvatar(
                                 backgroundColor: Colors.grey[300],
                                 radius: 25,
-                                child: ClipOval(
-                                  child: CachedNetworkImage(
-                                    fit: BoxFit.cover,
-                                    imageUrl:
-                                        'http://54.200.143.85:4200/profiles/now/${widget.addMembers[i]['pin']}.jpg',
-                                    placeholder: (context, url) => Center(
-                                      child: SizedBox(
-                                        height: 20.0,
-                                        width: 20.0,
-                                        child: CircularProgressIndicator(
-                                            strokeWidth: 1.0),
-                                      ),
+                                child: CachedNetworkImage(
+                                  fit: BoxFit.cover,
+                                  imageUrl:
+                                      'http://54.200.143.85:4200/profiles/now/${widget.addMembers[i]['pin']}.jpg',
+                                  placeholder: (context, url) => Center(
+                                    child: SizedBox(
+                                      height: 20.0,
+                                      width: 20.0,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 1.0),
                                     ),
-                                    errorWidget: (context, url, error) =>
-                                        Image.network(
-                                      'http://54.200.143.85:4200/profiles/then/${widget.addMembers[i]['pin']}.jpg',
-                                      // fit: BoxFit.cover,
-                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      FadeInImage.assetNetwork(
+                                    placeholder: 'assets/loading.gif',
+                                    image:
+                                        'http://54.200.143.85:4200/profiles/then/${widget.addMembers[i]['pin']}.jpg',
                                   ),
                                 ),
                               ),
-                            )),
+                            ),
+                          ),
+                        ),
                         title: Text(
                           '${widget.addMembers[i]['name']}',
                         ),
@@ -214,14 +213,15 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
         DateTime.now().millisecondsSinceEpoch.toString(),
         "0",
         _groupName.text,
+        pref.phone.toString(),
       );
       print('await fbGroupChatList res ok');
 
       //3.now add this group info to grouplist table
-      Map<String,dynamic> obj = {
+      Map<String, dynamic> obj = {
         "chatId": res['msg']['dialog_id'],
         "chatListLastMsg": 'created by @${pref.name}', //change last msg
-        "chatListSenderPhone": pref.pin.toString(),
+        "chatListSenderPhone": pref.phone.toString(),
         "chatListLastMsgTime": DateTime.now().millisecondsSinceEpoch.toString(),
         "chatListMsgCount": '0',
         "chatGroupName": _groupName.text,
@@ -256,7 +256,7 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
   }
 
   Future fbGroupChatList(String chatId, String senderPin, String msg,
-      String timestamp, String count, String gName) async {
+      String timestamp, String count, String gName, String senderPhone) async {
     Completer _c = new Completer();
     try {
       print('in FbGroupChatList():');
@@ -271,7 +271,8 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
         "count": count,
         "groupName": gName,
         "members": widget.checkAddMembers,
-        "admin": senderPin
+        "admin": senderPin,
+        "senderPhone": senderPhone
       };
       // privateChatRef.update(data);
       privateChatRef.set(data).then((onValue) {

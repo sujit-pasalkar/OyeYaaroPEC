@@ -26,6 +26,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:thumbnails/thumbnails.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 //pages
 import '../../Components/imageViwer.dart';
@@ -52,19 +53,21 @@ class GroupChatScreen extends StatefulWidget {
 }
 
 class _GroupChatScreenState extends State<GroupChatScreen> {
+  final globalKey = GlobalKey<ScaffoldState>();
+
   SelectBloc bloc;
   // group message
   DatabaseReference _groupMessagesreference;
   StreamSubscription<Event> _groupMessagesSubscription;
   // get profile url
-  DatabaseReference _profileReference;
-  StreamSubscription<Event> _profileSubscription;
+  // DatabaseReference _profileReference;
+  // StreamSubscription<Event> _profileSubscription;
   // get group members
   DatabaseReference _membersReference;
   // StreamSubscription<Event> _membersSubscription;
 
   final TextEditingController _textEditingController =
-      new TextEditingController();
+       TextEditingController();
   final ScrollController listScrollController = new ScrollController();
   bool _isComposingMessage = false;
   bool screenOpened = true;
@@ -108,10 +111,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       database: db,
       reactive: true,
     );
-    print('after groupchat table bloc');
 
     getDir();
-    print('after getDir');
 
     try {
       // firebase database
@@ -125,9 +126,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       _groupMessagesSubscription =
           _groupMessagesreference.onChildAdded.listen((Event event) {
         if (screenOpened) {
-          print('1st time get all');
-          // print(event.snapshot.value);
-
+          print('1st time get all:screenOpened:onChildAdded');
           // download song
           if (event.snapshot.value['msgType'] == '3') {
             Common.isSongDownloaded(event.snapshot.value['msgMedia'], '3');
@@ -137,62 +136,64 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
           //get fprfile img and add in group chat
           //  error occures when when we explicitly delete profile doc from firebase
-          try {
-            _profileReference = database
-                .reference()
-                .child('profiles')
-                .child(event.snapshot.value['senderPhone']);
-            _profileReference.keepSynced(true);
+          // try {
+          // _profileReference = database
+          //     .reference()
+          //     .child('profiles')
+          //     .child(event.snapshot.value['senderPhone']);
+          // _profileReference.keepSynced(true);
 
-            _profileSubscription =
-                _profileReference.onValue.listen((Event prof) async {
-              // print('event data ${prof.snapshot.value['profileImg']}');
+          // _profileSubscription =
+          //     _profileReference.onValue.listen((Event prof) async {
+          // print('event data ${prof.snapshot.value['profileImg']}');
 
-              sqlQuery
-                  .addGroupChat(
-                      event.snapshot.value['chatId'],
-                      event.snapshot.value['msgMedia'],
-                      event.snapshot.value['msgType'],
-                      event.snapshot.value['timestamp'],
-                      event.snapshot.value['senderName'],
-                      event.snapshot.value['senderPhone'],
-                      event.snapshot.value['isUploaded'],
-                      event.snapshot.value['mediaUrl'],
-                      event.snapshot.value['thumbPath'],
-                      event.snapshot.value['thumbUrl'],
-                      prof.snapshot.value['profileImg'])
-                  .then((onValue) {
-                // print('after adding into sqlGroupChat: $onValue');
-              }, onError: (e) {
-                print('show error message if addChat fails : $e');
-              });
-            }, onError: (e) {
-              print('Error in profile reference listen : $e');
-            });
-            // print('after addGroupChat...');
-          } catch (e) {
-            print('Error while getting profile Doc:$e');
-            // if get error from profile doc bcz of null
-            // add '' to profileImg value
-            sqlQuery
-                .addGroupChat(
-                    event.snapshot.value['chatId'],
-                    event.snapshot.value['msgMedia'],
-                    event.snapshot.value['msgType'],
-                    event.snapshot.value['timestamp'],
-                    event.snapshot.value['senderName'],
-                    event.snapshot.value['senderPhone'],
-                    event.snapshot.value['isUploaded'],
-                    event.snapshot.value['mediaUrl'],
-                    event.snapshot.value['thumbPath'],
-                    event.snapshot.value['thumbUrl'],
-                    '')
-                .then((onValue) {
-              // print('after adding into sqlGroupChat: $onValue');
-            }, onError: (e) {
-              print('show error message if addChat fails : $e');
-            });
-          }
+          sqlQuery
+              .addGroupChat(
+            event.snapshot.value['chatId'],
+            event.snapshot.value['msgMedia'],
+            event.snapshot.value['msgType'],
+            event.snapshot.value['timestamp'],
+            event.snapshot.value['senderName'],
+            event.snapshot.value['senderPhone'],
+            event.snapshot.value['isUploaded'],
+            event.snapshot.value['mediaUrl'],
+            event.snapshot.value['thumbPath'],
+            event.snapshot.value['thumbUrl'],
+            // prof.snapshot.value['profileImg']
+            event.snapshot.value['senderPin'],
+          )
+              .then((onValue) {
+            // print('after adding into sqlGroupChat: $onValue');
+          }, onError: (e) {
+            print('show error message if addChat fails : $e');
+          });
+          // }, onError: (e) {
+          //   print('Error in profile reference listen : $e');
+          // });
+          // print('after addGroupChat...');
+          // } catch (e) {
+          //   print('Error while getting profile Doc:$e');
+          //   // if get error from profile doc bcz of null
+          //   // add '' to profileImg value
+          //   sqlQuery
+          //       .addGroupChat(
+          //           event.snapshot.value['chatId'],
+          //           event.snapshot.value['msgMedia'],
+          //           event.snapshot.value['msgType'],
+          //           event.snapshot.value['timestamp'],
+          //           event.snapshot.value['senderName'],
+          //           event.snapshot.value['senderPhone'],
+          //           event.snapshot.value['isUploaded'],
+          //           event.snapshot.value['mediaUrl'],
+          //           event.snapshot.value['thumbPath'],
+          //           event.snapshot.value['thumbUrl'],
+          //           '')
+          //       .then((onValue) {
+          //     // print('after adding into sqlGroupChat: $onValue');
+          //   }, onError: (e) {
+          //     print('show error message if addChat fails : $e');
+          //   });
+          // }
 
           // _profileReference = database
           //     .reference()
@@ -227,7 +228,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           // });
 
         } else {
-          print('2nd time just add');
+          print('2nd time just add:onChildAdded:!screenOpend:');
           // download song
           if (event.snapshot.value['msgType'] == '3') {
             Common.isSongDownloaded(event.snapshot.value['msgMedia'], '3');
@@ -235,67 +236,69 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             Common.isSongDownloaded(event.snapshot.value['msgMedia'], '4');
           }
 
-          if (event.snapshot.value['senderPhone'] == pref.phone.toString()) {
+          if (event.snapshot.value['senderPin'] == pref.pin.toString()) {
             print('dont add this msg of firebase');
           } else {
             // print('add this msg to sqflite');
 
             //get profile img and add in group chat
-            try {
-              _profileReference = database
-                  .reference()
-                  .child('profiles')
-                  .child(event.snapshot.value['senderPhone']);
-              _profileReference.keepSynced(true);
+            // try {
+            // _profileReference = database
+            //     .reference()
+            //     .child('profiles')
+            //     .child(event.snapshot.value['senderPhone']);
+            // _profileReference.keepSynced(true);
 
-              _profileSubscription =
-                  _profileReference.onValue.listen((Event prof) async {
-                // print('event data ${prof.snapshot.value['profileImg']}');
+            // _profileSubscription =
+            //     _profileReference.onValue.listen((Event prof) async {
+            // print('event data ${prof.snapshot.value['profileImg']}');
 
-                sqlQuery
-                    .addGroupChat(
-                        event.snapshot.value['chatId'],
-                        event.snapshot.value['msgMedia'],
-                        event.snapshot.value['msgType'],
-                        event.snapshot.value['timestamp'],
-                        event.snapshot.value['senderName'],
-                        event.snapshot.value['senderPhone'],
-                        event.snapshot.value['isUploaded'],
-                        event.snapshot.value['mediaUrl'],
-                        event.snapshot.value['thumbPath'],
-                        event.snapshot.value['thumbUrl'],
-                        prof.snapshot.value['profileImg'])
-                    .then((onValue) {
-                  // print('after adding into sqlGroupChat: $onValue');
-                }, onError: (e) {
-                  print('show error message if addChat fails : $e');
-                });
-              }, onError: (e) {
-                print('Error in profile reference listen : $e');
-              });
-            } catch (e) {
-              print('Error while getting profile Doc:$e');
-              // if get error from profile doc bcz of null
-              // add '' to profileImg value
-              sqlQuery
-                  .addGroupChat(
-                      event.snapshot.value['chatId'],
-                      event.snapshot.value['msgMedia'],
-                      event.snapshot.value['msgType'],
-                      event.snapshot.value['timestamp'],
-                      event.snapshot.value['senderName'],
-                      event.snapshot.value['senderPhone'],
-                      event.snapshot.value['isUploaded'],
-                      event.snapshot.value['mediaUrl'],
-                      event.snapshot.value['thumbPath'],
-                      event.snapshot.value['thumbUrl'],
-                      '')
-                  .then((onValue) {
-                // print('after adding into sqlGroupChat: $onValue');
-              }, onError: (e) {
-                print('show error message if addChat fails : $e');
-              });
-            }
+            sqlQuery
+                .addGroupChat(
+              event.snapshot.value['chatId'],
+              event.snapshot.value['msgMedia'],
+              event.snapshot.value['msgType'],
+              event.snapshot.value['timestamp'],
+              event.snapshot.value['senderName'],
+              event.snapshot.value['senderPhone'],
+              event.snapshot.value['isUploaded'],
+              event.snapshot.value['mediaUrl'],
+              event.snapshot.value['thumbPath'],
+              event.snapshot.value['thumbUrl'],
+              // prof.snapshot.value['profileImg']
+              event.snapshot.value['senderPin'],
+            )
+                .then((onValue) {
+              print('after adding into sqlGroupChat: $onValue');
+            }, onError: (e) {
+              print('show error message if addChat fails : $e');
+            });
+            // }, onError: (e) {
+            //   print('Error in profile reference listen : $e');
+            // });
+            // } catch (e) {
+            //   print('Error while getting profile Doc:$e');
+            //   // if get error from profile doc bcz of null
+            //   // add '' to profileImg value
+            //   sqlQuery
+            //       .addGroupChat(
+            //           event.snapshot.value['chatId'],
+            //           event.snapshot.value['msgMedia'],
+            //           event.snapshot.value['msgType'],
+            //           event.snapshot.value['timestamp'],
+            //           event.snapshot.value['senderName'],
+            //           event.snapshot.value['senderPhone'],
+            //           event.snapshot.value['isUploaded'],
+            //           event.snapshot.value['mediaUrl'],
+            //           event.snapshot.value['thumbPath'],
+            //           event.snapshot.value['thumbUrl'],
+            //           '')
+            //       .then((onValue) {
+            //     // print('after adding into sqlGroupChat: $onValue');
+            //   }, onError: (e) {
+            //     print('show error message if addChat fails : $e');
+            //   });
+            // }
           }
         }
       }, onError: (Object o) {
@@ -316,60 +319,65 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     // get Group members(added all members firebase to sql[])
     _membersReference =
         database.reference().child('GroupMembers').child('${widget.chatId}');
+
     _membersReference.once().then((DataSnapshot snapshot) async {
-      // delete all id's from this groupMember table
-      await SqlQuery.deleteGroupMemberTable(widget.chatId);
-      // now add firebase group members to sql table
-      for (var value in snapshot.value.values) {
-        members.addAll(value['members']);
-        admin = value['admin'];
-      }
-      // add admin number also
-      members.add(admin);
-      members.toSet().toList().forEach((memb) {
-        // get member details from sql contacts
-        sqlQuery.getContactRow(memb.toString()).then((onValue) {
-          if (onValue.length == 0) {
-            Map<String, String> addMember = {
-              'chatId': widget.chatId,
-              'memberPhone': memb.toString(),
-              'memberName': memb.toString() == pref.phone.toString()
-                  ? 'You'
-                  : memb.toString(),
-              'profileUrl': memb.toString() == pref.phone.toString()
-                  ? pref.profileUrl
-                  : '',
-              'userType': memb.toString() == admin ? 'admin' : 'user'
-            };
-            // add that member in groupMember table sql
-            sqlQuery.addGroupsMember(addMember).then((onValue) {
-              // print('$memb added in group members sql');
-            }, onError: (e) {
-              print('Error while adding group members in sql:$e');
-            });
-          } else {
-            Map<String, String> addMember = {
-              'chatId': widget.chatId,
-              'memberPhone': onValue[0]['contactsPhone'],
-              'memberName': memb.toString() == pref.phone.toString()
-                  ? 'You'
-                  : onValue[0]['contactsName'],
-              'profileUrl': memb.toString() == pref.phone.toString()
-                  ? pref.profileUrl
-                  : onValue[0]['profileUrl'],
-              'userType': memb.toString() == admin ? 'admin' : 'user'
-            };
-            sqlQuery.addGroupsMember(addMember).then((onValue) {},
-                onError: (e) {
-              print('Error while adding group members in sql:$e');
-            });
-          }
+      try {
+        // delete all id's from this groupMember table
+        await SqlQuery.deleteGroupMemberTable(widget.chatId);
+        // now add firebase group members to sql table
+        for (var value in snapshot.value.values) {
+          members.addAll(value['members']);
+          admin = value['admin'];
+        }
+        // add admin number also
+        members.add(admin);
+
+        members.toSet().toList().forEach((memb) {
+          // get member details from sql contacts from pin.
+          sqlQuery.getContactRowFromPin(memb.toString()).then((onValue) {
+            if (onValue.length == 0) {
+              Map<String, String> addMember = {
+                'chatId': widget.chatId,
+                'memberPhone': memb.toString() == pref.pin.toString()
+                    ? pref.phone.toString()
+                    : '',
+                'memberName': memb.toString() == pref.pin.toString()
+                    ? 'You'
+                    : memb.toString(),
+                'userType': memb.toString() == admin ? 'admin' : 'user',
+                'memberPin': memb.toString()
+              };
+              // add that member in groupMember table sql
+              sqlQuery.addGroupsMember(addMember).then((onValue) {
+                // print('!contact $memb added in group members sql');
+              }, onError: (e) {
+                print('!contact Error while adding group members in sql:$e');
+              });
+            } else {
+              Map<String, String> addMember = {
+                'chatId': widget.chatId,
+                'memberPhone': onValue[0]['contactsPhone'],
+                'memberName': memb.toString() == pref.phone.toString()
+                    ? 'You'
+                    : onValue[0]['contactsName'],
+                'userType': memb.toString() == admin ? 'admin' : 'user',
+                'memberPin': memb.toString()
+              };
+              sqlQuery.addGroupsMember(addMember).then((onValue) {
+                // print('contact $memb added in group members sql');
+              }, onError: (e) {
+                print('contact Error while adding group members in sql:$e');
+              });
+            }
+          });
         });
-      });
+      } catch (e) {
+        print('Error while Adding group Memebers to SQL Table');
+      }
     });
 
     // get services
-    getSongs(); //
+    getSongs();
 
     _textEditingController.addListener(() {
       if (_textEditingController.text.isEmpty) {
@@ -427,8 +435,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   void dispose() {
     audioPlayer.stop();
     _groupMessagesSubscription.cancel();
-    _profileSubscription.cancel();
-    // print('dispose');
     super.dispose();
   }
 
@@ -457,6 +463,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   Widget build(BuildContext context) {
     width = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: globalKey,
       appBar: AppBar(
         flexibleSpace: FlexAppbar(),
         title: GestureDetector(
@@ -480,10 +487,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       ),
       body: WillPopScope(
           onWillPop: onBackPress,
-          child: new Container(
-            child: new Column(
+          child: Container(
+            child: Column(
               children: <Widget>[
-                new Flexible(
+                Flexible(
                   child: StreamBuilder<List<Map>>(
                       stream: bloc.items,
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -567,31 +574,30 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       tooltip: "Menu",
       onSelected: _onMenuItemSelect,
       itemBuilder: (BuildContext context) => [
-            PopupMenuItem<String>(
-              value: 'Hide Media',
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5.0),
-                child: Row(
-                  children: <Widget>[
-                    Text(pref.hideMedia == false || pref.hideMedia == null
-                        ? "Hide Media"
-                        : "Show Media"),
-                    Spacer(),
-                    Icon(pref.hideMedia == false || pref.hideMedia == null
-                        ? Icons.visibility_off
-                        : Icons.remove_red_eye),
-                  ],
-                ),
-              ),
+        PopupMenuItem<String>(
+          value: 'Hide Media',
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0),
+            child: Row(
+              children: <Widget>[
+                Text(pref.hideMedia == false || pref.hideMedia == null
+                    ? "Hide Media"
+                    : "Show Media"),
+                Spacer(),
+                Icon(pref.hideMedia == false || pref.hideMedia == null
+                    ? Icons.visibility_off
+                    : Icons.remove_red_eye),
+              ],
             ),
-          ],
+          ),
+        ),
+      ],
     );
   }
 
   _onMenuItemSelect(String option) {
     switch (option) {
       case 'Hide Media':
-        // print('Hide show media');
         hideShow();
         break;
     }
@@ -607,12 +613,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         pref.hideMedia = false;
       });
     }
-    // print('now :${pref.hideMedia}');
   }
 
   Widget buildChatList(index, Map<String, dynamic> snap) {
     //msg from this chatId
-    if (snap['senderPhone'] == pref.phone.toString()) {
+    if (snap['senderPin'] == pref.pin.toString()) {
       return Stack(
         children: <Widget>[
           Row(
@@ -710,156 +715,155 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                           },
                           onTap: () {
                             audioPlayer.stop();
-                            // print(snap['msgMedia']);
+                            print(snap['msgMedia']);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ImageViewer(
-                                      imageUrl: snap['msgMedia'],
-                                    ),
+                                  imageUrl: snap['msgMedia'],
+                                ),
                               ),
                             );
                           },
                           child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: <Widget>[
-                                FutureBuilder<String>(
-                                  future: Common.getTime(
-                                      int.parse(snap['timestamp'])),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<String> snapshot) {
-                                    switch (snapshot.connectionState) {
-                                      case ConnectionState.none:
-                                        return Text(
-                                            DateFormat('dd MMM kk:mm').format(
-                                                DateTime
-                                                    .fromMillisecondsSinceEpoch(
-                                                        int.parse(snap[
-                                                            'timestamp']))),
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 10.0,
-                                                fontStyle: FontStyle.normal));
-                                      case ConnectionState.active:
-                                      case ConnectionState.waiting:
-                                        return Text(
-                                            DateFormat('dd MMM kk:mm').format(
-                                                DateTime
-                                                    .fromMillisecondsSinceEpoch(
-                                                        int.parse(snap[
-                                                            'timestamp']))),
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 10.0,
-                                                fontStyle: FontStyle.normal));
-                                      case ConnectionState.done:
-                                        if (snapshot.hasError)
-                                          return Text(
-                                              DateFormat('dd MMM kk:mm').format(
-                                                  DateTime
-                                                      .fromMillisecondsSinceEpoch(
-                                                          int.parse(snap[
-                                                              'timestamp']))),
-                                              style: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 10.0,
-                                                  fontStyle: FontStyle.normal));
-                                        return Text(
-                                          snapshot.data,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              FutureBuilder<String>(
+                                future: Common.getTime(
+                                    int.parse(snap['timestamp'])),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<String> snapshot) {
+                                  switch (snapshot.connectionState) {
+                                    case ConnectionState.none:
+                                      return Text(
+                                          DateFormat('dd MMM kk:mm').format(
+                                              DateTime
+                                                  .fromMillisecondsSinceEpoch(
+                                                      int.parse(
+                                                          snap['timestamp']))),
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontSize: 10.0,
-                                              fontStyle: FontStyle.normal),
-                                        );
-                                    }
-                                    return Text(
-                                        DateFormat('dd MMM kk:mm').format(
-                                            DateTime.fromMillisecondsSinceEpoch(
-                                                int.parse(snap['timestamp']))),
+                                              fontStyle: FontStyle.normal));
+                                    case ConnectionState.active:
+                                    case ConnectionState.waiting:
+                                      return Text(
+                                          DateFormat('dd MMM kk:mm').format(
+                                              DateTime
+                                                  .fromMillisecondsSinceEpoch(
+                                                      int.parse(
+                                                          snap['timestamp']))),
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 10.0,
+                                              fontStyle: FontStyle.normal));
+                                    case ConnectionState.done:
+                                      if (snapshot.hasError)
+                                        return Text(
+                                            DateFormat('dd MMM kk:mm').format(
+                                                DateTime
+                                                    .fromMillisecondsSinceEpoch(
+                                                        int.parse(snap[
+                                                            'timestamp']))),
+                                            style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 10.0,
+                                                fontStyle: FontStyle.normal));
+                                      return Text(
+                                        snapshot.data,
                                         style: TextStyle(
                                             color: Colors.grey,
                                             fontSize: 10.0,
-                                            fontStyle: FontStyle
-                                                .normal)); // unreachable
-                                  },
-                                ),
-                                Stack(
-                                  children: <Widget>[
-                                    Container(
-                                      width: (width / 2) + 50,
-                                      height: (width / 2) - 10,
-                                      margin: EdgeInsets.fromLTRB(
-                                          2.0, 1.0, 2.0, 15.0),
-                                      decoration: BoxDecoration(
-                                        border:
-                                            new Border.all(color: Colors.grey),
-                                        borderRadius:
-                                            BorderRadius.circular(25.0),
-                                        color: Colors.white,
-                                        image: DecorationImage(
-                                          fit: BoxFit.cover,
-                                          image:
-                                              FileImage(File(snap['msgMedia'])),
-                                        ),
+                                            fontStyle: FontStyle.normal),
+                                      );
+                                  }
+                                  return Text(
+                                      DateFormat('dd MMM kk:mm').format(
+                                          DateTime.fromMillisecondsSinceEpoch(
+                                              int.parse(snap['timestamp']))),
+                                      style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 10.0,
+                                          fontStyle:
+                                              FontStyle.normal)); // unreachable
+                                },
+                              ),
+                              Stack(
+                                children: <Widget>[
+                                  Container(
+                                    width: (width / 2) + 50,
+                                    height: (width / 2) - 10,
+                                    margin: EdgeInsets.fromLTRB(
+                                        2.0, 1.0, 2.0, 15.0),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey),
+                                      borderRadius: BorderRadius.circular(25.0),
+                                      color: Colors.white,
+                                      image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image:
+                                            FileImage(File(snap['msgMedia'])),
                                       ),
                                     ),
-                                    snap['isUploaded'] == '0'
-                                        ? Positioned(
-                                            bottom: 20,
-                                            right: 15,
-                                            child: Icon(
-                                              Icons.schedule,
-                                              color: Colors.white,
-                                              size: 15,
-                                            ),
-                                          )
-                                        : SizedBox(height: 0, width: 0),
-                                    snap['isUploaded'] == '0' &&
-                                            uploading == true &&
-                                            uploadingTimestamp ==
-                                                int.parse(snap['timestamp'])
-                                        ? Positioned(
-                                            left: ((width / 2) + 25) / 2,
-                                            top: ((width / 2) - 25) / 2,
-                                            child: CircularProgressIndicator(
-                                                strokeWidth: 5.0))
-                                        : snap['isUploaded'] == '0'
-                                            ? Positioned(
-                                                left: (width / 5),
-                                                top: (width / 6),
-                                                child: RaisedButton(
-                                                  //user animatedbutton
-                                                  color: Colors.black
-                                                      .withOpacity(0.5),
-                                                  textColor: Colors.white,
-                                                  shape:
-                                                      new RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              new BorderRadius
-                                                                      .circular(
-                                                                  30.0)),
-                                                  child: Text('RETRY'),
-                                                  onPressed: () {
-                                                    uploadImage(
-                                                      widget.chatId,
-                                                      snap['msgMedia'],
-                                                      '1',
-                                                      snap['timestamp'],
-                                                      pref.name, //user profile name
-                                                      pref.phone.toString(),
-                                                    ).then((onValue) {
-                                                      print(
-                                                          'image uploaded successfully');
-                                                    }, onError: (e) {
-                                                      print(
-                                                          'Error while image uploading :$e');
-                                                    });
-                                                  },
-                                                ))
-                                            : SizedBox(height: 0, width: 0),
-                                  ],
-                                )
-                              ]),
+                                  ),
+                                  snap['isUploaded'] == '0'
+                                      ? Positioned(
+                                          bottom: 20,
+                                          right: 15,
+                                          child: Icon(
+                                            Icons.schedule,
+                                            color: Colors.white,
+                                            size: 15,
+                                          ),
+                                        )
+                                      : SizedBox(height: 0, width: 0),
+                                  snap['isUploaded'] == '0' &&
+                                          uploading == true &&
+                                          uploadingTimestamp ==
+                                              int.parse(snap['timestamp'])
+                                      ? Positioned(
+                                          left: ((width / 2) + 25) / 2,
+                                          top: ((width / 2) - 25) / 2,
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 5.0))
+                                      : snap['isUploaded'] == '0'
+                                          ? Positioned(
+                                              left: (width / 5),
+                                              top: (width / 6),
+                                              child: RaisedButton(
+                                                //user animatedbutton
+                                                color: Colors.black
+                                                    .withOpacity(0.5),
+                                                textColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30.0)),
+                                                child: Text('RETRY'),
+                                                onPressed: () {
+                                                  uploadImage(
+                                                    widget.chatId,
+                                                    snap['msgMedia'],
+                                                    '1',
+                                                    snap['timestamp'],
+                                                    pref.name, //user profile name
+                                                    pref.phone.toString(),
+                                                    pref.pin.toString(),                                                    
+                                                  ).then((onValue) {
+                                                    print(
+                                                        'image uploaded successfully');
+                                                  }, onError: (e) {
+                                                    print(
+                                                        'Error while image uploading :$e');
+                                                  });
+                                                },
+                                              ),
+                                            )
+                                          : SizedBox(height: 0, width: 0),
+                                ],
+                              ),
+                            ],
+                          ),
                         )
                       //video
                       : snap['msgType'] == '2' &&
@@ -873,13 +877,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                               },
                               onTap: () {
                                 audioPlayer.stop();
-                                // print(snap['msgMedia']);
+                                print(snap['msgMedia']);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => PlayVideo(
-                                          videoUrl: snap['msgMedia'],
-                                        ),
+                                      videoUrl: snap['msgMedia'],
+                                    ),
                                   ),
                                 );
                               },
@@ -959,8 +963,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                           margin: EdgeInsets.fromLTRB(
                                               2.0, 1.0, 2.0, 15.0),
                                           decoration: BoxDecoration(
-                                            border: new Border.all(
-                                                color: Colors.grey),
+                                            border:
+                                                Border.all(color: Colors.grey),
                                             borderRadius:
                                                 BorderRadius.circular(25.0),
                                             color: Colors.white,
@@ -972,16 +976,18 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                           ),
                                         ),
                                         Positioned(
-                                            left: 0,
-                                            top: 0,
-                                            right: 0,
-                                            bottom: 0,
-                                            child: Center(
-                                                child: Icon(
+                                          left: 0,
+                                          top: 0,
+                                          right: 0,
+                                          bottom: 0,
+                                          child: Center(
+                                            child: Icon(
                                               Icons.play_circle_outline,
                                               color: Colors.grey[300],
                                               size: 60,
-                                            ))),
+                                            ),
+                                          ),
+                                        ),
                                         snap['isUploaded'] == '0'
                                             ? Positioned(
                                                 bottom: 20,
@@ -990,7 +996,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                   Icons.schedule,
                                                   color: Colors.white,
                                                   size: 15,
-                                                ))
+                                                ),
+                                              )
                                             : SizedBox(height: 0, width: 0),
                                         snap['isUploaded'] == '0' &&
                                                 uploading == true &&
@@ -1002,9 +1009,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                 right: 0,
                                                 bottom: 0,
                                                 child: Center(
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                            strokeWidth: 5.0)))
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                          strokeWidth: 5.0),
+                                                ),
+                                              )
                                             : snap['isUploaded'] == '0'
                                                 ? Positioned(
                                                     left: 0,
@@ -1017,26 +1026,27 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                         color: Colors.black
                                                             .withOpacity(0.5),
                                                         textColor: Colors.white,
-                                                        shape: new RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                new BorderRadius
-                                                                        .circular(
-                                                                    30.0)),
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      30.0),
+                                                        ),
                                                         child: Text('RETRY'),
                                                         onPressed: () {
                                                           uploadVideo(
-                                                                  widget.chatId,
-                                                                  File(snap[
-                                                                      'msgMedia']),
-                                                                  '2',
-                                                                  snap[
-                                                                      'timestamp'],
-                                                                  pref.name,
-                                                                  pref.phone
-                                                                      .toString(),
-                                                                  snap[
-                                                                      'thumbPath'])
-                                                              .then((onValue) {
+                                                            widget.chatId,
+                                                            File(snap[
+                                                                'msgMedia']),
+                                                            '2',
+                                                            snap['timestamp'],
+                                                            pref.name,
+                                                            pref.phone
+                                                                .toString(),
+                                                            snap['thumbPath'],
+                                                            pref.pin.toString()
+                                                          ).then((onValue) {
                                                             print(
                                                                 'Video uploaded successfully(reentry)');
                                                           }, onError: (e) {
@@ -1352,7 +1362,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                         LayoutBuilder(builder:
                                                             (context,
                                                                 constraint) {
-                                                          return new Icon(
+                                                          return Icon(
                                                             Icons.pause,
                                                             size: 40.0,
                                                             color: Colors.white,
@@ -1376,7 +1386,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                         LayoutBuilder(builder:
                                                             (context,
                                                                 constraint) {
-                                                          return new Icon(
+                                                          return Icon(
                                                             Icons.music_note,
                                                             size: 40.0,
                                                             color: Colors.white,
@@ -1395,7 +1405,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         ],
       );
     } else {
-      // Left (peer message)
+      // Left(peer message)
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -1410,118 +1420,152 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => MyProfile(
-                              phone: int.parse(snap['senderPhone']),
-                            ),
+                          pin: pref.pin,
+                          // phone: pref.phone,
+                        ),
                       ),
                     );
                   },
                   child: Container(
                     margin: EdgeInsets.only(right: 8),
                     padding: EdgeInsets.all(1.0),
-                    decoration: new BoxDecoration(
-                      color: Color(0xffb00bae3),
+                    decoration: BoxDecoration(
+                      color: Color(0xffb4fcce0),
                       shape: BoxShape.circle,
                     ),
-                    child: snap['profileImg'] == ''
-                        ? CircleAvatar(
-                            child: Icon(
-                              Icons.person,
-                              color: Color(0xffb00bae3),
-                              size: 35,
+                    child: ClipOval(
+                      child: CircleAvatar(
+                        backgroundColor: Colors.grey[300],
+                        radius: 25,
+                        child: CachedNetworkImage(
+                          fit: BoxFit.cover,
+                          imageUrl:
+                              'http://54.200.143.85:4200/profiles/now/${snap['senderPin']}.jpg',
+                          placeholder: (context, url) => Center(
+                            child: SizedBox(
+                              height: 20.0,
+                              width: 20.0,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 1.0),
                             ),
-                            backgroundColor: Colors.grey[300],
-                            radius: 25,
-                          )
-                        : CircleAvatar(
-                            backgroundImage: NetworkImage(snap['profileImg']),
-                            backgroundColor: Colors.grey[300],
-                            radius: 20,
                           ),
+                          errorWidget: (context, url, error) =>
+                              FadeInImage.assetNetwork(
+                            placeholder: 'assets/loading.gif',
+                            image:
+                                'http://54.200.143.85:4200/profiles/then/${snap['senderPin']}.jpg',
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
+
+                  // Container(
+                  //   margin: EdgeInsets.only(right: 8),
+                  //   padding: EdgeInsets.all(1.0),
+                  //   decoration:  BoxDecoration(
+                  //     color: Color(0xffb00bae3),
+                  //     shape: BoxShape.circle,
+                  //   ),
+                  //   child: snap['profileImg'] == ''
+                  //       ? CircleAvatar(
+                  //           child: Icon(
+                  //             Icons.person,
+                  //             color: Color(0xffb00bae3),
+                  //             size: 35,
+                  //           ),
+                  //           backgroundColor: Colors.grey[300],
+                  //           radius: 25,
+                  //         )
+                  //       : CircleAvatar(
+                  //           backgroundImage: NetworkImage(snap['profileImg']),
+                  //           backgroundColor: Colors.grey[300],
+                  //           radius: 20,
+                  //         ),
+                  // ),
                 ),
 
           snap['msgType'] == '0' //text
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          FutureBuilder<String>(
-                            future:
-                                Common.getTime(int.parse(snap['timestamp'])),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<String> snapshot) {
-                              switch (snapshot.connectionState) {
-                                case ConnectionState.none:
-                                  return Text(
-                                      DateFormat('dd MMM kk:mm').format(
-                                          DateTime.fromMillisecondsSinceEpoch(
-                                              int.parse(snap['timestamp']))),
-                                      style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 10.0,
-                                          fontStyle: FontStyle.normal));
-                                case ConnectionState.active:
-                                case ConnectionState.waiting:
-                                  return Text(
-                                      DateFormat('dd MMM kk:mm').format(
-                                          DateTime.fromMillisecondsSinceEpoch(
-                                              int.parse(snap['timestamp']))),
-                                      style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 10.0,
-                                          fontStyle: FontStyle.normal));
-                                case ConnectionState.done:
-                                  if (snapshot.hasError)
-                                    return Text(
-                                        DateFormat('dd MMM kk:mm').format(
-                                            DateTime.fromMillisecondsSinceEpoch(
-                                                int.parse(snap['timestamp']))),
-                                        style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 10.0,
-                                            fontStyle: FontStyle.normal));
-                                  return Text(
-                                    snapshot.data,
+                    Row(
+                      children: <Widget>[
+                        FutureBuilder<String>(
+                          future: Common.getTime(int.parse(snap['timestamp'])),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<String> snapshot) {
+                            switch (snapshot.connectionState) {
+                              case ConnectionState.none:
+                                return Text(
+                                    DateFormat('dd MMM kk:mm').format(
+                                        DateTime.fromMillisecondsSinceEpoch(
+                                            int.parse(snap['timestamp']))),
                                     style: TextStyle(
                                         color: Colors.grey,
                                         fontSize: 10.0,
-                                        fontStyle: FontStyle.normal),
-                                  );
-                              }
-                              return Text(
-                                  DateFormat('dd MMM kk:mm').format(
-                                      DateTime.fromMillisecondsSinceEpoch(
-                                          int.parse(snap['timestamp']))),
+                                        fontStyle: FontStyle.normal));
+                              case ConnectionState.active:
+                              case ConnectionState.waiting:
+                                return Text(
+                                    DateFormat('dd MMM kk:mm').format(
+                                        DateTime.fromMillisecondsSinceEpoch(
+                                            int.parse(snap['timestamp']))),
+                                    style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 10.0,
+                                        fontStyle: FontStyle.normal));
+                              case ConnectionState.done:
+                                if (snapshot.hasError)
+                                  return Text(
+                                      DateFormat('dd MMM kk:mm').format(
+                                          DateTime.fromMillisecondsSinceEpoch(
+                                              int.parse(snap['timestamp']))),
+                                      style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 10.0,
+                                          fontStyle: FontStyle.normal));
+                                return Text(
+                                  snapshot.data,
                                   style: TextStyle(
                                       color: Colors.grey,
-                                      fontSize: 12.0,
-                                      fontStyle:
-                                          FontStyle.normal)); // unreachable
-                            },
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        margin: const EdgeInsets.fromLTRB(2.0, 1.0, 2.0, 15.0),
-                        decoration: BoxDecoration(
-                            color: Color(0xffb578de3),
-                            borderRadius: BorderRadius.circular(30.0)),
-                        constraints: BoxConstraints(maxWidth: (width / 2) + 20),
-                        child: Text(
-                          snap['msgMedia'],
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w300),
+                                      fontSize: 10.0,
+                                      fontStyle: FontStyle.normal),
+                                );
+                            }
+                            return Text(
+                                DateFormat('dd MMM kk:mm').format(
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                        int.parse(snap['timestamp']))),
+                                style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12.0,
+                                    fontStyle:
+                                        FontStyle.normal)); // unreachable
+                          },
                         ),
-                      )
-                    ])
+                      ],
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      margin: const EdgeInsets.fromLTRB(2.0, 1.0, 2.0, 15.0),
+                      decoration: BoxDecoration(
+                          color: Color(0xffb578de3),
+                          borderRadius: BorderRadius.circular(30.0)),
+                      constraints: BoxConstraints(maxWidth: (width / 2) + 20),
+                      child: Text(
+                        snap['msgMedia'],
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w300),
+                      ),
+                    ),
+                  ],
+                )
               : snap['msgType'] == '1' &&
                       (pref.hideMedia == false || pref.hideMedia == null)
-                  ? //Text('here you have got image message')
-                  GChatImage(snap: snap, width: width)
+                  ? GChatImage(snap: snap, width: width)
                   //video
                   : snap['msgType'] == '2' &&
                           (pref.hideMedia == false || pref.hideMedia == null)
@@ -1572,7 +1616,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                         switch (snapshot.connectionState) {
                                           case ConnectionState.none:
                                             return Text(snap['senderPhone'],
-                                                style: new TextStyle(
+                                                style: TextStyle(
                                                     fontSize: 12.0,
                                                     color: Colors.black,
                                                     fontWeight:
@@ -1604,7 +1648,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                             .bold)); //show
                                         }
                                         return Text(
-                                            snap['senderPhone']); // unreachable
+                                          snap['senderPhone'],
+                                        ); // unreachable
                                       },
                                     ),
                                     Container(
@@ -1631,11 +1676,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         : Image.asset('assets/short.png',
                             width: 25.0, height: 25.0),
                                           */
-                                      child: playPauseIcon(snap['msgMedia']
-                                              .toString()
-                                              .replaceAll(
-                                                  'http://oyeyaaroapi.plmlogix.com/AudioChat/',
-                                                  ''))
+                                      child: playPauseIcon(
+                                        snap['msgMedia'].toString().replaceAll(
+                                            'http://oyeyaaroapi.plmlogix.com/AudioChat/',
+                                            ''),
+                                      )
                                           ? Container(
                                               margin: EdgeInsets.all(3),
                                               padding: EdgeInsets.all(5),
@@ -1647,14 +1692,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                               ),
                                               child: Column(
                                                 children: <Widget>[
-                                                  LayoutBuilder(builder:
-                                                      (context, constraint) {
-                                                    return Icon(
-                                                      Icons.pause,
-                                                      size: 40.0,
-                                                      color: Colors.white,
-                                                    );
-                                                  }),
+                                                  LayoutBuilder(
+                                                    builder:
+                                                        (context, constraint) {
+                                                      return Icon(
+                                                        Icons.pause,
+                                                        size: 40.0,
+                                                        color: Colors.white,
+                                                      );
+                                                    },
+                                                  ),
                                                 ],
                                               ),
                                             )
@@ -1730,18 +1777,20 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                             );
                                         }
                                         return Text(
-                                            DateFormat('dd MMM kk:mm').format(
-                                                DateTime
-                                                    .fromMillisecondsSinceEpoch(
-                                                        int.parse(snap[
-                                                            'timestamp']))),
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 12.0,
-                                                fontStyle: FontStyle
-                                                    .normal)); // unreachable
+                                          DateFormat('dd MMM kk:mm').format(
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                              int.parse(
+                                                snap['timestamp'],
+                                              ),
+                                            ),
+                                          ),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 12.0,
+                                              fontStyle: FontStyle.normal),
+                                        ); // unreachable
                                       },
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1790,13 +1839,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                       children: <Widget>[
                                         FutureBuilder<dynamic>(
                                           future: sqlQuery.getContactName(
-                                              snap['senderPhone']),
+                                            snap['senderPhone'],
+                                          ),
                                           builder: (BuildContext context,
                                               AsyncSnapshot<dynamic> snapshot) {
                                             switch (snapshot.connectionState) {
                                               case ConnectionState.none:
                                                 return Text(snap['senderPhone'],
-                                                    style: new TextStyle(
+                                                    style: TextStyle(
                                                         fontSize: 12.0,
                                                         color: Colors.black,
                                                         fontWeight:
@@ -1804,7 +1854,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                               case ConnectionState.active:
                                               case ConnectionState.waiting:
                                                 return Text(snap['senderPhone'],
-                                                    style: new TextStyle(
+                                                    style: TextStyle(
                                                         fontSize: 12.0,
                                                         color: Colors.black,
                                                         fontWeight:
@@ -1814,20 +1864,24 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                   return Text(
                                                       snap['senderPhone']);
                                                 return snapshot.data.length == 0
-                                                    ? Text(snap['senderPhone'],
-                                                        style: new TextStyle(
+                                                    ? Text(
+                                                        snap['senderPhone'],
+                                                        style: TextStyle(
                                                             fontSize: 12.0,
                                                             color: Colors.black,
                                                             fontWeight:
                                                                 FontWeight
-                                                                    .bold))
+                                                                    .bold),
+                                                      )
                                                     : Text(
                                                         '${snapshot.data[0]['contactsName']}',
-                                                        style: new TextStyle(
+                                                        style: TextStyle(
                                                             fontSize: 12.0,
                                                             color: Colors.black,
-                                                            fontWeight: FontWeight
-                                                                .bold)); //show
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ); //show
                                             }
                                             return Text(snap[
                                                 'senderPhone']); // unreachable
@@ -1841,11 +1895,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                               Radius.circular(8.0),
                                             ),
                                           ),
-                                          child: playPauseIcon(snap['msgMedia']
-                                                  .toString()
-                                                  .replaceAll(
-                                                      'http://oyeyaaroapi.plmlogix.com/Audio/',
-                                                      ''))
+                                          child: playPauseIcon(
+                                            snap['msgMedia'].toString().replaceAll(
+                                                'http://oyeyaaroapi.plmlogix.com/Audio/',
+                                                ''),
+                                          )
                                               ? Container(
                                                   margin: EdgeInsets.all(3),
                                                   padding: EdgeInsets.all(5),
@@ -1858,15 +1912,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                   ),
                                                   child: Column(
                                                     children: <Widget>[
-                                                      LayoutBuilder(builder:
-                                                          (context,
-                                                              constraint) {
-                                                        return new Icon(
-                                                          Icons.pause,
-                                                          size: 40.0,
-                                                          color: Colors.white,
-                                                        );
-                                                      }),
+                                                      LayoutBuilder(
+                                                        builder: (context,
+                                                            constraint) {
+                                                          return Icon(
+                                                            Icons.pause,
+                                                            size: 40.0,
+                                                            color: Colors.white,
+                                                          );
+                                                        },
+                                                      ),
                                                     ],
                                                   ),
                                                 )
@@ -1882,40 +1937,67 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                   ),
                                                   child: Column(
                                                     children: <Widget>[
-                                                      LayoutBuilder(builder:
-                                                          (context,
-                                                              constraint) {
-                                                        return new Icon(
-                                                          Icons.music_note,
-                                                          size: 40.0,
-                                                          color: Colors.white,
-                                                        );
-                                                      }),
+                                                      LayoutBuilder(
+                                                        builder: (context,
+                                                            constraint) {
+                                                          return Icon(
+                                                            Icons.music_note,
+                                                            size: 40.0,
+                                                            color: Colors.white,
+                                                          );
+                                                        },
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
                                         ),
                                         FutureBuilder<String>(
                                           future: Common.getTime(
-                                              int.parse(snap['timestamp'])),
+                                            int.parse(
+                                              snap['timestamp'],
+                                            ),
+                                          ),
                                           builder: (BuildContext context,
                                               AsyncSnapshot<String> snapshot) {
                                             switch (snapshot.connectionState) {
                                               case ConnectionState.none:
                                                 return Text(
-                                                    DateFormat('dd MMM kk:mm')
-                                                        .format(DateTime
-                                                            .fromMillisecondsSinceEpoch(
-                                                                int.parse(snap[
-                                                                    'timestamp']))),
-                                                    style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 12.0,
-                                                        fontStyle:
-                                                            FontStyle.normal));
+                                                  DateFormat('dd MMM kk:mm')
+                                                      .format(
+                                                    DateTime
+                                                        .fromMillisecondsSinceEpoch(
+                                                      int.parse(
+                                                        snap['timestamp'],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 12.0,
+                                                      fontStyle:
+                                                          FontStyle.normal),
+                                                );
                                               case ConnectionState.active:
                                               case ConnectionState.waiting:
                                                 return Text(
+                                                  DateFormat('dd MMM kk:mm')
+                                                      .format(
+                                                    DateTime
+                                                        .fromMillisecondsSinceEpoch(
+                                                      int.parse(
+                                                        snap['timestamp'],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 12.0,
+                                                      fontStyle:
+                                                          FontStyle.normal),
+                                                );
+                                              case ConnectionState.done:
+                                                if (snapshot.hasError)
+                                                  return Text(
                                                     DateFormat('dd MMM kk:mm')
                                                         .format(DateTime
                                                             .fromMillisecondsSinceEpoch(
@@ -1925,20 +2007,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                         color: Colors.black,
                                                         fontSize: 12.0,
                                                         fontStyle:
-                                                            FontStyle.normal));
-                                              case ConnectionState.done:
-                                                if (snapshot.hasError)
-                                                  return Text(
-                                                      DateFormat('dd MMM kk:mm')
-                                                          .format(DateTime
-                                                              .fromMillisecondsSinceEpoch(
-                                                                  int.parse(snap[
-                                                                      'timestamp']))),
-                                                      style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 12.0,
-                                                          fontStyle: FontStyle
-                                                              .normal));
+                                                            FontStyle.normal),
+                                                  );
                                                 return Text(
                                                   snapshot.data,
                                                   style: TextStyle(
@@ -1950,17 +2020,21 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                             }
                                             return Text(
                                                 DateFormat('dd MMM kk:mm')
-                                                    .format(DateTime
-                                                        .fromMillisecondsSinceEpoch(
-                                                            int.parse(snap[
-                                                                'timestamp']))),
+                                                    .format(
+                                                  DateTime
+                                                      .fromMillisecondsSinceEpoch(
+                                                    int.parse(
+                                                      snap['timestamp'],
+                                                    ),
+                                                  ),
+                                                ),
                                                 style: TextStyle(
                                                     color: Colors.black,
                                                     fontSize: 12.0,
                                                     fontStyle: FontStyle
                                                         .normal)); // unreachable
                                           },
-                                        )
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -1973,8 +2047,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   CupertinoButton getIOSSendButton() {
-    return new CupertinoButton(
-      child: new Text("Send"),
+    return CupertinoButton(
+      child: Text("Send"),
       onPressed: _isComposingMessage
           ? () => _textMessageSubmitted(_textEditingController.text)
           : null,
@@ -1982,8 +2056,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   IconButton getDefaultSendButton() {
-    return new IconButton(
-      icon: new Icon(Icons.send, color: Colors.white),
+    return IconButton(
+      icon: Icon(Icons.send, color: Colors.white),
       onPressed: _isComposingMessage
           ? () => _textMessageSubmitted(_textEditingController.text)
           : null,
@@ -1991,153 +2065,153 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   songList(width) {
-    if (isSearching == true && searchresult.length > 0) {
-      return Container(
-          color: Colors.deepPurple[50],
-          height: 40.0,
-          width: width,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            shrinkWrap: true,
-            itemCount: searchresult.length,
-            itemBuilder: (BuildContext context, int index) {
-              String listData = searchresult[index];
-              return GestureDetector(
-                onTapUp: (TapUpDetails details) {
-                  // print("onTapUp");
-                  // playSongAlert();
-                  isPlaying
-                      ? stop()
-                      : play(
-                          "http://oyeyaaroapi.plmlogix.com/AudioChat/" +
-                              listData,
-                          listData);
-                },
-                onLongPress: () {
-                  // print("onLongPress snedin toast");
-                  Fluttertoast.showToast(
-                      msg: 'sent ${listData.replaceAll('.mp3', '')}');
-                  sendsong(
-                    songurl: "http://oyeyaaroapi.plmlogix.com/AudioChat/" +
-                        listData.toString(),
-                    senderName: 'pref.name',
-                    senderPhone: pref.phone.toString(),
-                    // receiverPhone: widget.receiverPhone.toString(),
-                    type: '3',
-                    timestamp:
-                        new DateTime.now().millisecondsSinceEpoch.toString(),
-                  );
-                },
-                child: Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
-                    ),
-                    playPauseIcon(listData)
-                        ? position != null && duration != null
-                            ? Icon(Icons.pause_circle_outline)
-                            : SizedBox(
-                                child: new CircularProgressIndicator(
-                                    valueColor: new AlwaysStoppedAnimation(
-                                        Color(0xffb00bae3)),
-                                    strokeWidth: 1.0),
-                                height: 20.0,
-                                width: 20.0,
-                              )
-                        : Image.asset('assets/short.png',
-                            width: 25.0, height: 25.0),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(0.0, 0.0, 5.0, 0.0),
-                    ),
-                    Text(
-                      listData.replaceAll('.mp3', ''),
-                      style: TextStyle(color: Colors.black, fontSize: 15),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(0.0, 0.0, 15.0, 0.0),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ));
-    } else
-      return SizedBox();
+    return isSearching == true && searchresult.length > 0
+        ? Container(
+            color: Colors.deepPurple[50],
+            height: 40.0,
+            width: width,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              itemCount: searchresult.length,
+              itemBuilder: (BuildContext context, int index) {
+                String listData = searchresult[index];
+                return GestureDetector(
+                  onTapUp: (TapUpDetails details) {
+                    // print("onTapUp");
+                    // playSongAlert();
+                    isPlaying
+                        ? stop()
+                        : play(
+                            "http://oyeyaaroapi.plmlogix.com/AudioChat/" +
+                                listData,
+                            listData);
+                  },
+                  onLongPress: () {
+                    // print("onLongPress snedin toast");
+                    Fluttertoast.showToast(
+                        msg: 'sent ${listData.replaceAll('.mp3', '')}');
+                    sendsong(
+                      songurl: "http://oyeyaaroapi.plmlogix.com/AudioChat/" +
+                          listData.toString(),
+                      senderName: 'pref.name',
+                      senderPhone: pref.phone.toString(),
+                      // receiverPhone: widget.receiverPhone.toString(),
+                      type: '3',
+                      timestamp:
+                          DateTime.now().millisecondsSinceEpoch.toString(),
+                      senderPin: pref.pin.toString()
+                    );
+                  },
+                  child: Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
+                      ),
+                      playPauseIcon(listData)
+                          ? position != null && duration != null
+                              ? Icon(Icons.pause_circle_outline)
+                              : SizedBox(
+                                  child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation(
+                                          Color(0xffb00bae3)),
+                                      strokeWidth: 1.0),
+                                  height: 20.0,
+                                  width: 20.0,
+                                )
+                          : Image.asset('assets/short.png',
+                              width: 25.0, height: 25.0),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0.0, 0.0, 5.0, 0.0),
+                      ),
+                      Text(
+                        listData.replaceAll('.mp3', ''),
+                        style: TextStyle(color: Colors.black, fontSize: 15),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0.0, 0.0, 15.0, 0.0),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          )
+        : SizedBox();
   }
 
   songList2(width) {
-    if (isSearching == true && songSearchresult2.length > 0) {
-      return Container(
-        color: Colors.blue[50],
-        height: 40.0,
-        width: width,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          shrinkWrap: true,
-          itemCount: songSearchresult2.length,
-          itemBuilder: (BuildContext context, int index) {
-            String listData = songSearchresult2[index];
-            return GestureDetector(
-              child: Row(
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
+    return isSearching == true && songSearchresult2.length > 0
+        ? Container(
+            color: Colors.blue[50],
+            height: 40.0,
+            width: width,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              itemCount: songSearchresult2.length,
+              itemBuilder: (BuildContext context, int index) {
+                String listData = songSearchresult2[index];
+                return GestureDetector(
+                  child: Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
+                      ),
+                      playPauseIcon(listData)
+                          ? position != null && duration != null
+                              ? Icon(Icons.pause_circle_outline)
+                              : SizedBox(
+                                  child: new CircularProgressIndicator(
+                                      valueColor: new AlwaysStoppedAnimation(
+                                          Color(0xffb00bae3)),
+                                      strokeWidth: 1.0),
+                                  height: 20.0,
+                                  width: 20.0,
+                                )
+                          : Icon(Icons.music_note),
+                      Text(
+                        listData.replaceAll('.mp3', ''),
+                        style: TextStyle(color: Colors.black, fontSize: 15),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0.0, 0.0, 15.0, 0.0),
+                      )
+                    ],
                   ),
-                  playPauseIcon(listData)
-                      ? position != null && duration != null
-                          ? Icon(Icons.pause_circle_outline)
-                          : SizedBox(
-                              child: new CircularProgressIndicator(
-                                  valueColor: new AlwaysStoppedAnimation(
-                                      Color(0xffb00bae3)),
-                                  strokeWidth: 1.0),
-                              height: 20.0,
-                              width: 20.0,
-                            )
-                      : Icon(Icons.music_note),
-                  Text(
-                    listData.replaceAll('.mp3', ''),
-                    style: TextStyle(color: Colors.black, fontSize: 15),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(0.0, 0.0, 15.0, 0.0),
-                  )
-                ],
-              ),
-              onTapUp: (TapUpDetails details) {
-                print("onTapUp");
-                isPlaying
-                    ? stop()
-                    : play(
-                        "http://oyeyaaroapi.plmlogix.com/Audio/" +
-                            listData.toString(),
-                        listData);
-              },
-              onLongPress: () {
-                // print("onLongPress");
-                // onTextMessage(
-                //     "http://oyeyaaroapi.plmlogix.com/Audio/" +
-                //         listData.toString(),
-                //     4);
-                Fluttertoast.showToast(
-                    msg: 'sent ${listData.replaceAll('.mp3', '')}');
-                sendsong(
-                  songurl: "http://oyeyaaroapi.plmlogix.com/Audio/" +
-                      listData.toString(),
-                  senderName: 'pref.name',
-                  senderPhone: pref.phone.toString(),
-                  // receiverPhone: widget.receiverPhone.toString(),
-                  type: '4',
-                  timestamp:
-                      new DateTime.now().millisecondsSinceEpoch.toString(),
+                  onTapUp: (TapUpDetails details) {
+                    print("onTapUp");
+                    isPlaying
+                        ? stop()
+                        : play(
+                            "http://oyeyaaroapi.plmlogix.com/Audio/" +
+                                listData.toString(),
+                            listData);
+                  },
+                  onLongPress: () {
+                    // print("onLongPress");
+                    // onTextMessage(
+                    //     "http://oyeyaaroapi.plmlogix.com/Audio/" +
+                    //         listData.toString(),
+                    //     4);
+                    Fluttertoast.showToast(
+                        msg: 'sent ${listData.replaceAll('.mp3', '')}');
+                    sendsong(
+                      songurl: "http://oyeyaaroapi.plmlogix.com/Audio/" +
+                          listData.toString(),
+                      senderName: 'pref.name',
+                      senderPhone: pref.phone.toString(),
+                      // receiverPhone: widget.receiverPhone.toString(),
+                      type: '4',
+                      timestamp:DateTime.now().millisecondsSinceEpoch.toString(),
+                      senderPin: pref.pin.toString()
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
-      );
-    } else
-      return SizedBox();
+            ),
+          )
+        : SizedBox();
   }
 
   bool playPauseIcon(songName) {
@@ -2153,68 +2227,66 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       child: Row(
         children: <Widget>[
           Flexible(
-            /* child: Container(
-              margin: EdgeInsets.only(left: 5),
+            child: Container(
+              height: 50,
+              margin: EdgeInsets.only(left: 2),
+              padding: EdgeInsets.only(left: 8),
               decoration: BoxDecoration(
-                color: Color(0xffb578de3),
+                color: Colors.white,
                 borderRadius: BorderRadius.all(
                   Radius.circular(50.0),
                 ),
-              ), */
-            child: Container(
-                height: 50,
-                margin: EdgeInsets.only(left: 2),
-                padding: EdgeInsets.only(left: 8),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(50.0),
-                    ),
-                    border: Border.all(
-                      width: 1,
-                      color: Color(0xffb578de3),
-                    )),
-                child: Row(
-                  children: <Widget>[
-                    Flexible(
-                      child: TextField(
-                        textCapitalization: TextCapitalization.sentences,
-                        controller: _textEditingController,
-                        onChanged: (String messageText) {
-                          print(messageText.trim().length);
-                          setState(() {
-                            _isComposingMessage = messageText.trim().length > 0;
-                          });
-                          if (_isComposingMessage) {
-                            searchSongs(messageText.trim());
-                          }
-                        },
-                        onTap: () {
-                          setState(() {
-                            this.isSearching = true;
-                          });
-                          searchSongs('');
-                        },
-                        decoration: InputDecoration.collapsed(
-                            hintText: "Send a message"),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.add, color: Color(0xffb00bae3)),
-                      onPressed: () {
-                        openBottomSheet();
+                border: Border.all(
+                  width: 1,
+                  color: Color(0xffb578de3),
+                ),
+              ),
+              child: Row(
+                children: <Widget>[
+                  Flexible(
+                    child: TextField(
+                      textCapitalization: TextCapitalization.sentences,
+                      controller: _textEditingController,
+                      onChanged: (String messageText) {
+                        print(messageText.trim().length);
+                        setState(() {
+                          _isComposingMessage = messageText.trim().length > 0;
+                        });
+                        if (_isComposingMessage) {
+                          searchSongs(messageText.trim());
+                        }
                       },
+                      onTap: () {
+                        setState(() {
+                          this.isSearching = true;
+                        });
+                        searchSongs('');
+                      },
+                      decoration:
+                          InputDecoration.collapsed(hintText: "Send a message"),
                     ),
-                  ],
-                )),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.add,
+                      color: Color(0xffb00bae3),
+                    ),
+                    onPressed: () {
+                      openBottomSheet();
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
           Padding(
             padding: EdgeInsets.all(2),
             child: Container(
               margin: EdgeInsets.only(left: 2),
               decoration: BoxDecoration(
-                  color: Color(0xffb00bae3),
-                  borderRadius: BorderRadius.circular(50.0)),
+                color: Color(0xffb00bae3),
+                borderRadius: BorderRadius.circular(50.0),
+              ),
               child: Theme.of(context).platform == TargetPlatform.iOS
                   ? getIOSSendButton()
                   : getDefaultSendButton(),
@@ -2232,18 +2304,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       for (int i = 0; i < _songList1.length; i++) {
         String data = _songList1[i];
         if (data.toLowerCase().contains(searchText.toLowerCase())) {
-          // String changed =  data.replaceAll('.mp3', '');
-          searchresult.add(data); //remove .mp4  nt here
+          searchresult.add(data);
         }
       }
 
       for (int i = 0; i < _songList2.length; i++) {
         String data = _songList2[i];
         if (data.toLowerCase().contains(searchText.toLowerCase())) {
-          // String changed =  data.replaceAll('.mp3', '');
           songSearchresult2.add(data);
-          // print('****songSearchresult2 added :: $songSearchresult2');
-          //remove .mp4  nt here
         }
       }
       if (searchresult.length == 0 && songSearchresult2.length == 0) {
@@ -2440,7 +2508,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: null,
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
                         child: Column(
                           children: <Widget>[
                             Container(
@@ -2543,12 +2613,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     });
 
     sendText(
-      messageText: text,
-      senderName: pref.phone.toString(),
-      senderPhone: pref.phone.toString(),
-      type: '0',
-      timestamp: new DateTime.now().millisecondsSinceEpoch.toString(),
-    );
+        messageText: text,
+        senderName: pref.phone.toString(),
+        senderPhone: pref.phone.toString(),
+        type: '0',
+        timestamp: new DateTime.now().millisecondsSinceEpoch.toString(),
+        senderPin: pref.pin.toString());
   }
 
   //send song
@@ -2558,6 +2628,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     String senderPhone,
     String type, //3
     String timestamp,
+    String senderPin
   }) async {
     print('msg: $songurl');
     try {
@@ -2575,16 +2646,24 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               "senderUrl",
               "thumbpath",
               "thumburl",
-              pref.profileUrl)
+              // pref.profileUrl
+              senderPin
+              )
           .then((onValue) {
         // setState(() {
         //   future = getAllChat(widget.chatId);
         // });
         //add sender's msg as last msg to privatechatlisttable sqlite
-        sqlQuery
-            .addGroupChatList(widget.chatId, 'Audio', senderPhone, timestamp,
-                '0', widget.groupName)
-            .then((onValue) {
+        Map<String, dynamic> obj = {
+          "chatId": widget.chatId,
+          "chatListLastMsg": 'Audio',
+          "chatListSenderPhone": senderPhone,
+          "chatListLastMsgTime": timestamp,
+          "chatListMsgCount": '0',
+          "chatGroupName": widget.groupName,
+          "chatListSenderPin": senderPin
+        };
+        sqlQuery.addGroupChatList(obj).then((onValue) {
           print('entry added in sqflite addGrouplist');
         }, onError: (e) {
           print('show error message if addgrouplist fails : $e');
@@ -2604,38 +2683,46 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 "thumburl",
                 widget.groupName,
                 members,
-                admin)
+                admin,senderPin)
             .then((sent) {
-          // print('uploaded to fb');
+          print('uploaded to fb');
           fbGroupChatList(widget.chatId, senderPhone, 'Audio', timestamp, "1",
-                  widget.groupName, members, admin)
+                  widget.groupName, members, admin,senderPin)
               .then((sent) {
-            // print('entry added in fb addchatlist');
+            print('entry added in fb addchatlist');
           });
           // update isUpoaded
           // sqlQuery.updatePrivateChat(widget.chatId,senderName,songurl,);
         });
       }, onError: (e) {
         print('err : $e');
-        Fluttertoast.showToast(msg: 'error while adding msg in Sqflite: $e');
+        // Fluttertoast.showToast(msg: 'error while adding msg in Sqflite: $e');
+         globalKey.currentState.showSnackBar(SnackBar(
+          content: Text('error while sending song: $e'),
+          duration: Duration(seconds: 2),
+        ));
       });
     } catch (e) {
       print('error while sending text: $e');
+       globalKey.currentState.showSnackBar(SnackBar(
+          content: Text('error while sending song: $e'),
+          duration: Duration(seconds: 2),
+        ));
     }
   }
 
 //send text
-  void sendText({
-    String messageText,
-    String senderName,
-    String senderPhone,
-    String type,
-    String timestamp,
-  }) async {
+  void sendText(
+      {String messageText,
+      String senderName,
+      String senderPhone,
+      String type,
+      String timestamp,
+      String senderPin}) async {
     print('msg: $messageText');
-    // print('timestamp: $timestamp');
 
     try {
+      // 1
       sqlQuery
           .addGroupChat(
               widget.chatId,
@@ -2648,34 +2735,44 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               "senderUrl",
               "thumbpath",
               "thumburl",
-              pref.profileUrl)
+              // pref.profileUrl
+              senderPin)
           .then((onValue) {
         // print('sendername : $senderName');
-        //add sender's msg as last msg to privatechatlisttable sqlite
-        sqlQuery
-            .addGroupChatList(widget.chatId, messageText, pref.phone.toString(),//obj
-                timestamp, '0', widget.groupName)
-            .then((onValue) {
-          // print('entry added in sqflite addchatlist');
+
+        //2.add sender's msg as last msg to privatechatlisttable sqlite
+        Map<String, dynamic> obj = {
+          "chatId": widget.chatId,
+          "chatListLastMsg": messageText,
+          "chatListSenderPhone": pref.phone.toString(),
+          "chatListLastMsgTime": timestamp,
+          "chatListMsgCount": '0',
+          "chatGroupName": widget.groupName,
+          "chatListSenderPin": senderPin
+        };
+        sqlQuery.addGroupChatList(obj).then((onValue) {
+          print('entry added in sqflite addchatlist');
         }, onError: (e) {
           print('show error message if addChatlist fails : $e');
         });
 
+        // 3
         addGroupChatFb(
-          senderName,
-          messageText,
-          senderPhone,
-          type,
-          timestamp,
-          '1',
-          "senderUrl",
-          "thumbpath",
-          "thumburl",
-          widget.groupName,
-          members,
-          admin,
-        ).then((sent) {
-          // print('uploaded to fb');
+                senderName,
+                messageText,
+                senderPhone,
+                type,
+                timestamp,
+                '1',
+                "senderUrl",
+                "thumbpath",
+                "thumburl",
+                widget.groupName,
+                members,
+                admin,
+                senderPin)
+            .then((sent) {
+          print('uploaded to fb');
           // then update isuploaded to 1 sqlite
           //     sqlQuery
           //     .updatePrivateChat(
@@ -2698,19 +2795,30 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           // }, onError: (e) {
           //   print('error while updating chat: $e'); //show UI msg ex.toast
           // });
-          //then add to fb chatlist
+
+          //4.then add to fb chatlist
           fbGroupChatList(widget.chatId, senderPhone, messageText, timestamp,
-                  "1", widget.groupName, members, admin)
+                  "1", widget.groupName, members, admin,senderPin)
               .then((sent) {
-            // print('entry added in fb fbGroupChatList');
+            print('entry added in fb fbGroupChatList');
+          }, onError: (e) {
+            print('Error while adding fb fbGroupChatList');
           });
         });
+
       }, onError: (e) {
         print('err : $e');
-        Fluttertoast.showToast(msg: 'error while adding msg in Sqflite: $e');
+        globalKey.currentState.showSnackBar(SnackBar(
+          content: Text('error while adding msg in Sqflite: $e'),
+          duration: Duration(seconds: 2),
+        ));
       });
     } catch (e) {
       print('error while sending text: $e');
+      globalKey.currentState.showSnackBar(SnackBar(
+          content: Text('error while sending message'),
+          duration: Duration(seconds: 2),
+        ));
     }
   }
 
@@ -2719,7 +2827,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     try {
       // print('galleryImage : ${img.path}');
       int timestamp = DateTime.now().millisecondsSinceEpoch;
-      // Directory extDir = await getExternalStorageDirectory();
+
       sqlQuery
           .addGroupChat(
               widget.chatId,
@@ -2733,16 +2841,24 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               "senderUrl",
               "thumbpath",
               "thumburl",
-              pref.profileUrl)
+              // pref.profileUrl,
+              pref.pin.toString())
           .then((onValue) {
         // print('senderName : ${pref.name}');
 
         //add sender's msg as last msg to privatechatlisttable sqlite
-        sqlQuery
-            .addGroupChatList(widget.chatId, 'Image', pref.phone.toString(),
-                timestamp.toString(), '0', widget.groupName)
-            .then((onValue) {
-          // print('entry added in sqflite addGroupChatList:img');
+        Map<String, dynamic> obj = {
+          "chatId": widget.chatId,
+          "chatListLastMsg": 'Image',
+          "chatListSenderPhone": pref.phone.toString(),
+          "chatListLastMsgTime": timestamp.toString(),
+          "chatListMsgCount": '0',
+          "chatGroupName": widget.groupName,
+          "chatListSenderPin": pref.pin.toString()
+        };
+
+        sqlQuery.addGroupChatList(obj).then((onValue) {
+          print('entry added in sqflite addGroupChatList:img');
         }, onError: (e) {
           print('show error message if addGroupChatList fails:img : $e');
         });
@@ -2772,9 +2888,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     "0", //isUpload
                     "mediaUrl", //firebase url.here no need
                     "thumbpath",
-                    "thumburl")
+                    "thumburl",
+                    pref.pin.toString())
                 .then((onValue) {
-              // print('updated res:$onValue');
+              print('updated res:$onValue');
             }, onError: (e) {
               print(
                   'Error while updating previous path of groupChat to desired path img:$e');
@@ -2788,8 +2905,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               timestamp.toString(),
               pref.name, //name
               pref.phone.toString(),
+              pref.pin.toString(),
             ).then((onValue) {
-              // print('image uploaded successfully');
+              print('image uploaded successfully');
             }, onError: (e) {
               print('Error while image uploading :$e');
             });
@@ -2801,10 +2919,18 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         });
       }, onError: (e) {
         print('err : $e');
-        Fluttertoast.showToast(msg: 'error while adding Img in Sqlite:$e');
+        // Fluttertoast.showToast(msg: 'error while adding Img in Sqlite:$e');
+         globalKey.currentState.showSnackBar(SnackBar(
+          content: Text('error while adding Image to sqlite'),
+          duration: Duration(seconds: 2),
+        ));
       });
     } catch (e) {
-      print('error while uploading imge: $e');
+      print('error while uploading image: $e');
+       globalKey.currentState.showSnackBar(SnackBar(
+          content: Text('error while uploading image'),
+          duration: Duration(seconds: 2),
+        ));
     }
   }
 
@@ -2816,14 +2942,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 //vid thum folder
       String thumbPath = await Thumbnails.getThumbnail(
           thumbnailFolder:
-              '/storage/emulated/0/OyeYaaro/Media/Thumbs/.${widget.chatId}',
+              '${extDir.path}/OyeYaaro/Media/Thumbs/.${widget.chatId}',
           videoFile: vid.path,
           imageType: ThumbFormat.JPEG,
           quality: 30);
 
       //1. rename default thumbnail name to desired
       File newThumb = await File(thumbPath).rename(
-        '/storage/emulated/0/OyeYaaro/Media/Thumbs/.${widget.chatId}/$timestamp.jpg',
+        '${extDir.path}/OyeYaaro/Media/Thumbs/.${widget.chatId}/$timestamp.jpg',
       );
 
 // 2.add in chat
@@ -2839,7 +2965,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               "mediaUrl", //firebaseUrl
               newThumb.path,
               "thumbUrl",
-              pref.profileUrl)
+              // pref.profileUrl
+              pref.pin.toString(),
+              )
           .then((onValue) {
         // show loading
         setState(() {
@@ -2848,11 +2976,18 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         });
 
         //3.add sender's msg as last msg to privatechatlisttable sqlite
-        sqlQuery
-            .addGroupChatList(widget.chatId, 'Video', pref.phone.toString(),
-                timestamp.toString(), '0', widget.groupName)
-            .then((onValue) {
-          // print('entry added in sqflite addGroupChatList');
+        Map<String, dynamic> obj = {
+          "chatId": widget.chatId,
+          "chatListLastMsg": 'Video',
+          "chatListSenderPhone": pref.phone.toString(),
+          "chatListLastMsgTime": timestamp.toString(),
+          "chatListMsgCount": '0',
+          "chatGroupName": widget.groupName,
+          "chatListSenderPin": pref.pin.toString()
+        };
+
+        sqlQuery.addGroupChatList(obj).then((onValue) {
+          print('entry added in sqflite addGroupChatList');
         }, onError: (e) {
           print('show error message if addGroupChatList fails : $e');
         });
@@ -2861,12 +2996,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         cmprsMedia
             .compressVideo(
                 vid,
-                '/storage/emulated/0/OyeYaaro/Media/Vid/.${widget.chatId}',
+                '${extDir.path}/OyeYaaro/Media/Vid/.${widget.chatId}',
                 '$timestamp')
             .then((compressedVideoFile) {
-          // print('org img file path:${vid.path}');
-          // print(
-          //     'compressedImageFile path :${compressedVideoFile.path}'); //compressed and copied to desired path
+          print('org img file path:${vid.path}');
+          print(
+              'compressedImageFile path :${compressedVideoFile.path}'); //compressed and copied to desired path
+
           //5.change previous path of privateChat table with desire path
           sqlQuery
               .updateGroupChat(
@@ -2879,9 +3015,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   "0", //isUpload
                   "mediaUrl", //firebase url.here no need
                   newThumb.path,
-                  "thumbUrl")
+                  "thumbUrl",
+                  pref.pin.toString(),
+                  )
               .then((onValue) {
-            // print('updated to compressed vid path:$onValue');
+            print('updated to compressed vid path:$onValue');
           }, onError: (e) {
             print(
                 'Error while updating previous path of privateChat to desired path:$e');
@@ -2895,9 +3033,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   timestamp.toString(),
                   pref.name,
                   pref.phone.toString(),
-                  newThumb.path)
+                  newThumb.path,
+                  pref.pin.toString(),
+                  )
               .then((onValue) {
-            // print('Video uploaded successfully');
+            print('Video uploaded successfully');
           }, onError: (e) {
             print('Error while Video uploading :$e');
           });
@@ -2920,7 +3060,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     String timestamp,
     String senderName,
     String senderPhone,
-    // String receiverPhone
+    String senderPin
   ) async {
     try {
       setState(() {
@@ -2930,16 +3070,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
       Future.delayed(const Duration(seconds: 30), () {
         setState(() {
-          // Here you can write your code for open new view
           uploading = false;
           uploadingTimestamp = 0;
         });
       });
 
-      //call firebase storeage
+      //call firebase storage
       storage.uploadImage(timestamp.toString(), File(imgPath)).then(
           (firebaseUrl) {
-        // print('firebase mediaUrl : $firebaseUrl');
+        print('firebase mediaUrl : $firebaseUrl');
 
         setState(() {
           uploading = false;
@@ -2959,24 +3098,25 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 "thumburl",
                 widget.groupName,
                 members,
-                admin)
+                admin,senderPin)
             .then((sent) {
-          // print('img path uploaded to fb');
+          print('img path uploaded to fb');
+
           //now update query for isUploaded = 1 on this chatId row
           sqlQuery
               .updateGroupChat(widget.chatId, senderName, imgPath, senderPhone,
-                  type, timestamp, '1', firebaseUrl.toString(), "", "")
+                  type, timestamp, '1', firebaseUrl.toString(), "", "",senderPin)
               .then((onValue) async {
-            // print('updated data timestamp: $timestamp');
+            print('updated data timestamp: $timestamp');
           }, onError: (e) {
             print('error while updating chat: $e');
           });
 
           //add image as last msg to fb chatlist
           fbGroupChatList(widget.chatId, senderPhone, 'Image', timestamp, "1",
-                  widget.groupName, members, admin)
+                  widget.groupName, members, admin,senderPin)
               .then((sent) {
-            // print('entry added in fb fbGroupChatList');
+            print('entry added in fb fbGroupChatList');
           });
         });
       }, onError: (e) {
@@ -2988,7 +3128,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   Future uploadVideo(String chatId, File vidFile, String type, String timestamp,
-      String senderName, String senderPhone, String thumbPath) async {
+      String senderName, String senderPhone, String thumbPath,String senderPin) async {
     try {
       setState(() {
         uploading = true;
@@ -3008,7 +3148,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           await storage.uploadImage(timestamp.toString(), File(thumbPath));
 
       storage.uploadVideo(timestamp.toString(), vidFile).then((firebaseUrl) {
-
         setState(() {
           uploading = false;
           uploadingTimestamp = 0;
@@ -3027,9 +3166,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 thumbUrl,
                 widget.groupName,
                 members,
-                admin)
+                admin,senderPin)
             .then((sent) {
-          // print('vid path uploaded to fb:$thumbPath');
+          print('vid path uploaded to fb:$thumbPath');
           //now update query for isUploaded = 1 on this chatId row
           sqlQuery
               .updateGroupChat(
@@ -3043,18 +3182,18 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   '1',
                   firebaseUrl.toString(),
                   thumbPath,
-                  thumbUrl)
+                  thumbUrl,senderPin)
               .then((onValue) async {
-            // print('updated data vid timestamp: $timestamp');
+            print('updated data vid timestamp: $timestamp');
           }, onError: (e) {
             print('error while updating chat: $e'); //show UI msg ex.toast
           });
 
           // add to fb chatlist
           fbGroupChatList(widget.chatId, senderPhone, 'Video', timestamp, "1",
-                  widget.groupName, members, admin)
+                  widget.groupName, members, admin,senderPin)
               .then((sent) {
-            // print('entry added in fb fbGroupChatList');
+            print('entry added in fb fbGroupChatList');
           });
         });
       }, onError: (e) {
@@ -3078,6 +3217,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     gName,
     List member,
     admin,
+    String senderPin
   ) async {
     // print('toSet: ${member.toSet()}');
     //make common
@@ -3096,7 +3236,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       'groupName': gName,
       'members': member.toSet().toList(),
       'admin': admin,
-      'profileUrl': pref.profileUrl
+      // 'profileUrl': pref.profileUrl
+      "senderPin":senderPin
     });
   }
 
@@ -3108,7 +3249,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       String count,
       String gName,
       List members,
-      String adminPhone) async {
+      String adminPhone,
+      String senderPin
+      ) async {
     // print('in FbGroupChatList():');
     DatabaseReference groupChatRef =
         database.reference().child('groupChatList').child(chatId);
@@ -3121,13 +3264,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       "count": count,
       "groupName": gName,
       "members": members.toSet().toList(),
-      "admin": adminPhone
+      "admin": adminPhone,
+      "senderPin":senderPin
     };
     try {
       // privateChatRef.update(data);
 
       groupChatRef.set(data).then((onValue) {
-        // print('uploaded to fb private chat list');
+        print('uploaded to fb private chat list');
         return '';
       });
     } catch (e) {
@@ -3137,9 +3281,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   //song play stop pause
   Future<int> play(url, songName) async {
-    // print('in play() url:$url');
-    // print('in play() songName:$songName');
-
     setState(() {
       position = null;
       duration = null;
@@ -3150,7 +3291,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         playerState = PlayerState.playing;
         isPlaying = true;
         playingSongInList = songName;
-        // print('playing');
       });
     return result;
   }

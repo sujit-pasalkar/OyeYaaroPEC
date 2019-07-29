@@ -11,6 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:async';
 import 'comments.dart';
 import 'playVideo.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class FeedBuilder extends StatefulWidget {
   final String username;
@@ -84,7 +85,7 @@ class _FeedBuilder extends State<FeedBuilder> {
   Map likes;
   int likeCount;
 
-  String profileUrl;
+  // String profileUrl;
 
   bool liked;
   bool showHeart = false;
@@ -106,8 +107,7 @@ class _FeedBuilder extends State<FeedBuilder> {
   @override
   void initState() {
     time = _calculateTime();
-    getProfileUrl();
-
+    imageCache.clear();
     super.initState();
   }
 
@@ -116,24 +116,24 @@ class _FeedBuilder extends State<FeedBuilder> {
     super.dispose();
   }
 
-  getProfileUrl() async {
-    print('in feedbuilder-$username');
-    try {
-      sqlQuery.getContactRow(widget.ownerId.toString()).then((onValue) {
-        if (onValue.length == 0) {
-          setState(() {
-            profileUrl = 'add';
-          });
-        } else {
-          setState(() {
-            profileUrl = onValue[0]['profileUrl'];
-          });
-        }
-      });
-    } catch (e) {
-      print('Error in getProfileUrl() :$e');
-    }
-  }
+  // getProfileUrl() async {
+  //   print('in feedbuilder-$username,OwnerId:${widget.ownerId}');
+  //   try {
+  //     sqlQuery.getContactRow(widget.ownerId.toString()).then((onValue) {
+  //       if (onValue.length == 0) {
+  //         setState(() {
+  //           profileUrl = 'add';
+  //         });
+  //       } else {
+  //         setState(() {
+  //           profileUrl = onValue[0]['profileUrl'];
+  //         });
+  //       }
+  //     });
+  //   } catch (e) {
+  //     print('Error in getProfileUrl() :$e');
+  //   }
+  // }
 
   _likePost() async {
     if (!_processing) {
@@ -213,7 +213,7 @@ class _FeedBuilder extends State<FeedBuilder> {
             postOwner: ownerId,
             postId: postId,
             description: description,
-            profileUrl: profileUrl,
+            // profileUrl: profileUrl,
             type: type),
       ),
     );
@@ -366,93 +366,111 @@ class _FeedBuilder extends State<FeedBuilder> {
           Row(
             children: <Widget>[
               Container(
-                  margin: EdgeInsets.fromLTRB(8, 2, 2, 2),
-                  padding: EdgeInsets.all(1.0),
-                  decoration: new BoxDecoration(
-                    color: Color(0xffb00bae3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: widget.ownerId == pref.phone
-                      ? GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MyProfile(
-                                  phone: widget.ownerId,
-                                ),
+                margin: EdgeInsets.fromLTRB(8, 2, 2, 2),
+                padding: EdgeInsets.all(1.0),
+                decoration: new BoxDecoration(
+                  color: Color(0xffb00bae3),
+                  shape: BoxShape.circle,
+                ),
+                child: widget.ownerId == pref.phone
+                    ? GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MyProfile(
+                                pin: widget.ownerId,
                               ),
-                            );
-                          },
+                            ),
+                          );
+                        },
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(pref.profileUrl),
+                          backgroundColor: Colors.grey[300],
+                          radius: 18,
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MyProfile(
+                                pin: widget.ownerId,
+                              ),
+                            ),
+                          );
+                        },
+                        child: ClipOval(
                           child: CircleAvatar(
                             // backgroundImage: NetworkImage(pref.profileUrl),
                             backgroundColor: Colors.grey[300],
                             radius: 18,
-                          ),
-                        )
-                      : profileUrl == '' || profileUrl == null
-                          ? GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MyProfile(
-                                      phone: widget.ownerId,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: CircleAvatar(
-                                child: Icon(
-                                  Icons.person,
-                                  color: Colors.white,
-                                  size: 20,
+                            child: CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl:
+                                  'http://54.200.143.85:4200/profiles/now/${widget.ownerId}.jpg',
+                              placeholder: (context, url) => Center(
+                                child: SizedBox(
+                                  height: 40.0,
+                                  width: 40.0,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2.0),
                                 ),
-                                backgroundColor: Colors.grey[300],
-                                radius: 18,
                               ),
-                            )
-                          : profileUrl == 'add'
-                              ? GestureDetector(
-                                  onTap: () {
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) => MyProfile(
-                                    //           phone: widget.ownerId,
-                                    //         ),
-                                    //   ),
-                                    // );
-                                    print('Add user logic');
-                                  },
-                                  child: CircleAvatar(
-                                    child: Icon(
-                                      Icons.person_add,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    backgroundColor: Colors.grey[300],
-                                    radius: 18,
-                                  ),
-                                )
-                              : GestureDetector(
-                                  onTap: () {
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) => MyProfile(
-                                    //           phone: widget.ownerId,
-                                    //         ),
-                                    //   ),
-                                    // );
-                                    print(profileUrl);
-                                  },
-                                  child: CircleAvatar(
-                                    backgroundImage: NetworkImage(profileUrl),
-                                    backgroundColor: Colors.grey[300],
-                                    radius: 18,
-                                  ),
-                                )),
+                              errorWidget: (context, url, error) =>
+                               FadeInImage.assetNetwork(
+                                placeholder: 'assets/loading.gif',
+                                image:
+                                    'http://54.200.143.85:4200/profiles/then/${widget.ownerId}.jpg',
+                              ) 
+                              // Image.network(
+                              //     'http://54.200.143.85:4200/profiles/then/${widget.ownerId}.jpg'),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                // profileUrl == '' || profileUrl == null
+                //     ? GestureDetector(
+                //         onTap: () {
+                //         },
+                //         child: CircleAvatar(
+                //           child: Icon(
+                //             Icons.person,
+                //             color: Colors.white,
+                //             size: 20,
+                //           ),
+                //           backgroundColor: Colors.grey[300],
+                //           radius: 18,
+                //         ),
+                //       )
+                //     : profileUrl == 'add'
+                //         ? GestureDetector(
+                //             onTap: () {
+                //               print('Add user logic');
+                //             },
+                //             child: CircleAvatar(
+                //               child: Icon(
+                //                 Icons.person_add,
+                //                 color: Colors.white,
+                //                 size: 20,
+                //               ),
+                //               backgroundColor: Colors.grey[300],
+                //               radius: 18,
+                //             ),
+                //           )
+                //         : GestureDetector(
+                //             onTap: () {
+                //               print(profileUrl);
+                //             },
+                //             child: CircleAvatar(
+                //               backgroundImage: NetworkImage(profileUrl),
+                //               backgroundColor: Colors.grey[300],
+                //               radius: 18,
+                //             ),
+                //           ),
+              ),
               Flexible(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(5, 2, 2, 2),

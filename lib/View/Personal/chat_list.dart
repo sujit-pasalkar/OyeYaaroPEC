@@ -11,6 +11,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sqlcool/sqlcool.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ChatList extends StatefulWidget {
   final ScrollController hideButtonController;
@@ -28,10 +29,6 @@ class _ChatListState extends State<ChatList> {
   StreamSubscription<Event> _privateListChildChangedSubscription;
   StreamSubscription<Event> _privateListChildAddedSubscription;
 
-  // get profile url
-  DatabaseReference _profileReference;
-  StreamSubscription<Event> _profileSubscription;
-
   @override
   void initState() {
     this.bloc = SelectBloc(
@@ -42,114 +39,94 @@ class _ChatListState extends State<ChatList> {
       reactive: true,
     );
 
-
     // get data from firebase chatlist event(.onChildChanged)
     _privateListReference = database.reference().child('privateChatList');
     _privateListReference.keepSynced(true);
+
     _privateListChildChangedSubscription =
         _privateListReference.onChildChanged.listen((Event event) async {
-      print('onChildChanged : ${event.snapshot.value['recPhone']} and me : ${pref.phone}');
-
-      // check is msg for me
-      if (event.snapshot.value['recPhone'] == pref.phone.toString()) {
-        _profileReference = database
-            .reference()
-            .child('profiles')
-            .child(event.snapshot.value['senderPhone']);
-        _profileReference.keepSynced(true);
-        _profileSubscription =
-            _profileReference.onValue.listen((Event prof) async {
-          print('event data ${prof.snapshot.value['profileImg']}');
-
-          sqlQuery
-              .addPrivateChatList(
-                  event.snapshot.value['chatId'],
-                  event.snapshot.value['msg'],
-                  event.snapshot.value['senderPhone'],
-                  event.snapshot.value['recPhone'],
-                  event.snapshot.value['timestamp'],
-                  event.snapshot.value['count'],
-                  prof.snapshot.value['profileImg'])
-              .then((onValue) {
-            print('entry added in sqflite addchatlist');
-          }, onError: (e) {
-            print('show error message if addChatlist fails : $e');
-          });
-        }, onError: (e) {
-          print('Error in profile reference listen : $e');
-        });
-      } else {
-        print('this msg is not for me');
+      try {
+        // check is msg for me
+        if (event.snapshot.value['recPin'] == pref.pin.toString()) {
+          await sqlQuery.addPrivateChatList(
+            event.snapshot.value['chatId'],
+            event.snapshot.value['msg'],
+            event.snapshot.value['senderPhone'],
+            event.snapshot.value['recPhone'],
+            event.snapshot.value['timestamp'],
+            event.snapshot.value['count'],
+            event.snapshot.value['senderPin'],
+            event.snapshot.value['recPin'],
+          );
+        } else {
+          print('onChildChanged:this msg is not for me');
+        }
+      } catch (e) {
+        print('Error in onChildChanged:addPrivateChatList():$e');
       }
     });
 
     // new chat created(.onChildAdded)
     _privateListReference = database.reference().child('privateChatList');
     _privateListReference.keepSynced(true);
+
     _privateListChildAddedSubscription =
         _privateListReference.onChildAdded.listen((Event event) async {
-      print('onChildAdded: ${event.snapshot.value['recPhone']}, me: ${pref.phone}, ${pref.getPrivateChatHistory},');
-
+      print('getPrivateChatHistory:${pref.getPrivateChatHistory}');
       // getprivateChatHistory
-      // no need of fetchPrivateChatHistory service
       try {
         if (pref.getPrivateChatHistory == null) {
-          if (event.snapshot.value['recPhone'] == pref.phone.toString() ||
-              event.snapshot.value['senderPhone'] == pref.phone.toString()) {
-            // 1.get profile url from contact
-            String oppositPhn =
-                event.snapshot.value['recPhone'] == pref.phone.toString()
-                    ? event.snapshot.value['senderPhone']
-                    : event.snapshot.value['recPhone'];
-
-            List<Map<String, dynamic>> row =
-                await sqlQuery.getContactRow(oppositPhn);
-            print('row to get profile url: $row');
-
-            //2.add data in sql.addPrivateChatList
+          if (event.snapshot.value['recPin'] == pref.pin.toString() ||
+              event.snapshot.value['senderPin'] == pref.pin.toString()) {
             await sqlQuery.addPrivateChatList(
-                event.snapshot.value['chatId'],
-                event.snapshot.value['msg'],
-                event.snapshot.value['senderPhone'],
-                event.snapshot.value['recPhone'],
-                event.snapshot.value['timestamp'],
-                event.snapshot.value['count'],
-                row.length > 0 ? row[0]['profileUrl'] : '');
+              event.snapshot.value['chatId'],
+              event.snapshot.value['msg'],
+              event.snapshot.value['senderPhone'],
+              event.snapshot.value['recPhone'],
+              event.snapshot.value['timestamp'],
+              event.snapshot.value['count'],
+              event.snapshot.value['senderPin'],
+              event.snapshot.value['recPin'],
+            );
           }
         }
+
+        if (event.snapshot.value['recPin'] == pref.pin.toString()) {
+          await sqlQuery.addPrivateChatList(
+            event.snapshot.value['chatId'],
+            event.snapshot.value['msg'],
+            event.snapshot.value['senderPhone'],
+            event.snapshot.value['recPhone'],
+            event.snapshot.value['timestamp'],
+            event.snapshot.value['count'],
+            event.snapshot.value['senderPin'],
+            event.snapshot.value['recPin'],
+          );
+        } else {
+          print('onChildAdded: this added msg is not for me');
+        }
       } catch (e) {
-        print('Error while getprivateChatHistory..');
+        print('Error in onChildAdded: addPrivateChatList()1:$e');
       }
 
-      if (event.snapshot.value['recPhone'] == pref.phone.toString()) {
-        _profileReference = database
-            .reference()
-            .child('profiles')
-            .child(event.snapshot.value['senderPhone']);
-        _profileReference.keepSynced(true);
-        _profileSubscription =
-            _profileReference.onValue.listen((Event prof) async {
-          print('event data ${prof.snapshot.value['profileImg']}');
-
-          sqlQuery
-              .addPrivateChatList(
-                  event.snapshot.value['chatId'],
-                  event.snapshot.value['msg'],
-                  event.snapshot.value['senderPhone'],
-                  event.snapshot.value['recPhone'],
-                  event.snapshot.value['timestamp'],
-                  event.snapshot.value['count'],
-                  prof.snapshot.value['profileImg'])
-              .then((onValue) {
-            print('entry added in sqflite addchatlist');
-          }, onError: (e) {
-            print('show error message if addChatlist fails : $e');
-          });
-        }, onError: (e) {
-          print('Error in profile reference listen : $e');
-        });
-      } else {
-        print('this added msg is not for me');
+      // 2
+      try {
+        if (event.snapshot.value['recPin'] == pref.pin.toString()) {
+          await sqlQuery.addPrivateChatList(
+            event.snapshot.value['chatId'],
+            event.snapshot.value['msg'],
+            event.snapshot.value['senderPhone'],
+            event.snapshot.value['recPhone'],
+            event.snapshot.value['timestamp'],
+            event.snapshot.value['count'],
+            event.snapshot.value['senderPin'],
+            event.snapshot.value['recPin'],
+          );
+        } else {
+          print('onChildAdded: this added msg is not for me');
+        }
+      } catch (e) {
+        print('Error in onChildAdded: addPrivateChatList()2:$e');
       }
     });
 
@@ -161,13 +138,7 @@ class _ChatListState extends State<ChatList> {
     super.dispose();
     _privateListChildChangedSubscription.cancel();
     _privateListChildAddedSubscription.cancel();
-    _profileSubscription.cancel();
     pref.setPrivateChatHistory(true);
-    print('dispose');
-  }
-
-  deleteEmptyChatList(chatId) {
-    sqlQuery.deleteEmptyChatList(chatId);
   }
 
   @override
@@ -218,18 +189,10 @@ class _ChatListState extends State<ChatList> {
                     ),
                   );
                 }
-
-                // if (!scrolled) {
-                //   Future.delayed(Duration(milliseconds: 200)).then((v) {
-                //     widget.hideButtonController.jumpTo(0.0);
-                //     scrolled = true;
-                //   });
-                // }
                 // the select query has results
                 return ListView.builder(
                     controller: widget.hideButtonController,
                     reverse: false,
-                    // shrinkWrap: true,
                     itemCount: snapshot.data.length,
                     itemBuilder: (BuildContext context, int index) {
                       var item =
@@ -270,7 +233,6 @@ class _ChatListState extends State<ChatList> {
   }
 
   Widget _buildListTile(Map<String, dynamic> chatList) {
-    // widget.hideButtonController.jumpTo(0.0);
     return Column(
       children: <Widget>[
         ListTile(
@@ -283,71 +245,105 @@ class _ChatListState extends State<ChatList> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => MyProfile(
-                        phone: pref.phone.toString() ==
-                                chatList['chatListSenderPhone']
-                            ? int.parse(chatList['chatListRecPhone'])
-                            : int.parse(chatList['chatListSenderPhone']),
-                      ),
+                    pin: pref.pin.toString() == chatList['chatListSenderPin']
+                        ? int.parse(chatList['chatListRecPin'])
+                        : int.parse(chatList['chatListSenderPin']),
+                  ),
                 ),
               );
+              // print(pref.pin.toString() == chatList['chatListSenderPin']
+              //     ? 'http://54.200.143.85:4200/profiles/now/' +
+              //         chatList['chatListRecPin'].toString() +
+              //         '.jpg'
+              //     : 'http://54.200.143.85:4200/profiles/now/' +
+              //         chatList['chatListSenderPin'].toString() +
+              //         '.jpg');
+              // String urlPin =
+              //     pref.pin.toString() == chatList['chatListSenderPin']
+              //         ? chatList['chatListRecPin']
+              //         : chatList['chatListSenderPin'];
+              // print('http://54.200.143.85:4200/profiles/then/$urlPin.jpg');
             },
             child: Container(
-              padding: EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                  color: Color(0xffb00bae3), shape: BoxShape.circle),
-              child: chatList['chatListProfile'] == ''
-                  ? CircleAvatar(
-                      child: Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 35,
-                      ),
-                      backgroundColor: Colors.grey[300],
-                      radius: 25,
-                    )
-                  : CircleAvatar(
-                      backgroundImage:
-                          NetworkImage(chatList['chatListProfile']),
-                      backgroundColor: Colors.grey[300],
-                      radius: 25,
-                    ),
-            ),
+                padding: EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                    color: Color(0xffb00bae3), shape: BoxShape.circle),
+                child: ClipOval(
+                  child: CircleAvatar(
+                    backgroundColor: Colors.grey[300],
+                    radius: 25,
+                    child: CachedNetworkImage(
+                        fit: BoxFit.cover,
+                        imageUrl:
+                            pref.pin.toString() == chatList['chatListSenderPin']
+                                ? 'http://54.200.143.85:4200/profiles/now/' +
+                                    chatList['chatListRecPin'].toString() +
+                                    '.jpg'
+                                : 'http://54.200.143.85:4200/profiles/now/' +
+                                    chatList['chatListSenderPin'].toString() +
+                                    '.jpg',
+                        placeholder: (context, url) => Center(
+                              child: SizedBox(
+                                height: 20.0,
+                                width: 20.0,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 1.0),
+                              ),
+                            ),
+                        errorWidget: (context, url, error) {
+                          String urlPin = pref.pin.toString() ==
+                                  chatList['chatListSenderPin']
+                              ? chatList['chatListRecPin']
+                              : chatList['chatListSenderPin'];
+                          return 
+                            FadeInImage.assetNetwork(
+                                placeholder: 'assets/loading.gif',
+                                image:
+                                    'http://54.200.143.85:4200/profiles/then/$urlPin.jpg',
+                              )
+                          // Image.network(
+                          //   'http://54.200.143.85:4200/profiles/then/$urlPin.jpg',
+                          //   fit: BoxFit.cover,
+                          // )
+                          ;
+                        }),
+                  ),
+                ),),
           ),
           title: FutureBuilder<dynamic>(
             future: sqlQuery.getContactName(
-                pref.phone.toString() == chatList['chatListSenderPhone']
+                pref.pin.toString() == chatList['chatListSenderPin']
                     ? chatList['chatListRecPhone']
                     : chatList['chatListSenderPhone']),
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.none:
                   return Text(
-                      pref.phone.toString() == chatList['chatListSenderPhone']
+                      pref.pin.toString() == chatList['chatListSenderPin']
                           ? chatList['chatListRecPhone']
                           : chatList['chatListSenderPhone']);
                 case ConnectionState.active:
                 case ConnectionState.waiting:
                   return Text(
-                      pref.phone.toString() == chatList['chatListSenderPhone']
+                      pref.pin.toString() == chatList['chatListSenderPin']
                           ? chatList['chatListRecPhone']
                           : chatList['chatListSenderPhone']);
                 case ConnectionState.done:
                   if (snapshot.hasError)
                     return Text(
-                        pref.phone.toString() == chatList['chatListSenderPhone']
+                        pref.pin.toString() == chatList['chatListSenderPin']
                             ? chatList['chatListRecPhone']
                             : chatList['chatListSenderPhone']);
                   return snapshot.data.length == 0
-                      ? Text(pref.phone.toString() ==
-                              chatList['chatListSenderPhone']
-                          ? chatList['chatListRecPhone']
-                          : chatList['chatListSenderPhone'])
+                      ? Text(
+                          pref.pin.toString() == chatList['chatListSenderPin']
+                              ? chatList['chatListRecPhone']
+                              : chatList['chatListSenderPhone'])
                       : Text('${snapshot.data[0]['contactsName']}'); //show
               }
-              return Text(
-                  pref.phone.toString() == chatList['chatListSenderPhone']
-                      ? chatList['chatListRecPhone']
-                      : chatList['chatListSenderPhone']); // unreachable
+              return Text(pref.pin.toString() == chatList['chatListSenderPin']
+                  ? chatList['chatListRecPhone']
+                  : chatList['chatListSenderPhone']); // unreachable
             },
           ),
           subtitle: Text(chatList['chatListLastMsg'],
@@ -427,28 +423,33 @@ class _ChatListState extends State<ChatList> {
   }
 
   chat(Map<String, dynamic> chatList) async {
-    print('opposite user profile pic url :${chatList['chatListProfile']}');
+    // print('opposite user profile pic url :${chatList['chatListProfile']}');
     List<Map<String, dynamic>> data = await sqlQuery.getContactName(
-        pref.phone.toString() == chatList['chatListSenderPhone']
+        pref.pin.toString() == chatList['chatListSenderPin']
             ? chatList['chatListRecPhone']
             : chatList['chatListSenderPhone']);
-    // print('get data in chatlist: ${data[0]['contactsName']}');
+    print('get data in chatlist: $chatList');
+
     Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatScreen(
-              chatId: chatList['chatId'],
-              chatType: 'private',
-              receiverName: data.length == 0
-                  ? pref.phone.toString() == chatList['chatListSenderPhone']
-                      ? chatList['chatListRecPhone']
-                      : chatList['chatListSenderPhone']
-                  : data[0]['contactsName'],
-              receiverPhone:
-                  pref.phone.toString() == chatList['chatListSenderPhone']
-                      ? chatList['chatListRecPhone']
-                      : chatList['chatListSenderPhone'],
-              profileUrl: chatList['chatListProfile']),
-        ));
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatScreen(
+          chatId: chatList['chatId'],
+          chatType: 'private', //
+          receiverName: data.length == 0
+              ? pref.pin.toString() == chatList['chatListSenderPin']
+                  ? chatList['chatListRecPhone']
+                  : chatList['chatListSenderPhone']
+              : data[0]['contactsName'],
+          receiverPhone: pref.pin.toString() == chatList['chatListSenderPin']
+              ? chatList['chatListRecPhone']
+              : chatList['chatListSenderPhone'],
+          recPin: pref.pin.toString() == chatList['chatListSenderPin']
+              ? chatList['chatListRecPin']
+              : chatList['chatListSenderPin'],
+          // profileUrl: chatList['chatListProfile']
+        ),
+      ),
+    );
   }
 }

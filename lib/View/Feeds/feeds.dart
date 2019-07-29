@@ -105,7 +105,7 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MyProfile(phone: pref.phone,),
+            builder: (context) => MyProfile(pin: pref.pin,),
           ),
         );
         break;
@@ -275,13 +275,11 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
     int loop = 0;
     for (int i = 0; i < count; i++) {
       if (i % 2 == 0) {
-        // print('i:$i,$one');
         _staggeredTiles.add(new StaggeredTile.count(1, one));
       } else {
         _staggeredTiles.add(new StaggeredTile.count(1, two));
       }
       loop = loop + 1;
-      // print('loop+1:$loop');
     }
     return _staggeredTiles;
   }
@@ -321,10 +319,8 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String userId = pref.pin.toString();
-    // print('userId:${pref.pin},phone : ${pref.phone}');
     String uri = '${url.api}getFeeds?userId=' + userId;
     HttpClient httpClient = new HttpClient();
-    // print(uri);
 
     try {
       HttpClientRequest request = await httpClient.getUrl(Uri.parse(uri));

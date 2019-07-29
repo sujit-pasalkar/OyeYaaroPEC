@@ -75,14 +75,14 @@ class _GroupInfoState extends State<GroupInfo> {
         return GestureDetector(
           onTap: () {
             print('show profile');
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MyProfile(
-                      phone: int.parse(snapshot[position]['memberPhone']),
-                    ),
-              ),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => MyProfile(
+            //           phone: int.parse(snapshot[position]['memberPhone']),
+            //         ),
+            //   ),
+            // );
           },
           onLongPress: widget.admin == pref.phone.toString() &&
                   snapshot[position]['memberPhone'] != widget.admin

@@ -1,3 +1,4 @@
+// remove profileUrl var
 import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,13 +12,12 @@ class SharedPref {
 
   Future<String> getValues() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
-    // print('in getValues()..${_prefs.getInt('userPhone')}');
     name = (_prefs.getString('userName') ?? null);
     phone = (_prefs.getInt('userPhone') ?? null);
     pin = (_prefs.getInt('pin') ?? null);
     // email = (_prefs.getString('userEmail') ?? null);
     // address = (_prefs.getString('userAddress') ?? null);
-    profileUrl = (_prefs.getString('profileUrl') ?? null);
+    // profileUrl = (_prefs.getString('profileUrl') ?? null);
     hideMedia = (_prefs.getBool('hideMedia') ?? null);
     getPrivateChatHistory = (_prefs.getBool('getPrivateChatHistory') ?? null);
     groupId = (_prefs.getString('collegeName') ?? null);

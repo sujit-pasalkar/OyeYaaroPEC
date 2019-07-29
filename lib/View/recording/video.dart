@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../cameraModule/views/recordClip.dart';
 import 'package:vibrate/vibrate.dart';
-// import 'package:share_extend/share_extend.dart';
+import 'package:path_provider/path_provider.dart';
 
 class RecordedVideoScreen extends StatefulWidget {
   final ScrollController hideButtonController;
@@ -21,7 +21,7 @@ class RecordedVideoScreen extends StatefulWidget {
 
 class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
   ScrollController _scrollController = new ScrollController();
-  Directory directory = new Directory('/storage/emulated/0/OyeYaaro/Videos');
+  Directory directory = Directory('/storage/emulated/0/OyeYaaro/Videos');
   Directory thumbailDirectory;
 
   List<bool> showShareVideoCheckBox = <bool>[];
@@ -39,13 +39,29 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
 
   @override
   void initState() {
-    super.initState();
     loading = false;
+    dir();
+    super.initState();
+  }
+
+  dir() async {
+    Directory extDir1 =
+        await getApplicationDocumentsDirectory(); //'/data/user/0/com.plmlogix.oye_yaaro_pec/app_flutter'
+    Directory extDir2 =
+        await getExternalStorageDirectory(); //'/storage/emulated/0/Android/data/com.plmlogix.oye_yaaro_pec/files'-----useThis
+    Directory extDir3 =
+        await getTemporaryDirectory(); //'/data/user/0/com.plmlogix.oye_yaaro_pec/cache'
+
+    print('extDir1:$extDir1');
+    print('extDir2:${extDir2.path}');
+    print('extDir3:$extDir3');
   }
 
   Future<List<String>> listDir() async {
+    print('in listDir');
     List<String> videos = <String>[];
     var exists = await directory.exists();
+    print('exists: $exists');
 
     if (exists) {
       directory.listSync(recursive: true, followLinks: true).forEach((f) {
@@ -252,7 +268,7 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
   }
 
   Widget body(dataList) {
-    // print('dataList  : $dataList');
+    print('dataList  : $dataList');
     if (dataList.length != 0) {
       if (dataList[0] == 'empty') {
         return noVideoFound();
@@ -345,8 +361,8 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
                           //                 .replaceAll('mp4', 'png')),
 
                           PlayVideo(
-                            videoUrl: dataList[i],
-                          ),
+                        videoUrl: dataList[i],
+                      ),
                     ),
                   );
                 }

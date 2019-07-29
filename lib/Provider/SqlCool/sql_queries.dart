@@ -86,24 +86,24 @@ class SqlQuery {
   }
 
   //delete whole groupMember table
-  static Future<int> deleteGroupMemberTable(String chatId) async {
-    int val;
+  static Future deleteGroupMemberTable(String chatId) async {
+    Completer _c =new Completer();
     print('in  deleteGroupMemberTable sql query');
     try {
-      val = await db.delete(
+       await db.delete(
           table: "groupMembersTable",
           where: "chatId='$chatId'",
           verbose: false);
-      print('delete : $val');
-      return val;
+      _c.complete('deleted');
     } catch (e) {
-      val = 1;
       print('delete error : $e');
-      return val;
+      _c.completeError(e);
     }
+    return _c.future;
   }
 
   Future addPrivateChat(
+      //pass obj
       String chatId,
       String msgMedia,
       String msgType,
@@ -114,7 +114,9 @@ class SqlQuery {
       String isUploaded,
       String mediaUrl,
       String thumbPath,
-      String thumbUrl) async {
+      String thumbUrl,
+      String senderPin,
+      String recPin) async {
     Completer _completer = new Completer();
     try {
       Map<String, String> chatRow = {
@@ -129,6 +131,8 @@ class SqlQuery {
         "mediaUrl": mediaUrl,
         "thumbPath": thumbPath,
         "thumbUrl": thumbUrl,
+        "senderPin": senderPin,
+        "receiverPin": recPin
       };
       print('in add private chat');
 
@@ -161,7 +165,9 @@ class SqlQuery {
       isUploaded,
       firebaseUrl,
       thumbPath,
-      thumbUrl) async {
+      thumbUrl,
+      senderPin,
+      recPin) async {
     Completer _completer = new Completer();
     Map<String, String> chatRow = {
       "chatId": chatId,
@@ -175,6 +181,8 @@ class SqlQuery {
       "mediaUrl": firebaseUrl,
       "thumbPath": thumbPath,
       "thumbUrl": thumbUrl,
+      "senderPin": senderPin,
+      "receiverPin": recPin
     };
     try {
       int updated = await db.update(
@@ -200,7 +208,9 @@ class SqlQuery {
       String recPhone,
       String timestamp,
       String count,
-      String profileUrl) async {
+      // String profileUrl.
+      String senderPin,
+      String recPin) async {
     Completer _completer = new Completer();
     try {
       Map<String, String> chatListRow = {
@@ -210,7 +220,9 @@ class SqlQuery {
         "chatListRecPhone": recPhone,
         "chatListLastMsgTime": timestamp,
         "chatListMsgCount": count,
-        "chatListProfile": profileUrl
+        // "chatListProfile": profileUrl,
+        "chatListSenderPin": senderPin,
+        "chatListRecPin": recPin
       };
       // print('in add private chat list');
 
@@ -218,14 +230,14 @@ class SqlQuery {
           table: "privateChatListTable", where: "chatId='$chatId'");
 
       if (exists) {
-         await db.update(
+        await db.update(
             table: "privateChatListTable",
             row: chatListRow,
             where: "chatId='$chatId'",
             verbose: false);
         _completer.complete('added');
       } else {
-         await db.insert(
+        await db.insert(
             table: "privateChatListTable", row: chatListRow, verbose: false);
         _completer.complete('added');
       }
@@ -383,7 +395,7 @@ class SqlQuery {
           columns: "contactsName",
           where: "contactsPhone='$phone'",
           verbose: false);
-      print('select contactsName from  contactsTable :$rows');
+      print('getcontactname:select contactsName from  contactsTable :$rows');
       _completer.complete(rows);
     } catch (e) {
       _completer.completeError(e);
@@ -392,7 +404,7 @@ class SqlQuery {
     return _completer.future;
   }
 
-  //get conatcts row
+  //get conatcts row from num
   Future getContactRow(String phone) async {
     Completer _completer = new Completer();
     try {
@@ -411,6 +423,25 @@ class SqlQuery {
     return _completer.future;
   }
 
+  //get conatcts row from pin
+  Future getContactRowFromPin(String pin) async {
+    Completer _completer = new Completer();
+    try {
+      // check is phone exists logic(need to change wayfor groupInfo.dart and privatechatlist.dart)
+      List<Map<String, dynamic>> rows = await db.select(
+          table: "contactsTable",
+          columns: "*",
+          where: "contactsPin='$pin'",
+          verbose: false);
+      // print('select contactsName from  contactsTable :$rows');
+      _completer.complete(rows);
+    } catch (e) {
+      _completer.completeError(e);
+      print('err while getting name :$e');
+    }
+    return _completer.future;
+  }
+
   //update conatcts row
   Future updateContactRow(Map<String, dynamic> row) async {
     Completer _completer = new Completer();
@@ -419,8 +450,7 @@ class SqlQuery {
           table: "contactsTable",
           row: row,
           where: "contactsPhone='${row['contactsPhone']}'",
-          verbose: false
-          );
+          verbose: false);
       print('updated res-- :$val');
       _completer.complete(1);
     } catch (e) {
@@ -451,7 +481,7 @@ class SqlQuery {
   }
 
   // get only phones from contacts
-   Future getPhonesfromContact() async {
+  Future getPhonesfromContact() async {
     Completer _completer = new Completer();
     try {
       List<Map<String, dynamic>> rows = await db.select(
@@ -469,7 +499,9 @@ class SqlQuery {
   }
 
   //add into Groupchatlist table
-  Future addGroupChatList( Map<String,dynamic> obj,) async {
+  Future addGroupChatList(
+    Map<String, dynamic> obj,
+  ) async {
     Completer _completer = new Completer();
     try {
       Map<String, String> chatListRow = {
@@ -510,36 +542,38 @@ class SqlQuery {
 
 //add into GroupchatlistHistory table
 // you will get error as 'chatListSenderPin' new field added in groupChatListTable table check addGroupChatList() method for reference
-  Future addGroupChatListHistory(String chatId, String lastMsg,
-      String senderPhone, String timestamp, String count, String gName) async {
-    Completer _completer = new Completer();
-    try {
-      Map<String, String> chatListRow = {
-        "chatId": chatId,
-        "chatListLastMsg": lastMsg,
-        "chatListSenderPhone": senderPhone,
-        "chatListLastMsgTime": timestamp,
-        "chatListMsgCount": count,
-        "chatGroupName": gName
-      };
-      print('in add group chat list history');
+  // Future addGroupChatListHistory(
+  //   Map<String, dynamic> obj,
+  // ) async {
+  //   Completer _completer = new Completer();
+  //   try {
+  //     Map<String, String> chatListRow = {
+  //       "chatId": obj['chatId'],
+  //       "chatListLastMsg": obj['chatListLastMsg'],
+  //       "chatListSenderPhone": obj['chatListSenderPhone'],
+  //       "chatListLastMsgTime": obj['chatListLastMsgTime'],
+  //       "chatListMsgCount": obj['chatListMsgCount'],
+  //       "chatGroupName": obj['chatGroupName'],
+  //       "chatListSenderPin": obj['chatListSenderPin']
+  //     };
 
-      bool exists = await db.exists(
-          table: "groupChatListTable", where: "chatId='$chatId'");
+  //     print('in add group chat list history');
 
-      if (exists) {
-        _completer.complete('exist');
-      } else {
-        final result = await db.insert(
-            table: "groupChatListTable", row: chatListRow, verbose: false);
-        print('inserted result grouplist by history: $result');
-        _completer.complete('added');
-      }
-    } catch (e) {
-      _completer.completeError(e);
-    }
-    return _completer.future;
-  }
+  //     bool exists = await db.exists(
+  //         table: "groupChatListTable", where: "chatId='${obj['chatId']}'");
+
+  //     if (exists) {
+  //       _completer.complete('exist');
+  //     } else {
+  //       await db.insert(
+  //           table: "groupChatListTable", row: chatListRow, verbose: false);
+  //       _completer.complete('added');
+  //     }
+  //   } catch (e) {
+  //     _completer.completeError(e);
+  //   }
+  //   return _completer.future;
+  // }
 
 //add into groupsMembers table
   Future addGroupsMember(Map<String, String> addMember) async {
@@ -551,7 +585,7 @@ class SqlQuery {
       bool exists = await db.exists(
           table: "groupMembersTable",
           where:
-              "chatId='${addMember['chatId']}' AND memberPhone='${addMember['memberPhone']}'");
+              "chatId='${addMember['chatId']}' AND memberPin='${addMember['memberPin']}'");
 
       if (exists) {
         print('${addMember['memberPhone']} already exist');
@@ -559,9 +593,6 @@ class SqlQuery {
       } else {
         final result = await db.insert(
             table: "groupMembersTable", row: addMember, verbose: false);
-        // print('${addMember['memberPhone']} added successfully');
-
-        // print('inserted result groupMembRow: $result');
         _completer.complete(result);
       }
     } catch (e) {
@@ -599,7 +630,7 @@ class SqlQuery {
       String mediaUrl,
       String thumbPath,
       String thumbUrl,
-      String profileUrl) async {
+      String senderpin) async {
     Completer _completer = new Completer();
     try {
       Map<String, String> chatRow = {
@@ -613,7 +644,7 @@ class SqlQuery {
         "mediaUrl": mediaUrl,
         "thumbPath": thumbPath,
         "thumbUrl": thumbUrl,
-        "profileImg": profileUrl
+        "senderpin": senderpin
       };
       // print('in add group chat');
 
@@ -621,38 +652,33 @@ class SqlQuery {
           table: "groupChatTable", where: "timestamp='$timestamp'");
 
       if (exists) {
-        // print('timestamp already exist');
-        final selectRes = await db.select(
-            table: "groupChatTable",
-            columns: 'profileImg',
-            where: "timestamp='$timestamp'",
-            verbose: false);
-        // print(
-        //     'selected groupChatTable profile result: ${selectRes[0]['profileImg']}'); //
-        if (selectRes[0]['chatListProfile'] != profileUrl) {
-          // print('profile url is not same so update new one');
-          // int updated =
-          await db.update(
-              table: "groupChatTable",
-              row: chatRow,
-              where: "chatId='$chatId' AND timestamp='$timestamp'",
-              verbose: false);
-          // print('profile pic url updated in privatechatlist table : $updated');
-        }
-        // else {
-        // print('profile url is same so dont update');
+        print('chat timestamp already exist');
+        // final selectRes = await db.select(
+        //     table: "groupChatTable",
+        //     columns: 'profileImg',
+        //     where: "timestamp='$timestamp'",
+        //     verbose: false);
+        // // print(
+        // //     'selected groupChatTable profile result: ${selectRes[0]['profileImg']}'); //
+        // if (selectRes[0]['chatListProfile'] != profileUrl) {
+        //   // print('profile url is not same so update new one');
+        //   // int updated =
+        //   await db.update(
+        //       table: "groupChatTable",
+        //       row: chatRow,
+        //       where: "chatId='$chatId' AND timestamp='$timestamp'",
+        //       verbose: false);
+        //   // print('profile pic url updated in privatechatlist table : $updated');
         // }
+        // // else {
+        // // print('profile url is same so dont update');
+        // // }
 
         _completer.complete('exist');
       } else {
-        // not exist
-        // if (chatRow['msgType'] == '1' || chatRow['msgType'] == '2') {
-        //   downloadTumb
-        // } else {
-          final result = await db.insert(
-              table: "groupChatTable", row: chatRow, verbose: false);
-          print('inserted result: $result');
-        // }
+        final result = await db.insert(
+            table: "groupChatTable", row: chatRow, verbose: false);
+        print('inserted result: $result');
         _completer.complete('added');
       }
     } catch (e) {
@@ -663,8 +689,9 @@ class SqlQuery {
 
   // update group chat
   Future updateGroupChat(chatId, senderName, imgPath, senderPhone, msgType,
-      timestamp, isUploaded, firebaseUrl, thumbPath, thumbUrl) async {
+      timestamp, isUploaded, firebaseUrl, thumbPath, thumbUrl,senderPin) async {
     Completer _completer = new Completer();
+
     Map<String, String> chatRow = {
       "chatId": chatId,
       "senderName": senderName,
@@ -676,6 +703,7 @@ class SqlQuery {
       "mediaUrl": firebaseUrl,
       "thumbPath": thumbPath,
       "thumbUrl": thumbUrl,
+      "senderPin":senderPin
     };
     try {
       int updated = await db.update(

@@ -37,65 +37,35 @@ class _GroupListState extends State<GroupList> {
       reactive: true,
     );
 
-    // problem stmt
-    // im passing members[] along with fbchatlist. and adding members[] in sql gmebertable at the time
-    // crating group(remember its  happening only at group creaters side not at participans side)
-
-    // i can get updated group members[] from group chat array
-    // but when admin adds new members should notify and changes should be added to all
-    // create gmembers[] at firebase side , create new msg type (--added--).
-
     // check and get chatlist history service
-    checkHistory();
-
-    //check privateChatListTable data
-    // sqlQuery.selectGroupChatListTable();
-
-    // get data from firebase chatlist
-    //while createing group or sending msg
-    // create members arrays String a long string with space ex.' 7040470678 7972241516 xyz..'
-    // now if 'event.snapshot.value['membs'].contains('pref.phone.toString')'
-
+    //  checkHistory();
     _groupListReference = database.reference().child('groupChatList');
     _groupListReference.keepSynced(true);
 
     _groupListChildChangedSubscription =
         _groupListReference.onChildChanged.listen((Event event) {
+      print('in onChildChanged:');
+
       print(
           'onChildChanged : ${event.snapshot.value['members']} and me : ${pref.phone}');
-      if (event.snapshot.value['members'].contains(pref.phone.toString())
-          //  ||
-          //     event.snapshot.value['admin'] != pref.phone.toString()
-          ) {
+      if (event.snapshot.value['members'].contains(pref.pin.toString())) {
         //chek condition
-        print('conatains');
-        sqlQuery
-            .addGroupChatList(//obj
-                event.snapshot.value['chatId'],
-                event.snapshot.value['msg'],
-                event.snapshot.value['senderPhone'],
-                event.snapshot.value['timestamp'],
-                event.snapshot.value['count'],
-                event.snapshot.value['groupName'])
-            .then((onValue) {
+        // print('conatains');
+        Map<String, dynamic> obj = {
+          "chatId": event.snapshot.value['chatId'],
+          "chatListLastMsg": event.snapshot.value['msg'],
+          "chatListSenderPhone": event.snapshot.value['senderPhone'],
+          "chatListLastMsgTime": event.snapshot.value['timestamp'],
+          "chatListMsgCount": event.snapshot.value['count'],
+          "chatGroupName": event.snapshot.value['groupName'],
+          "chatListSenderPin": pref.pin.toString()
+        };
+
+        sqlQuery.addGroupChatList(obj).then((onValue) {
           print('entry added in sqflite addchatlist');
         }, onError: (e) {
           print('show error message if addChatlist fails : $e');
         });
-
-        // add members[] in sql
-        // event.snapshot.value['members'].forEach((memb) { //no need
-        //   print('member:$memb');
-        //   sqlQuery
-        //       .addGroupsMember(event.snapshot.value['chatId'], memb,
-        //           event.snapshot.value['admin'])
-        //       .then((onValue) {
-        //     print('$memb added in group members sql');
-        //   }, onError: (e) {
-        //     print('Error while adding group members in sql:$e');
-        //   });
-        // });
-
       } else {
         print('this msg is not for me');
       }
@@ -104,38 +74,25 @@ class _GroupListState extends State<GroupList> {
 // group created
     _groupListChildCreatedSubscription =
         _groupListReference.onChildAdded.listen((Event event) {
-      print('event : ${event.snapshot.value}');
-      if (event.snapshot.value['members'].contains(pref.phone.toString()) ||
-          event.snapshot.value['admin'] == pref.phone.toString()) {
-        print('conatains');
-        sqlQuery
-            .addGroupChatList(
-                event.snapshot.value['chatId'],
-                event.snapshot.value['msg'],
-                event.snapshot.value['senderPhone'],
-                event.snapshot.value['timestamp'],
-                event.snapshot.value['count'],
-                event.snapshot.value['groupName'])
-            .then((onValue) {
+      print('in onChildAdded:');
+
+      if (event.snapshot.value['members'].contains(pref.pin.toString()) ||
+          event.snapshot.value['admin'] == pref.pin.toString()) {
+        Map<String, dynamic> obj = {
+          "chatId": event.snapshot.value['chatId'],
+          "chatListLastMsg": event.snapshot.value['msg'],
+          "chatListSenderPhone": event.snapshot.value['senderPhone'],
+          "chatListLastMsgTime": event.snapshot.value['timestamp'],
+          "chatListMsgCount": event.snapshot.value['count'],
+          "chatGroupName": event.snapshot.value['groupName'],
+          "chatListSenderPin": pref.pin.toString()
+        };
+
+        sqlQuery.addGroupChatList(obj).then((onValue) {
           print('entry added in sqflite addchatlist');
         }, onError: (e) {
           print('show error message if addChatlist fails : $e');
         });
-
-        // add members[] in sql
-        // addNewMembers(event.snapshot.value['members']) //make one function//rm
-        // event.snapshot.value['members'].forEach((memb) {//no need
-        //   print('member:$memb');
-        //   sqlQuery
-        //       .addGroupsMember(event.snapshot.value['chatId'], memb,
-        //           event.snapshot.value['admin'])
-        //       .then((onValue) {
-        //     print('$memb added in group members sql');
-        //   }, onError: (e) {
-        //     print('Error while adding group members in sql:$e');
-        //   });
-        // });
-
       } else {
         print('this group is not for me');
       }
@@ -149,48 +106,38 @@ class _GroupListState extends State<GroupList> {
     super.dispose();
     _groupListChildChangedSubscription.cancel();
     _groupListChildCreatedSubscription.cancel();
-    print('dispose');
   }
 
-  checkHistory() async {
-    try {
-      Group.fetchGroupChat().then((onValue) {
-        print("Got history :$onValue");
-        onValue.forEach((f) {
-          print('g_id:${f['dialog_id']}');
-          print('admin:${f['admin_id']}');
-          print('g_name:${f['name']}');
-// add to list
-          sqlQuery
-              .addGroupChatListHistory(
-                  f['dialog_id'], '', '', '', '0', f['name'])
-              .then((onValue) {
-            print('entry added in sqflite addGroupchatlist:$onValue');
-          }, onError: (e) {
-            print('show error message if addgroupChatlist fails : $e');
-          });
+  //  checkHistory() async {
+  //   try {
+  //     dynamic onValue = await Group.fetchGroupChat();
+  //     print("Got Chat history :$onValue");
 
-          // add members[] in sql
-          // f['occupants_ids'].forEach((memb) { //no need
-          //   print('member:${memb['pin']}');
-          //   sqlQuery
-          //       .addGroupsMember(f['dialog_id'], memb['pin'], f['admin_id'])
-          //       .then((onValue) {
-          //     print('${memb['pin']} added in group members sql');
-          //   }, onError: (e) {
-          //     print('Error while adding group members in sql:$e');
-          //   });
-          // });
-        });
-      }, onError: (e) {
-        print(
-            "Got Error while getting User's chat list hostory in service: $e");
-      });
-    } catch (e) {
-      print(
-          "Got Error while getting User's chat list hostory in function : $e");
-    }
-  }
+  //     onValue.forEach((f) {
+
+  //      Map<String, String> obj = {
+  //        "chatId": f['dialog_id'],
+  //       "chatListLastMsg": obj['chatListLastMsg'],
+  //       "chatListSenderPhone": obj['chatListSenderPhone'],
+  //       "chatListLastMsgTime": obj['chatListLastMsgTime'],
+  //       "chatListMsgCount": obj['chatListMsgCount'],
+  //       "chatGroupName": obj['chatGroupName'],
+  //       "chatListSenderPin": obj['chatListSenderPin']
+  //      };
+
+  //       // add to list
+  //       sqlQuery
+  //           .addGroupChatListHistory(f['dialog_id'], '', '', '', '0', f['name'])
+  //           .then((onValue) {
+  //         print('entry added in sqflite addGroupchatlist:$onValue');
+  //       }, onError: (e) {
+  //         print('show error message if addgroupChatlist fails : $e');
+  //       });
+  //     });
+  //   } catch (e) {
+  //     print("Error from fetchGroupChat() function : $e");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

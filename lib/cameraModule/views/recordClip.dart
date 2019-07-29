@@ -67,6 +67,7 @@ class _RecordClipState extends State<RecordClip> with TickerProviderStateMixin {
   void dispose() {
     if (audioPlayer != null) audioPlayer.stop();
     disposeCtrl();
+    super.dispose();
   }
 
   @override
@@ -76,6 +77,7 @@ class _RecordClipState extends State<RecordClip> with TickerProviderStateMixin {
 
   disposeCtrl() async {
     if (controller != null) await controller.dispose();
+    if (_controller != null)  _controller.dispose();    
     super.dispose();
   }
 

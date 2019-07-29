@@ -36,17 +36,24 @@ class FirebaseStorageOperations {
     Completer _c = new Completer();
     StorageReference firebaseStorageRef;
     try {
+      print('in uploadVideo() try');
+      print('feedsImage:$feedsImage');
+
       if (feedsImage == true) {
         firebaseStorageRef = FirebaseStorage.instance
             .ref()
             .child('posts')
             .child('$timestamp.mp4');
       } else {
+      print('this is not feed img');
         firebaseStorageRef =
             FirebaseStorage.instance.ref().child('$timestamp.mp4');
+      print('got firebaseStorageRef');
       }
 
       final StorageUploadTask uploadTask = firebaseStorageRef.putFile(vidFile);
+      print('got uploadTask');
+
       var dowurl = await (await uploadTask.onComplete).ref.getDownloadURL();
 
       _c.complete(dowurl.toString());

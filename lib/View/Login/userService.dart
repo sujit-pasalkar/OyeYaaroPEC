@@ -13,7 +13,7 @@ class UserService {
     Completer c = Completer();
     try {
       http.Response response = await http.post(
-          "http://oyeyaaroapi.plmlogix.com/getProfile",
+          "${url.api}getProfile",
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({"pin": '$pin'}));
 
@@ -42,7 +42,7 @@ class UserService {
             "userId": pin,
             "username": result['data'][0]['Name'],
             "photoUrl":
-                "http://oyeyaaroapi.plmlogix.com/profiles/now/" + pin + ".jpg",
+                "${url.api}profiles/now/" + pin + ".jpg",
             "email": result['data'][0]['Email'],
             "following": {
               "Public": true,

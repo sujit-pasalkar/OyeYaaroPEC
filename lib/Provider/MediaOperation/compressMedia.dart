@@ -8,7 +8,6 @@ import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 final CompressMedia cmprsMedia = new CompressMedia();
 
 class CompressMedia {
-  
   Future compressImage(File f) async {
     print('in compressImage()');
     Completer _c = new Completer();
@@ -20,8 +19,8 @@ class CompressMedia {
       if ((f.lengthSync() / 1024) > 400) {
         compressedImageFile = await FlutterNativeImage.compressImage(f.path,
             percentage: 75, quality: 75);
-      //   print('compressedImageFile path1 :${compressedImageFile.toString()}');
-      // print('cmpr fileSize : ${compressedImageFile.lengthSync()}');
+        //   print('compressedImageFile path1 :${compressedImageFile.toString()}');
+        // print('cmpr fileSize : ${compressedImageFile.lengthSync()}');
 
         _c.complete(compressedImageFile);
       } else {
@@ -37,35 +36,41 @@ class CompressMedia {
     return _c.future;
   }
 
-  Future compressVideo(File vid, String finalDirPath,String timestamp) async {
+  Future compressVideo(File vid, String finalDirPath, String timestamp) async {
     // compressing and coping to desired path
-    print('in compressVideo()');
+    print(
+        'in compressVideo()****************************************************');
+    print('final dir:$finalDirPath');
     Completer _c = new Completer();
     try {
       final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
 
-       if (!Directory(finalDirPath).existsSync()) {
-      Directory(finalDirPath).createSync(recursive: true);
-    }
+      if (!Directory(finalDirPath).existsSync()) {
+        Directory(finalDirPath).createSync(recursive: true);
+        print('final dir created');
+      }
 
-    String finalFilePath = finalDirPath+"/"+timestamp+".mp4";
+      String finalFilePath = finalDirPath + "/" + timestamp + ".mp4";
 
-      // bool isExist = await File(finalFilePath).exists();
-      // if (!isExist) {
-      //   print('compressedVideo file not exist..');
-      //   File(finalPath).createSync(recursive: true);
-      // }
+      bool isExist = await File(finalFilePath).exists();
+      if (!isExist) {
+        print('compressedVideo file not exist..');
+        File(finalFilePath).createSync(recursive: true);
+      }
+      else{
+        print('file already exist');
+      }
 
-      await _flutterFFmpeg
+     int rc = await _flutterFFmpeg
           .execute(
-              '-y -i ${vid.path} -c:v libx264 -crf 34 -preset superfast -c:a copy -b:v 700k $finalFilePath')
-          .then((rc) {
+              '-y -i ${vid.path} -c:v libx264 -crf 34 -preset superfast -c:a copy -b:v 700k $finalFilePath');
+      //     .then((rc) {
         print("FFmpeg process exited with rc $rc");
-        _c.complete(File(finalFilePath));
-      }, onError: (e) {
-        print("Error in compressing _flutterFFmpeg.execute() Video $e");
-        throw e;
-      });
+      //   _c.complete(File(finalFilePath));
+      // }, onError: (e) {
+      //   print("Error in compressing _flutterFFmpeg.execute() Video $e");
+      //   throw e;
+      // });
     } catch (e) {
       print('Error while compressing Video:$e');
       _c.completeError(e);

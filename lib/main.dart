@@ -137,12 +137,6 @@ class _MainPageState extends State<MainPage> {
             ),
           );
         } else
-          // Navigator.pushReplacement(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => HomePage(),
-          //   ),
-          // );
            Navigator.of(context).pushReplacementNamed('/home');
       } else {
         Navigator.of(context).pushReplacementNamed('/loginpage');

@@ -28,6 +28,7 @@ class _ContactsState extends State<Contacts> {
   @override
   void initState() {
     getSqlContacts();
+    imageCache.clear();
     super.initState();
   }
 
@@ -135,8 +136,9 @@ class _ContactsState extends State<Contacts> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => MyProfile(
-                            phone: int.parse(r['contactsPin']),
-                          ),
+                        pin: int.parse(r['contactsPin']),
+                        // phone:int.parse(r['contactsPhone'])
+                      ),
                     ),
                   );
                 },
@@ -144,8 +146,8 @@ class _ContactsState extends State<Contacts> {
                   padding: EdgeInsets.all(1),
                   decoration: BoxDecoration(
                       color: Color(0xffb00bae3), shape: BoxShape.circle),
-                  child: CircleAvatar(
-                    child: ClipOval(
+                  child: ClipOval(
+                    child: CircleAvatar(
                       child: CachedNetworkImage(
                         fit: BoxFit.cover,
                         imageUrl:
@@ -157,14 +159,20 @@ class _ContactsState extends State<Contacts> {
                             child: CircularProgressIndicator(strokeWidth: 1.0),
                           ),
                         ),
-                        errorWidget: (context, url, error) => Image.network(
-                          'http://54.200.143.85:4200/profiles/then/${r['contactsPin']}.jpg',
-                          fit: BoxFit.cover,
-                        ),
+                        errorWidget: (context, url, error) => 
+                         FadeInImage.assetNetwork(
+                                placeholder: 'assets/loading.gif',
+                                image:
+                                    'http://54.200.143.85:4200/profiles/then/${r['contactsPin']}.jpg',
+                              )
+                        // Image.network(
+                        //   'http://54.200.143.85:4200/profiles/then/${r['contactsPin']}.jpg',
+                        //   fit: BoxFit.cover,
+                        // ),
                       ),
+                      backgroundColor: Colors.grey[300],
+                      radius: 25,
                     ),
-                    backgroundColor: Colors.grey[300],
-                    radius: 25,
                   ),
                 ),
               )
@@ -193,11 +201,13 @@ class _ContactsState extends State<Contacts> {
                     _isLoading = true;
                   });
                   String receiverNumber = r['contactsPhone'].toString();
+                  String recPin = r['contactsPin'].toString();
+                  // print('recPin:$recPin,,$r');
 
                   try {
                     String body = jsonEncode({
-                      "senderPhone": pref.phone.toString(),
-                      "receiverPhone": receiverNumber
+                      "senderPhone": pref.pin.toString(),
+                      "receiverPhone": recPin
                     });
 
                     var response = await http.post(
@@ -206,17 +216,21 @@ class _ContactsState extends State<Contacts> {
                         body: body);
                     var res = jsonDecode(response.body)["data"][0];
                     var chatId = res["chat_id"];
+                    print(chatId);
 
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatScreen(
-                              chatId: chatId,
-                              chatType: 'private',
-                              receiverName: r['contactsName'].toString(),
-                              receiverPhone: receiverNumber,
-                              profileUrl: r['profileUrl']),
-                        ));
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatScreen(
+                            chatId: chatId,
+                            chatType: 'private', //
+                            receiverName: r['contactsName'].toString(),
+                            receiverPhone: receiverNumber,
+                            recPin: recPin
+                            // profileUrl: r['profileUrl']
+                            ),
+                      ),
+                    );
 
                     setState(() {
                       _isLoading = false;
@@ -279,9 +293,6 @@ class _ContactsState extends State<Contacts> {
         //   getAllContacts();
         // }
       }
-      // else {
-
-      // }
     }, onError: (e) {
       print('Error from sqlQuery.selectContact():$e');
       setState(() {

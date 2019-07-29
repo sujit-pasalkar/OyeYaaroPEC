@@ -1,3 +1,4 @@
+// create Group
 import 'package:oye_yaaro_pec/Provider/ContactOperations/contact_operations.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
 import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
@@ -110,8 +111,8 @@ class _ContactsGroupState extends State<ContactsGroup> {
                                 searchContacts = !searchContacts;
                                 List<ContactDetails> l = List<ContactDetails>();
                                 records.forEach((f) {
-                                  if (addInGroup.contains(
-                                      f['contactsPin'].toString())) {
+                                  if (addInGroup
+                                      .contains(f['contactsPin'].toString())) {
                                     l.add(
                                       ContactDetails(
                                         name: f['contactsName'],
@@ -157,7 +158,7 @@ class _ContactsGroupState extends State<ContactsGroup> {
                                 'name': f.name,
                                 'phone': f.phone,
                                 // 'profileUrl': f.profileUrl
-                                'pin':f.contactsPin
+                                'pin': f.contactsPin
                               });
                             }
                           });
@@ -191,7 +192,7 @@ class _ContactsGroupState extends State<ContactsGroup> {
                 child: Center(
                   child: CircularProgressIndicator(
                     valueColor:
-                         AlwaysStoppedAnimation<Color>(Color(0xffb00bae3)),
+                        AlwaysStoppedAnimation<Color>(Color(0xffb00bae3)),
                   ),
                 ))
             : SizedBox(),
@@ -218,49 +219,52 @@ class _ContactsGroupState extends State<ContactsGroup> {
       },
       child: ListTile(
         leading: i.registered == 1
-            ?
-            // CircleAvatar(
-            //   backgroundImage: NetworkImage(i.profileUrl),
-            //   backgroundColor: Colors.grey[300],
-            //   radius: 25,
-            // )
-            GestureDetector(
+            ? GestureDetector(
                 onTap: () {
                   print(i.contactsPin);
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => MyProfile(
-                  //           pin: i.contactsPin,
-                  //         ),
-                  //   ),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MyProfile(
+                        pin: int.parse(i.contactsPin),
+                      ),
+                    ),
+                  );
                 },
                 child: Container(
                   padding: EdgeInsets.all(1),
                   decoration: BoxDecoration(
                       color: Color(0xffb00bae3), shape: BoxShape.circle),
-                  child: CircleAvatar(
-                    child: ClipOval(
+                  child: ClipOval(
+                    child: CircleAvatar(
                       child: CachedNetworkImage(
-                        fit: BoxFit.cover,
-                        imageUrl:
-                            'http://54.200.143.85:4200/profiles/now/${i.contactsPin}.jpg',
-                        placeholder: (context, url) => Center(
-                          child: SizedBox(
-                            height: 20.0,
-                            width: 20.0,
-                            child: CircularProgressIndicator(strokeWidth: 1.0),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Image.network(
-                          'http://54.200.143.85:4200/profiles/then/${i.contactsPin}.jpg',
                           fit: BoxFit.cover,
-                        ),
-                      ),
+                          imageUrl:
+                              'http://54.200.143.85:4200/profiles/now/${i.contactsPin}.jpg',
+                          placeholder: (context, url) => Center(
+                                child: SizedBox(
+                                  height: 20.0,
+                                  width: 20.0,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 1.0),
+                                ),
+                              ),
+                          errorWidget: (context, url, error) =>
+                              FadeInImage.assetNetwork(
+                                placeholder: 'assets/loading.gif',
+                                image:
+                                    'http://54.200.143.85:4200/profiles/then/${i.contactsPin}.jpg',
+                              )
+
+                          //  Image.network(
+                          //   'http://54.200.143.85:4200/profiles/then/${i.contactsPin}.jpg',
+                          //   fit: BoxFit.cover,
+                          // ),
+
+                          ),
+                      backgroundColor: Colors.grey[300],
+                      radius: 25,
                     ),
-                       backgroundColor: Colors.grey[300],
-                    radius: 25,
                   ),
                 ),
               )

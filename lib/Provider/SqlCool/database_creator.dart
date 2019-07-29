@@ -26,6 +26,8 @@ class DatabaseCreator {
       senderPin TEXT NOT NULL,
       receiverPin TEXT NOT NULL
    )""";
+  //  get senderPhone and recPhone but dont use them directly
+   
 
     String q2 = """CREATE TABLE groupChatTable ( 
       timestamp TEXT PRIMARY KEY,
@@ -38,18 +40,20 @@ class DatabaseCreator {
       mediaUrl TEXT,
       thumbPath TEXT,
       thumbUrl TEXT,
-      profileImg TEXT NOT NULL,
       senderPin TEXT NOT NULL
    )""";
+      // profileImg TEXT NOT NULL,  
+  //  rm pr
 
     String q3 = """CREATE TABLE groupMembersTable ( 
       chatId TEXT NOT NULL,
       memberPhone TEXT NOT NULL,
       memberName TEXT NOT NULL,
-      profileUrl TEXT NOT NULL,
       userType TEXT NOT NULL,
       memberPin TEXT NOT NULL
    )""";
+      // profileUrl TEXT NOT NULL,
+  //  remove profileUrl field
 
     String q4 = """CREATE TABLE privateChatListTable ( 
       chatId TEXT PRIMARY KEY,
@@ -58,10 +62,11 @@ class DatabaseCreator {
       chatListRecPhone TEXT NOT NULL,
       chatListLastMsgTime TEXT NOT NULL,
       chatListMsgCount TEXT NOT NULL,
-      chatListProfile TEXT NOT NULL,
       chatListSenderPin TEXT NOT NULL,
       chatListRecPin TEXT NOT NULL
    )""";
+      // chatListProfile TEXT NOT NULL,
+   
 
     String q5 = """CREATE TABLE groupChatListTable ( 
       chatId TEXT PRIMARY KEY,
@@ -81,6 +86,7 @@ class DatabaseCreator {
       profileUrl TEXT,
       contactsPin TEXT
    )""";
+  //  pr ok
 
     // the path is relative to the documents directory
     String dbpath = "data.sqlite";
