@@ -6,7 +6,7 @@ final SharedPref pref = new SharedPref();
 
 class SharedPref {
   int phone, pin;
-  String name, profileUrl, groupId, collegeName; //email, address,
+  String name, profileUrl, groupId, collegeName,filterActive; //email, address,
   int currentIndex = 0;
   bool connectionListener, hideMedia, getPrivateChatHistory;
 
@@ -22,8 +22,16 @@ class SharedPref {
     getPrivateChatHistory = (_prefs.getBool('getPrivateChatHistory') ?? null);
     groupId = (_prefs.getString('collegeName') ?? null);
     collegeName = (_prefs.getString('collegeName') ?? null);
+    filterActive = _prefs.getString('filterActive') ?? 'All';
 
     return 'ok';
+  }
+
+   changeFilter(String filter) async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    _prefs.setString('filterActive', filter);
+    this.filterActive = filter;
+    // return;
   }
 
   setName(String name) async {

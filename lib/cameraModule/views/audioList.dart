@@ -107,7 +107,7 @@ class _AudioListState extends State<AudioList> {
     return Scaffold(
         appBar: AppBar(
           title: Text('Songs'),
-           flexibleSpace: FlexAppbar(),
+          flexibleSpace: FlexAppbar(),
         ),
         body: donloadSongLoading
             ? Center(
@@ -194,7 +194,8 @@ class _AudioListState extends State<AudioList> {
                                                   if (_position == null &&
                                                       _duration == null) {
                                                     _stop().then((res) {
-                                                      print('after stopped.. : $res');
+                                                      print(
+                                                          'after stopped.. : $res');
                                                       _play(
                                                           'http://oyeyaaroapi.plmlogix.com/Audio/' +
                                                               searchresult[
@@ -324,36 +325,44 @@ class _AudioListState extends State<AudioList> {
   }
 
   Future<dynamic> download(String url) async {
-    print('send------- $url');
-    print('duration------- $_duration');
+    try {
+      print('send------- $url');
+      print('duration------- $_duration');
+      applicationDir = (await getExternalStorageDirectory()).path;
+      String songnm =
+          url.replaceAll('http://oyeyaaroapi.plmlogix.com/Audio/', '');
+      String dir = '$applicationDir${Config.musicDownloadFolderPath}';
+      print('getExternalStorageDirectory :  $dir');
+      String trimmedSongName = songnm.replaceAll(new RegExp(r"\s+\b|\b\s"), "");
+      File file = new File('$dir/$trimmedSongName');
 
-    applicationDir = (await getApplicationDocumentsDirectory()).path;
-    String songnm = url.replaceAll('http://oyeyaaroapi.plmlogix.com/Audio/', '');
-    String dir = '$applicationDir${Config.musicDownloadFolderPath}';
-    print('getApplicationDocumentsDirectory :  $dir');
-    String trimmedSongName = songnm.replaceAll(new RegExp(r"\s+\b|\b\s"), "");
-    File file = new File('$dir/$trimmedSongName');
-    if (file.existsSync()) {
+      if (file.existsSync()) {
         print('duration------- check');
+        var returnObject = [];
+        returnObject.add(file.path);
+        returnObject.add(_duration);
+        Navigator.pop(context, returnObject);
+      } else {
+        file.createSync(recursive: true);
+        print('new file created');
+      }
+      
+      var request = await http.get(
+        url,
+      );
+      var bytes = await request.bodyBytes;
+      await file.writeAsBytes(bytes);
+      print("final path :  " + file.path);
+      Fluttertoast.showToast(
+        msg: "song downloaded successfully",
+      );
       var returnObject = [];
       returnObject.add(file.path);
       returnObject.add(_duration);
-      Navigator.pop(context, returnObject
-          );
+      Navigator.pop(context, returnObject);
+    } catch (e) {
+      print('Error while downloading song in (create video with images): $e');
     }
-    var request = await http.get(
-      url,
-    );
-    var bytes = await request.bodyBytes;
-    await file.writeAsBytes(bytes);
-    print("final path :  " + file.path);
-    Fluttertoast.showToast(
-      msg: "song downloaded successfully",
-    );
-    var returnObject = [];
-    returnObject.add(file.path);
-    returnObject.add(_duration);
-    Navigator.pop(context, returnObject);
   }
 
   // song search

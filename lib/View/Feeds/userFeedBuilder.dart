@@ -365,30 +365,31 @@ class _FeedBuilder extends State<UserFeedBuilder> {
                           backgroundColor: Colors.grey[300],
                           radius: 18,
                         ))
-                    :
-                    CircleAvatar(
-                        backgroundColor: Colors.grey[300],
-                        radius: 18,
-                        child: CachedNetworkImage(
-                          fit: BoxFit.cover,
-                          imageUrl:
-                              'http://54.200.143.85:4200/profiles/now/${widget.ownerId}.jpg',
-                          placeholder: (context, url) => Center(
-                            child: SizedBox(
-                              height: 40.0,
-                              width: 40.0,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2.0),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => 
-                           FadeInImage.assetNetwork(
-                                placeholder: 'assets/loading.gif',
-                                image:
-                                    'http://54.200.143.85:4200/profiles/then/${widget.ownerId}.jpg',
-                              )
-                          // Image.network(
-                          //     'http://54.200.143.85:4200/profiles/then/${widget.ownerId}.jpg'),
+                    : ClipOval(
+                        child: CircleAvatar(
+                          backgroundColor: Colors.grey[300],
+                          radius: 18,
+                          child: CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl:
+                                  'http://54.200.143.85:4200/profiles/now/${widget.ownerId}.jpg',
+                              placeholder: (context, url) => Center(
+                                    child: SizedBox(
+                                      height: 40.0,
+                                      width: 40.0,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2.0),
+                                    ),
+                                  ),
+                              errorWidget: (context, url, error) =>
+                                  FadeInImage.assetNetwork(
+                                    placeholder: 'assets/loading.gif',
+                                    image:
+                                        'http://54.200.143.85:4200/profiles/then/${widget.ownerId}.jpg',
+                                  )
+                              // Image.network(
+                              //     'http://54.200.143.85:4200/profiles/then/${widget.ownerId}.jpg'),
+                              ),
                         ),
                       ),
               ),

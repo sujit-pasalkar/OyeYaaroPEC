@@ -1,15 +1,15 @@
+// make vibrate common
 import 'package:oye_yaaro_pec/Components/videoPlayer.dart';
-// import 'package:oye_yaaro_pec/Components/gaurav_video.dart';
 import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
 import 'package:oye_yaaro_pec/View/recording/shareRecordedVideo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../cameraModule/views/recordClip.dart';
 import 'package:vibrate/vibrate.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_extend/share_extend.dart';
 
 class RecordedVideoScreen extends StatefulWidget {
   final ScrollController hideButtonController;
@@ -20,8 +20,8 @@ class RecordedVideoScreen extends StatefulWidget {
 }
 
 class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
-  ScrollController _scrollController = new ScrollController();
-  Directory directory = Directory('/storage/emulated/0/OyeYaaro/Videos');
+  ScrollController _scrollController = ScrollController();
+  Directory directory; 
   Directory thumbailDirectory;
 
   List<bool> showShareVideoCheckBox = <bool>[];
@@ -30,7 +30,7 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
   String myId;
   String myName;
   String userPhone;
-  var _scaffoldKey = new GlobalKey<ScaffoldState>();
+  var _scaffoldKey = GlobalKey<ScaffoldState>();
 
   //share video to group
   List<String> selectedIndexes = [];
@@ -40,44 +40,32 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
   @override
   void initState() {
     loading = false;
-    dir();
     super.initState();
-  }
-
-  dir() async {
-    Directory extDir1 =
-        await getApplicationDocumentsDirectory(); //'/data/user/0/com.plmlogix.oye_yaaro_pec/app_flutter'
-    Directory extDir2 =
-        await getExternalStorageDirectory(); //'/storage/emulated/0/Android/data/com.plmlogix.oye_yaaro_pec/files'-----useThis
-    Directory extDir3 =
-        await getTemporaryDirectory(); //'/data/user/0/com.plmlogix.oye_yaaro_pec/cache'
-
-    print('extDir1:$extDir1');
-    print('extDir2:${extDir2.path}');
-    print('extDir3:$extDir3');
   }
 
   Future<List<String>> listDir() async {
     print('in listDir');
+    directory = await getExternalStorageDirectory();
+    print('directory:$directory');
+
     List<String> videos = <String>[];
-    var exists = await directory.exists();
+    Directory vidDir = Directory(directory.path + "/OyeYaaro/Videos");
+    var exists = await vidDir.exists();
     print('exists: $exists');
-
-    if (exists) {
-      directory.listSync(recursive: true, followLinks: true).forEach((f) {
-        if (f.path.toString().endsWith('.mp4')) {
-          videos.add(f.path);
-          showShareVideoCheckBox.add(false);
-        }
-      });
-      print('videos:$videos');
-      videos.sort();
-
-      return videos;
-    } else {
-      videos.add('empty');
-      return videos;
+    if (!exists) {
+      vidDir.createSync(recursive: true);
     }
+
+    // if (exists) {
+    vidDir.listSync(recursive: true, followLinks: true).forEach((f) {
+      if (f.path.toString().endsWith('.mp4')) {// || f.path.toString().endsWith('.mkv')
+        videos.add(f.path);
+        showShareVideoCheckBox.add(false);
+      }
+    });
+    videos.sort();
+    print('videos:$videos');
+    return videos;
   }
 
   void removeVideosAlert() {
@@ -135,7 +123,7 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
                 IconButton(
                   icon: Icon(Icons.share),
                   onPressed: () {
-                    print('selected indexes:$selectedIndexes');
+                    print('selected indexes:$selectedIndexes:share with Chats');
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -148,6 +136,7 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
                     ? IconButton(
                         icon: Icon(Icons.mobile_screen_share),
                         onPressed: () {
+                          print('share from messaging apps');
                           share();
                         },
                       )
@@ -194,7 +183,7 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Expanded(
-                  child: new FutureBuilder<List<String>>(
+                  child: FutureBuilder<List<String>>(
                     future: listDir(),
                     builder: (context, AsyncSnapshot snapshot) {
                       if (snapshot.hasError)
@@ -203,7 +192,7 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
                           ? body(snapshot.data)
                           : Center(
                               child: CircularProgressIndicator(
-                              valueColor: new AlwaysStoppedAnimation<Color>(
+                              valueColor: AlwaysStoppedAnimation<Color>(
                                   Color(0xffb00bae3)),
                             ));
                     },
@@ -216,8 +205,7 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 CircularProgressIndicator(
-                  valueColor:
-                      new AlwaysStoppedAnimation<Color>(Color(0xffb00bae3)),
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xffb00bae3)),
                 ),
                 SizedBox(
                   height: 10,
@@ -228,10 +216,10 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
                 )
               ],
             )),
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         backgroundColor: Color(0xffb00bae3),
         child: Image(
-          image: new AssetImage("assets/VIDEO_BACKGROUND.png"),
+          image: AssetImage("assets/VIDEO_BACKGROUND.png"),
           color: Colors.white,
           width: 40.0,
           height: 40.0,
@@ -251,39 +239,22 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
   }
 
   share() async {
-    // ShareExtend.share(selectedIndexes[0], "video");
-    var platform = const MethodChannel("com.plmlogix.oye_yaaro_pec/platform");
-    for (var video in this.selectedIndexes) {
-      print('share: $video');
-      var data = <String, String>{
-        'title': 'shareVideo',
-        'path': video,
-      };
-      try {
-        await platform.invokeMethod('shareVideo', data);
-      } catch (e) {
-        print(e);
-      }
-    }
+    print('share: ${selectedIndexes[0]}');
+    ShareExtend.share(selectedIndexes[0], "video");
   }
 
   Widget body(dataList) {
-    print('dataList  : $dataList');
+    print('dataList: $dataList');
     if (dataList.length != 0) {
-      if (dataList[0] == 'empty') {
-        return noVideoFound();
-      } else {
-        return GridView.count(
-          reverse: false,
-          primary: false,
-          padding: EdgeInsets.all(8.0),
-          crossAxisSpacing: 8.0,
-          crossAxisCount: 2,
-          controller: _scrollController,
-          //  widget.hideButtonController,
-          children: videoGrid(dataList),
-        );
-      }
+      return GridView.count(
+        reverse: false,
+        primary: false,
+        padding: EdgeInsets.all(8.0),
+        crossAxisSpacing: 8.0,
+        crossAxisCount: 2,
+        controller: _scrollController,
+        children: videoGrid(dataList),
+      );
     } else {
       return noVideoFound();
     }
@@ -328,7 +299,6 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
   List<Widget> videoGrid(dataList) {
     List<Widget> btnlist = List<Widget>();
     for (var i = 0; i < dataList.length; i++) {
-      // print('dataList : ${dataList[i]}');
       btnlist.add(
         GestureDetector(
           onLongPress: this.showShareVideoCheckBox[i] != true
@@ -352,15 +322,7 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          // PlayVideo(
-                          //     videoPath: dataList[i],
-                          //     videoThumb:
-                          //         '/storage/emulated/0/OyeYaaro/Thumbnails/' +
-                          //             (dataList[i].toString().split("/").last)
-                          //                 .replaceAll('mp4', 'png')),
-
-                          PlayVideo(
+                      builder: (context) => PlayVideo(
                         videoUrl: dataList[i],
                       ),
                     ),
@@ -382,13 +344,13 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
                 children: <Widget>[
                   Container(
                     decoration: BoxDecoration(
-                        border: new Border.all(
+                        border: Border.all(
                           color: Colors.indigo[50],
                           width: showShareVideoCheckBox[i] == true ? 10 : 0,
                         ),
                         image: DecorationImage(
                           image: FileImage(
-                            File('/storage/emulated/0/OyeYaaro/Thumbnails/' +
+                            File('${directory.path}/OyeYaaro/Thumbnails/' +
                                 (dataList[i].toString().split("/").last)
                                     .replaceAll('mp4', 'png')),
                           ),

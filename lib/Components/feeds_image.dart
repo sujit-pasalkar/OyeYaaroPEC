@@ -79,9 +79,9 @@ class _S3Image extends State<S3Image> {
       print('${widget.timestamp.toString()}.jpg file exist');
       file = downloadedFile;
     } else {
-      // print('${widget.timestamp.toString()}.jpg file not exist');
-      bool downloaded = await storage.downloadImage(
-          //can pass direcr downloaded file path instead of bool
+      try{
+
+        bool downloaded = await storage.downloadImage(
           widget.filename,
           widget.timestamp.toString(),
           feedsImage: true);
@@ -90,6 +90,12 @@ class _S3Image extends State<S3Image> {
           "/OyeYaaro/.posts/" +
           widget.timestamp.toString() +
           ".jpg");
+
+      }
+      catch(e){
+        print('====================error:$e');
+      }
+      
     }
 
     s3image = Container(

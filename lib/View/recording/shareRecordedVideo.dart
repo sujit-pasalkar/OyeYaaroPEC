@@ -289,6 +289,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
           contentPadding: EdgeInsets.all(5),
           onTap: () {
             // check contact in chat list if not then call startchat service
+            // print(chatList['contactsPin']);
             sendToPrivate(chatList);
           },
           leading: GestureDetector(
@@ -297,7 +298,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => MyProfile(
-                    pin: chatList['contactsPin'],
+                    pin: int.parse(chatList['contactsPin']),
                   ),
                 ),
               );
@@ -306,13 +307,10 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
               padding: EdgeInsets.all(2),
               decoration: BoxDecoration(
                   color: Color(0xffb00bae3), shape: BoxShape.circle),
-              child:
-//  ClipOval(
-                  // child:
-                  CircleAvatar(
-                backgroundColor: Colors.grey[300],
-                radius: 25,
-                child: ClipOval(
+              child: ClipOval(
+                child: CircleAvatar(
+                  backgroundColor: Colors.grey[300],
+                  radius: 25,
                   child: CachedNetworkImage(
                     fit: BoxFit.cover,
                     imageUrl: 'http://54.200.143.85:4200/profiles/now/' +
@@ -331,33 +329,11 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
                         placeholder: 'assets/loading.gif',
                         image:
                             'http://54.200.143.85:4200/profiles/then/$urlPin.jpg',
-                      )
-                          // Image.network(
-                          //   'http://54.200.143.85:4200/profiles/then/$urlPin.jpg',
-                          //   fit: BoxFit.cover,
-                          // )
-                          ;
+                      );
                     },
                   ),
                 ),
               ),
-              // ),
-
-              // chatList['profileUrl'] == ''
-              //     ? CircleAvatar(
-              //         child: Icon(
-              //           Icons.person,
-              //           color: Colors.white,
-              //           size: 35,
-              //         ),
-              //         backgroundColor: Colors.grey[300],
-              //         radius: 25,
-              //       )
-              //     : CircleAvatar(
-              //         backgroundImage: NetworkImage(chatList['profileUrl']),
-              //         backgroundColor: Colors.grey[300],
-              //         radius: 25,
-              //       ),
             ),
           ),
           title: Text(chatList['contactsName']),
@@ -462,7 +438,8 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
             "0", //isUpload
             "mediaUrl", //firebase url.here no need
             newThumb.path,
-            "thumbUrl",pref.pin.toString());
+            "thumbUrl",
+            pref.pin.toString());
         print('7: updateGroupChatValue passed : $updateGroupChatValue');
 
         //7.uplaod to fb
@@ -476,7 +453,8 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
             newThumb.path,
             chatList['chatGroupName'],
             members,
-            admin,pref.pin.toString());
+            admin,
+            pref.pin.toString());
 
         print('8 end .Video uploaded successfully:$uploadVideoValue');
         setState(() {
@@ -525,7 +503,8 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
       String thumbPath,
       String groupName,
       List members,
-      String admin,String senderPin) async {
+      String admin,
+      String senderPin) async {
     Completer _c = new Completer();
     try {
       print('8.1 status uploading started');
@@ -554,7 +533,8 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
           thumbUrl,
           groupName,
           members,
-          admin,senderPin);
+          admin,
+          senderPin);
 
       print('8.4 vid path uploaded to fb:$thumbPath,$addGroupChatFbVal');
       //now update query for isUploaded = 1 on this chatId row
@@ -568,13 +548,14 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
           '1',
           firebaseUrl.toString(),
           thumbPath,
-          thumbUrl,senderPin);
+          thumbUrl,
+          senderPin);
 
       print('8.5 updated data vid to groupchat sql: $updateGroupChatVal');
 
       // add to fb chatlist
       var fbGroupChatListVal = await fbGroupChatList(chatId, senderPhone,
-          'Video', timestamp, "1", groupName, members, admin,senderPin);
+          'Video', timestamp, "1", groupName, members, admin, senderPin);
       print('8.6 end: entry added in fb fbGroupChatList:$fbGroupChatListVal');
       _c.complete('uploaded..');
     } catch (e) {
@@ -586,21 +567,20 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
 
 // Group(addFB)
   Future addGroupChatFb(
-    chatId,
-    senderName,
-    messageText,
-    senderPhone,
-    type,
-    timestamp,
-    isUploaded,
-    mediaUrl,
-    thumbPath,
-    thumbUrl,
-    gName,
-    List member,
-    admin,
-   String senderPin
-  ) async {
+      chatId,
+      senderName,
+      messageText,
+      senderPhone,
+      type,
+      timestamp,
+      isUploaded,
+      mediaUrl,
+      thumbPath,
+      thumbUrl,
+      gName,
+      List member,
+      admin,
+      String senderPin) async {
     //make common
     Completer _c = new Completer();
     try {
@@ -627,8 +607,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
         'groupName': gName,
         'members': member.toSet().toList(),
         'admin': admin,
-        // 'profileUrl': pref.profileUrl
-        "senderPin":senderPin
+        "senderPin": senderPin
       }).then((onValue) {
         print('9.22222 uploaded to fb private chat list');
         _c.complete('ok');
@@ -649,7 +628,8 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
       String count,
       String gName,
       List members,
-      String adminPhone,String senderPin) async {
+      String adminPhone,
+      String senderPin) async {
     Completer _c = new Completer();
     try {
       print('9.1 in FbGroupChatList():');
@@ -666,7 +646,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
         "groupName": gName,
         "members": members.toSet().toList(),
         "admin": adminPhone,
-        "senderPin":senderPin
+        "senderPin": senderPin
       };
       groupChatRef.set(data).then((onValue) {
         print('9.2 uploaded to fb private chat list');
@@ -689,13 +669,17 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
       // 1.get chatId
       String body = jsonEncode({
         "senderPhone": pref.pin.toString(),
-        "receiverPhone  ": chatList['contactsPin']
+        "receiverPhone": chatList['contactsPin'].toString()
       });
+      print('recPin:${chatList['contactsPin']}');
 
       var response = await http.post("${url.api}startChatToContacts",
           headers: {"Content-Type": "application/json"}, body: body);
       var res = jsonDecode(response.body)["data"][0];
+      print('res: $res');
+
       String chatId = res["chat_id"].toString();
+      print('chatID: $chatId');
 
       // future upload
       Future<void> upload(int i) async {
@@ -705,8 +689,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
 
         //2.vid thum folder
         String thumbPath = await Thumbnails.getThumbnail(
-            thumbnailFolder:
-                '${extDir.path}/OyeYaaro/Media/Thumbs/.$chatId',
+            thumbnailFolder: '${extDir.path}/OyeYaaro/Media/Thumbs/.$chatId',
             videoFile: widget.selectedIndexes[i],
             imageType: ThumbFormat.JPEG,
             quality: 30);
@@ -716,6 +699,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
         File newThumb = await File(thumbPath).rename(
           '${extDir.path}/OyeYaaro/Media/Thumbs/.$chatId/$timestamp.jpg',
         );
+        print('thumb renamed: ${newThumb.path}');
 
         //4.add in chat
         var addPrivateChatValue = await sqlQuery.addPrivateChat(
@@ -751,7 +735,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
         // 6.call compress function
         var compressedVideoFile = await cmprsMedia.compressVideo(
             File(widget.selectedIndexes[i]),
-            '/storage/emulated/0/OyeYaaro/Media/Vid/.$chatId',
+            '${extDir.path}/OyeYaaro/Media/Vid/.$chatId',
             '$timestamp');
         print('6.video compressed successfully:$compressedVideoFile');
 
@@ -793,12 +777,24 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
         });
       }
 
+      //check if dir exist if not create
+
+      // if(!Directory('${extDir.path}/OyeYaaro/Media/Thumbs/').existsSync()){
+      //   Directory('${extDir.path}/OyeYaaro/Media/Thumbs/').createSync(recursive: true);
+      //   print('/');
+      // }
+
+      // if(!Directory('${extDir.path}/OyeYaaro/Media/Vid/').existsSync()){
+      //   Directory('${extDir.path}/OyeYaaro/Media/Vid/').createSync(recursive: true);
+      // }
+
       List<Future> futures = [];
       for (int index = 0; index < widget.selectedIndexes.length; index++) {
+        // print('adding video:$index');
         futures.add(upload(index));
       }
       await Future.wait(futures);
-
+      // print('now got to private chat');
       goToPrivateChat(chatId, chatList);
 
       setState(() {

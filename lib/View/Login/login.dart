@@ -26,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _phone = TextEditingController();
 
   List<DropdownMenuItem<String>> _countryCodes = [];
-  String phoneNo, smsCode = '', verificationId, _countryCode;
+  String phoneNo, smsCode = '', verificationId, _countryCode,loadingMessage = '';
   bool userVerified = false,
       loading = false,
       smsCodeSent = false,
@@ -173,16 +173,18 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> register() async {
      setState(() {
         this.loading = true;
+        loadingMessage = 'wait a while...';
       });
     try {
+      pref.setPhone(int.parse(phoneNo));
       _timer.cancel();
       // set contacts
       await co.getContacts();
        setState(() {
         this.loading = false;
+        loadingMessage = '';
       });
 
-      pref.setPhone(int.parse(phoneNo));
 
       _scaffoldKey.currentState.showSnackBar(SnackBar(
         content: Text(
@@ -265,6 +267,7 @@ class _LoginPageState extends State<LoginPage> {
                 : SizedBox(),
             Loader(
               loading: loading,
+              loadingMessage: loadingMessage,
             ),
           ],
         ),
@@ -284,7 +287,7 @@ class _LoginPageState extends State<LoginPage> {
       return Future.value(true);
     }
     _scaffoldKey.currentState.showSnackBar(SnackBar(
-      backgroundColor: Colors.red,
+      backgroundColor: Colors.black,
       content: Container(
         child: Text(
           "Press again to exit from appliction",

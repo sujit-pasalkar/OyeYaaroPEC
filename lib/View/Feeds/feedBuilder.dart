@@ -388,6 +388,7 @@ class _FeedBuilder extends State<FeedBuilder> {
                           backgroundImage: NetworkImage(pref.profileUrl),
                           backgroundColor: Colors.grey[300],
                           radius: 18,
+                          child: Text(pref.profileUrl),
                         ),
                       )
                     : GestureDetector(
@@ -403,7 +404,6 @@ class _FeedBuilder extends State<FeedBuilder> {
                         },
                         child: ClipOval(
                           child: CircleAvatar(
-                            // backgroundImage: NetworkImage(pref.profileUrl),
                             backgroundColor: Colors.grey[300],
                             radius: 18,
                             child: CachedNetworkImage(

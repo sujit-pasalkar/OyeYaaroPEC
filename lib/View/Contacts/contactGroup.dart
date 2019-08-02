@@ -5,7 +5,7 @@ import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
 import 'package:oye_yaaro_pec/View/Group/create_newGroup.dart';
 import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 import 'package:flutter/material.dart';
-import 'package:share/share.dart';
+// import 'package:share/share.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ContactsGroup extends StatefulWidget {
@@ -17,14 +17,16 @@ class _ContactsGroupState extends State<ContactsGroup> {
   List<ContactDetails> phoneBook = List<ContactDetails>();
   List<ContactDetails> phoneBookCopy = List<ContactDetails>(); //for cl issue
 
-  List<Map<String, dynamic>> records = new List<Map<String, dynamic>>();
+  List<Map<String, dynamic>> records = List<Map<String, dynamic>>();
 
   bool isLoading = false, searchContacts = false;
 
-  List<String> addInGroup = new List<String>();
+  List<String> addInGroup = List<String>();
 
-  final TextEditingController _textEditingController =
-      new TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
@@ -73,130 +75,135 @@ class _ContactsGroupState extends State<ContactsGroup> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Scaffold(
-            appBar: AppBar(
-              title: !searchContacts
-                  ? Text('Create Group')
-                  : TextField(
-                      style: new TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                      decoration: InputDecoration(
-                        hintText: 'Type Contact name..',
-                        border: InputBorder.none,
-                      ),
-                      controller: _textEditingController,
-                      autofocus: true,
-                      onChanged: (String searchText) {
-                        searchContactsFunc(searchText);
-                      },
-                    ),
-              backgroundColor: Color(0xffb00bae3),
-              actions: <Widget>[
-                records.length > 0
-                    ? !searchContacts
-                        ? IconButton(
-                            icon: Icon(Icons.search),
-                            onPressed: () {
-                              setState(() {
-                                searchContacts = !searchContacts;
-                              });
-                            },
-                          )
-                        : IconButton(
-                            icon: Icon(Icons.close),
-                            onPressed: () {
-                              setState(() {
-                                searchContacts = !searchContacts;
-                                List<ContactDetails> l = List<ContactDetails>();
-                                records.forEach((f) {
-                                  if (addInGroup
-                                      .contains(f['contactsPin'].toString())) {
-                                    l.add(
-                                      ContactDetails(
-                                        name: f['contactsName'],
-                                        phone: f['contactsPhone'].toString(),
-                                        registered:
-                                            int.parse(f['contactRegistered']),
-                                        checked: true,
-                                        // profileUrl: f['profileUrl']
-                                        contactsPin: f['contactsPin'],
-                                      ),
-                                    );
-                                  } else {
-                                    l.add(
-                                      ContactDetails(
-                                        name: f['contactsName'],
-                                        phone: f['contactsPhone'].toString(),
-                                        registered:
-                                            int.parse(f['contactRegistered']),
-                                        checked: false,
-                                        // profileUrl: f['profileUrl']
-                                        contactsPin: f['contactsPin'],
-                                      ),
-                                    );
-                                  }
-                                });
-                                l.sort((a, b) => a.name.compareTo(b.name));
-                                phoneBook = l;
-                                _textEditingController.text = '';
-                              });
-                            },
-                          )
-                    : SizedBox(),
-                addInGroup.length > 0
-                    ? IconButton(
-                        icon: Icon(Icons.add),
-                        onPressed: () {
-                          print('goto create group');
-                          List<Map<String, String>> cl =
-                              List<Map<String, String>>();
-                          phoneBookCopy.forEach((f) {
-                            if (addInGroup.contains(f.contactsPin)) {
-                              cl.add({
-                                'name': f.name,
-                                'phone': f.phone,
-                                // 'profileUrl': f.profileUrl
-                                'pin': f.contactsPin
-                              });
-                            }
-                          });
-                          print('addInGroup : $addInGroup');
-                          print('cl : $cl');
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CreateGroupWithName(
-                                  addMembers: cl, checkAddMembers: addInGroup),
-                            ),
-                          );
+    return RefreshIndicator(
+      key: _refreshIndicatorKey,
+      onRefresh: _refresh,
+      child: Stack(
+        children: <Widget>[
+          Scaffold(
+            key: _scaffoldKey,
+              appBar: AppBar(
+                title: !searchContacts
+                    ? Text('Create Group')
+                    : TextField(
+                        style: new TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                        decoration: InputDecoration(
+                          hintText: 'Type Contact name..',
+                          border: InputBorder.none,
+                        ),
+                        controller: _textEditingController,
+                        autofocus: true,
+                        onChanged: (String searchText) {
+                          searchContactsFunc(searchText);
                         },
-                      )
-                    : SizedBox()
-              ],
-              flexibleSpace: FlexAppbar(),
-            ),
-            body: Container(
-              child: ListView.builder(
-                itemCount: phoneBook?.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return _buildListTile(phoneBook[index]);
-                },
+                      ),
+                backgroundColor: Color(0xffb00bae3),
+                actions: <Widget>[
+                  records.length > 0
+                      ? !searchContacts
+                          ? IconButton(
+                              icon: Icon(Icons.search),
+                              onPressed: () {
+                                setState(() {
+                                  searchContacts = !searchContacts;
+                                });
+                              },
+                            )
+                          : IconButton(
+                              icon: Icon(Icons.close),
+                              onPressed: () {
+                                setState(() {
+                                  searchContacts = !searchContacts;
+                                  List<ContactDetails> l = List<ContactDetails>();
+                                  records.forEach((f) {
+                                    if (addInGroup
+                                        .contains(f['contactsPin'].toString())) {
+                                      l.add(
+                                        ContactDetails(
+                                          name: f['contactsName'],
+                                          phone: f['contactsPhone'].toString(),
+                                          registered:
+                                              int.parse(f['contactRegistered']),
+                                          checked: true,
+                                          // profileUrl: f['profileUrl']
+                                          contactsPin: f['contactsPin'],
+                                        ),
+                                      );
+                                    } else {
+                                      l.add(
+                                        ContactDetails(
+                                          name: f['contactsName'],
+                                          phone: f['contactsPhone'].toString(),
+                                          registered:
+                                              int.parse(f['contactRegistered']),
+                                          checked: false,
+                                          // profileUrl: f['profileUrl']
+                                          contactsPin: f['contactsPin'],
+                                        ),
+                                      );
+                                    }
+                                  });
+                                  l.sort((a, b) => a.name.compareTo(b.name));
+                                  phoneBook = l;
+                                  _textEditingController.text = '';
+                                });
+                              },
+                            )
+                      : SizedBox(),
+                  addInGroup.length > 0
+                      ? IconButton(
+                          icon: Icon(Icons.add),
+                          onPressed: () {
+                            print('goto create group');
+                            List<Map<String, String>> cl =
+                                List<Map<String, String>>();
+                            phoneBookCopy.forEach((f) {
+                              if (addInGroup.contains(f.contactsPin)) {
+                                cl.add({
+                                  'name': f.name,
+                                  'phone': f.phone,
+                                  // 'profileUrl': f.profileUrl
+                                  'pin': f.contactsPin
+                                });
+                              }
+                            });
+                            print('addInGroup : $addInGroup');
+                            print('cl : $cl');
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CreateGroupWithName(
+                                    addMembers: cl, checkAddMembers: addInGroup),
+                              ),
+                            );
+                          },
+                        )
+                      : SizedBox()
+                ],
+                flexibleSpace: FlexAppbar(),
               ),
-            )),
-        isLoading
-            ? Container(
-                decoration: BoxDecoration(color: Colors.black54),
-                child: Center(
-                  child: CircularProgressIndicator(
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Color(0xffb00bae3)),
-                  ),
-                ))
-            : SizedBox(),
-      ],
+              body: Container(
+                child: ListView.builder(
+                  itemCount: phoneBook?.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return _buildListTile(phoneBook[index]);
+                  },
+                ),
+              )),
+          isLoading
+              ? Container(
+                  decoration: BoxDecoration(color: Colors.black54),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Color(0xffb00bae3)),
+                    ),
+                  ))
+              : SizedBox(),
+        ],
+      ),
     );
   }
 
@@ -344,15 +351,30 @@ class _ContactsGroupState extends State<ContactsGroup> {
     );
   }
 
-// refresh contact
-  getAllContacts() async {
-    // get
-    co.getContacts().then((onValue) {
-      print('i got contacts supply');
-      getSqlContacts();
-    }, onError: (e) {
-      print('Error from co.getContacts():$e');
-    });
+// call this functioin on refresh
+  Future<void> _refresh() async {
+    try {
+      // setState(() {
+      //   _isLoading = true;
+      // });
+      await co.updateRegisteredContacts();
+      // setState(() {
+      //   _isLoading = false;
+      // });
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text('Contacts Updated Succeessfully.'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green));
+    } catch (e) {
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text('Something Went Wrong'),
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.redAccent,
+      ));
+      // setState(() {
+      //   _isLoading = false;
+      // });
+    }
   }
 
   getSqlContacts() async {
@@ -385,10 +407,8 @@ class _ContactsGroupState extends State<ContactsGroup> {
     });
   }
 
-  invite(phone) {
-    //make common
-    Share.share(
-        'You are invited to join OyeYaaro. Download this App using following url http://oyeyaaro.plmlogix.com/download ');
+  invite(String phone) {
+    ContactOperation.sharePin(phone);
   }
 }
 

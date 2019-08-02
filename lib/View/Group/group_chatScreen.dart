@@ -66,8 +66,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   DatabaseReference _membersReference;
   // StreamSubscription<Event> _membersSubscription;
 
-  final TextEditingController _textEditingController =
-       TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
   final ScrollController listScrollController = new ScrollController();
   bool _isComposingMessage = false;
   bool screenOpened = true;
@@ -708,22 +707,20 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   : snap['msgType'] == '1' &&
                           (pref.hideMedia == false || pref.hideMedia == null)
                       ? GestureDetector(
-                          onLongPress: () {
-                            // adddeleteMsgIdx(
-                            //     index, document['timestamp'], document['type']);
-                            // print('longpress');
-                          },
+                          onLongPress: () {},
                           onTap: () {
                             audioPlayer.stop();
                             print(snap['msgMedia']);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ImageViewer(
-                                  imageUrl: snap['msgMedia'],
+                            if (File(snap['msgMedia']).existsSync()) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ImageViewer(
+                                    imageUrl: snap['msgMedia'],
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -788,80 +785,99 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                               FontStyle.normal)); // unreachable
                                 },
                               ),
-                              Stack(
-                                children: <Widget>[
-                                  Container(
-                                    width: (width / 2) + 50,
-                                    height: (width / 2) - 10,
-                                    margin: EdgeInsets.fromLTRB(
-                                        2.0, 1.0, 2.0, 15.0),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey),
-                                      borderRadius: BorderRadius.circular(25.0),
-                                      color: Colors.white,
-                                      image: DecorationImage(
-                                        fit: BoxFit.cover,
-                                        image:
-                                            FileImage(File(snap['msgMedia'])),
-                                      ),
-                                    ),
-                                  ),
-                                  snap['isUploaded'] == '0'
-                                      ? Positioned(
-                                          bottom: 20,
-                                          right: 15,
-                                          child: Icon(
-                                            Icons.schedule,
+                              File(snap['msgMedia']).existsSync()
+                                  ? Stack(
+                                      children: <Widget>[
+                                        Container(
+                                          width: (width / 2) + 50,
+                                          height: (width / 2) - 10,
+                                          margin: EdgeInsets.fromLTRB(
+                                              2.0, 1.0, 2.0, 15.0),
+                                          decoration: BoxDecoration(
+                                            border:
+                                                Border.all(color: Colors.grey),
+                                            borderRadius:
+                                                BorderRadius.circular(25.0),
                                             color: Colors.white,
-                                            size: 15,
+                                            image: DecorationImage(
+                                              fit: BoxFit.cover,
+                                              image: FileImage(
+                                                  File(snap['msgMedia'])),
+                                            ),
                                           ),
-                                        )
-                                      : SizedBox(height: 0, width: 0),
-                                  snap['isUploaded'] == '0' &&
-                                          uploading == true &&
-                                          uploadingTimestamp ==
-                                              int.parse(snap['timestamp'])
-                                      ? Positioned(
-                                          left: ((width / 2) + 25) / 2,
-                                          top: ((width / 2) - 25) / 2,
-                                          child: CircularProgressIndicator(
-                                              strokeWidth: 5.0))
-                                      : snap['isUploaded'] == '0'
-                                          ? Positioned(
-                                              left: (width / 5),
-                                              top: (width / 6),
-                                              child: RaisedButton(
-                                                //user animatedbutton
-                                                color: Colors.black
-                                                    .withOpacity(0.5),
-                                                textColor: Colors.white,
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            30.0)),
-                                                child: Text('RETRY'),
-                                                onPressed: () {
-                                                  uploadImage(
-                                                    widget.chatId,
-                                                    snap['msgMedia'],
-                                                    '1',
-                                                    snap['timestamp'],
-                                                    pref.name, //user profile name
-                                                    pref.phone.toString(),
-                                                    pref.pin.toString(),                                                    
-                                                  ).then((onValue) {
-                                                    print(
-                                                        'image uploaded successfully');
-                                                  }, onError: (e) {
-                                                    print(
-                                                        'Error while image uploading :$e');
-                                                  });
-                                                },
-                                              ),
-                                            )
-                                          : SizedBox(height: 0, width: 0),
-                                ],
-                              ),
+                                        ),
+                                        snap['isUploaded'] == '0'
+                                            ? Positioned(
+                                                bottom: 20,
+                                                right: 15,
+                                                child: Icon(
+                                                  Icons.schedule,
+                                                  color: Colors.white,
+                                                  size: 15,
+                                                ),
+                                              )
+                                            : SizedBox(height: 0, width: 0),
+                                        snap['isUploaded'] == '0' &&
+                                                uploading == true &&
+                                                uploadingTimestamp ==
+                                                    int.parse(snap['timestamp'])
+                                            ? Positioned(
+                                                left: ((width / 2) + 25) / 2,
+                                                top: ((width / 2) - 25) / 2,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                        strokeWidth: 5.0))
+                                            : snap['isUploaded'] == '0'
+                                                ? Positioned(
+                                                    left: (width / 5),
+                                                    top: (width / 6),
+                                                    child: RaisedButton(
+                                                      //user animatedbutton
+                                                      color: Colors.black
+                                                          .withOpacity(0.5),
+                                                      textColor: Colors.white,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          30.0)),
+                                                      child: Text('RETRY'),
+                                                      onPressed: () {
+                                                        uploadImage(
+                                                          widget.chatId,
+                                                          snap['msgMedia'],
+                                                          '1',
+                                                          snap['timestamp'],
+                                                          pref.name, //user profile name
+                                                          pref.phone.toString(),
+                                                          pref.pin.toString(),
+                                                        ).then((onValue) {
+                                                          print(
+                                                              'image uploaded successfully');
+                                                        }, onError: (e) {
+                                                          print(
+                                                              'Error while image uploading :$e');
+                                                        });
+                                                      },
+                                                    ),
+                                                  )
+                                                : SizedBox(height: 0, width: 0),
+                                      ],
+                                    )
+                                  : Container(
+                                      width: (width / 2) + 50,
+                                      height: (width / 2) - 10,
+                                      margin: EdgeInsets.fromLTRB(
+                                          2.0, 1.0, 2.0, 15.0),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius:
+                                            BorderRadius.circular(25.0),
+                                        color: Colors.white,
+                                      ),
+                                      child: Center(
+                                          child: Text('Image not available'))),
                             ],
                           ),
                         )
@@ -1034,25 +1050,43 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                                                       30.0),
                                                         ),
                                                         child: Text('RETRY'),
-                                                        onPressed: () {
-                                                          uploadVideo(
-                                                            widget.chatId,
-                                                            File(snap[
-                                                                'msgMedia']),
-                                                            '2',
-                                                            snap['timestamp'],
-                                                            pref.name,
-                                                            pref.phone
-                                                                .toString(),
-                                                            snap['thumbPath'],
-                                                            pref.pin.toString()
-                                                          ).then((onValue) {
-                                                            print(
-                                                                'Video uploaded successfully(reentry)');
-                                                          }, onError: (e) {
-                                                            print(
-                                                                'Error while Video uploading :$e');
-                                                          });
+                                                        onPressed: () async {
+                                                          try {
+                                                            await uploadVideo(
+                                                                widget.chatId,
+                                                                File(snap[
+                                                                    'msgMedia']),
+                                                                '2',
+                                                                snap[
+                                                                    'timestamp'],
+                                                                pref.name,
+                                                                pref.phone
+                                                                    .toString(),
+                                                                snap[
+                                                                    'thumbPath'],
+                                                                pref.pin
+                                                                    .toString());
+
+                                                            setState(() {
+                                                              uploading = false;
+                                                              uploadingTimestamp =
+                                                                  0;
+                                                            });
+                                                          } catch (e) {
+                                                            setState(() {
+                                                              uploading = false;
+                                                              uploadingTimestamp =
+                                                                  0;
+                                                            });
+                                                          }
+
+                                                          //     .then((onValue) {
+                                                          //   print(
+                                                          //       'Video uploaded successfully(reentry)');
+                                                          // }, onError: (e) {
+                                                          //   print(
+                                                          //       'Error while Video uploading :$e');
+                                                          // });
                                                         },
                                                       ),
                                                     ))
@@ -2092,16 +2126,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     Fluttertoast.showToast(
                         msg: 'sent ${listData.replaceAll('.mp3', '')}');
                     sendsong(
-                      songurl: "http://oyeyaaroapi.plmlogix.com/AudioChat/" +
-                          listData.toString(),
-                      senderName: 'pref.name',
-                      senderPhone: pref.phone.toString(),
-                      // receiverPhone: widget.receiverPhone.toString(),
-                      type: '3',
-                      timestamp:
-                          DateTime.now().millisecondsSinceEpoch.toString(),
-                      senderPin: pref.pin.toString()
-                    );
+                        songurl: "http://oyeyaaroapi.plmlogix.com/AudioChat/" +
+                            listData.toString(),
+                        senderName: 'pref.name',
+                        senderPhone: pref.phone.toString(),
+                        // receiverPhone: widget.receiverPhone.toString(),
+                        type: '3',
+                        timestamp:
+                            DateTime.now().millisecondsSinceEpoch.toString(),
+                        senderPin: pref.pin.toString());
                   },
                   child: Row(
                     children: <Widget>[
@@ -2197,15 +2230,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     Fluttertoast.showToast(
                         msg: 'sent ${listData.replaceAll('.mp3', '')}');
                     sendsong(
-                      songurl: "http://oyeyaaroapi.plmlogix.com/Audio/" +
-                          listData.toString(),
-                      senderName: 'pref.name',
-                      senderPhone: pref.phone.toString(),
-                      // receiverPhone: widget.receiverPhone.toString(),
-                      type: '4',
-                      timestamp:DateTime.now().millisecondsSinceEpoch.toString(),
-                      senderPin: pref.pin.toString()
-                    );
+                        songurl: "http://oyeyaaroapi.plmlogix.com/Audio/" +
+                            listData.toString(),
+                        senderName: 'pref.name',
+                        senderPhone: pref.phone.toString(),
+                        // receiverPhone: widget.receiverPhone.toString(),
+                        type: '4',
+                        timestamp:
+                            DateTime.now().millisecondsSinceEpoch.toString(),
+                        senderPin: pref.pin.toString());
                   },
                 );
               },
@@ -2622,14 +2655,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   //send song
-  void sendsong({
-    String songurl,
-    String senderName,
-    String senderPhone,
-    String type, //3
-    String timestamp,
-    String senderPin
-  }) async {
+  void sendsong(
+      {String songurl,
+      String senderName,
+      String senderPhone,
+      String type, //3
+      String timestamp,
+      String senderPin}) async {
     print('msg: $songurl');
     try {
       Common.isSongDownloaded(songurl, type);
@@ -2647,8 +2679,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               "thumbpath",
               "thumburl",
               // pref.profileUrl
-              senderPin
-              )
+              senderPin)
           .then((onValue) {
         // setState(() {
         //   future = getAllChat(widget.chatId);
@@ -2683,11 +2714,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 "thumburl",
                 widget.groupName,
                 members,
-                admin,senderPin)
+                admin,
+                senderPin)
             .then((sent) {
           print('uploaded to fb');
           fbGroupChatList(widget.chatId, senderPhone, 'Audio', timestamp, "1",
-                  widget.groupName, members, admin,senderPin)
+                  widget.groupName, members, admin, senderPin)
               .then((sent) {
             print('entry added in fb addchatlist');
           });
@@ -2697,17 +2729,17 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       }, onError: (e) {
         print('err : $e');
         // Fluttertoast.showToast(msg: 'error while adding msg in Sqflite: $e');
-         globalKey.currentState.showSnackBar(SnackBar(
+        globalKey.currentState.showSnackBar(SnackBar(
           content: Text('error while sending song: $e'),
           duration: Duration(seconds: 2),
         ));
       });
     } catch (e) {
       print('error while sending text: $e');
-       globalKey.currentState.showSnackBar(SnackBar(
-          content: Text('error while sending song: $e'),
-          duration: Duration(seconds: 2),
-        ));
+      globalKey.currentState.showSnackBar(SnackBar(
+        content: Text('error while sending song: $e'),
+        duration: Duration(seconds: 2),
+      ));
     }
   }
 
@@ -2798,14 +2830,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
           //4.then add to fb chatlist
           fbGroupChatList(widget.chatId, senderPhone, messageText, timestamp,
-                  "1", widget.groupName, members, admin,senderPin)
+                  "1", widget.groupName, members, admin, senderPin)
               .then((sent) {
             print('entry added in fb fbGroupChatList');
           }, onError: (e) {
             print('Error while adding fb fbGroupChatList');
           });
         });
-
       }, onError: (e) {
         print('err : $e');
         globalKey.currentState.showSnackBar(SnackBar(
@@ -2816,9 +2847,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     } catch (e) {
       print('error while sending text: $e');
       globalKey.currentState.showSnackBar(SnackBar(
-          content: Text('error while sending message'),
-          duration: Duration(seconds: 2),
-        ));
+        content: Text('error while sending message'),
+        duration: Duration(seconds: 2),
+      ));
     }
   }
 
@@ -2920,17 +2951,17 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       }, onError: (e) {
         print('err : $e');
         // Fluttertoast.showToast(msg: 'error while adding Img in Sqlite:$e');
-         globalKey.currentState.showSnackBar(SnackBar(
+        globalKey.currentState.showSnackBar(SnackBar(
           content: Text('error while adding Image to sqlite'),
           duration: Duration(seconds: 2),
         ));
       });
     } catch (e) {
       print('error while uploading image: $e');
-       globalKey.currentState.showSnackBar(SnackBar(
-          content: Text('error while uploading image'),
-          duration: Duration(seconds: 2),
-        ));
+      globalKey.currentState.showSnackBar(SnackBar(
+        content: Text('error while uploading image'),
+        duration: Duration(seconds: 2),
+      ));
     }
   }
 
@@ -2939,7 +2970,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     try {
       int timestamp = DateTime.now().millisecondsSinceEpoch;
 
-//vid thum folder
+      //vid thum folder
       String thumbPath = await Thumbnails.getThumbnail(
           thumbnailFolder:
               '${extDir.path}/OyeYaaro/Media/Thumbs/.${widget.chatId}',
@@ -2952,116 +2983,118 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         '${extDir.path}/OyeYaaro/Media/Thumbs/.${widget.chatId}/$timestamp.jpg',
       );
 
-// 2.add in chat
-      sqlQuery
-          .addGroupChat(
-              widget.chatId,
-              vid.path,
-              '2',
-              timestamp.toString(),
-              pref.name,
-              pref.phone.toString(),
-              '0',
-              "mediaUrl", //firebaseUrl
-              newThumb.path,
-              "thumbUrl",
-              // pref.profileUrl
-              pref.pin.toString(),
-              )
-          .then((onValue) {
-        // show loading
-        setState(() {
-          uploading = true;
-          uploadingTimestamp = timestamp;
-        });
+      // 2.add in chat
+      await sqlQuery.addGroupChat(
+        widget.chatId,
+        vid.path,
+        '2',
+        timestamp.toString(),
+        pref.name,
+        pref.phone.toString(),
+        '0',
+        "mediaUrl", //firebaseUrl
+        newThumb.path,
+        "thumbUrl",
+        // pref.profileUrl
+        pref.pin.toString(),
+      );
+      // .then((onValue) {
 
-        //3.add sender's msg as last msg to privatechatlisttable sqlite
-        Map<String, dynamic> obj = {
-          "chatId": widget.chatId,
-          "chatListLastMsg": 'Video',
-          "chatListSenderPhone": pref.phone.toString(),
-          "chatListLastMsgTime": timestamp.toString(),
-          "chatListMsgCount": '0',
-          "chatGroupName": widget.groupName,
-          "chatListSenderPin": pref.pin.toString()
-        };
-
-        sqlQuery.addGroupChatList(obj).then((onValue) {
-          print('entry added in sqflite addGroupChatList');
-        }, onError: (e) {
-          print('show error message if addGroupChatList fails : $e');
-        });
-
-        // 4.call compress function
-        cmprsMedia
-            .compressVideo(
-                vid,
-                '${extDir.path}/OyeYaaro/Media/Vid/.${widget.chatId}',
-                '$timestamp')
-            .then((compressedVideoFile) {
-          print('org img file path:${vid.path}');
-          print(
-              'compressedImageFile path :${compressedVideoFile.path}'); //compressed and copied to desired path
-
-          //5.change previous path of privateChat table with desire path
-          sqlQuery
-              .updateGroupChat(
-                  widget.chatId,
-                  pref.name,
-                  compressedVideoFile.path, //new desired path(compressed)
-                  pref.phone.toString(),
-                  "2", //msgType
-                  timestamp.toString(),
-                  "0", //isUpload
-                  "mediaUrl", //firebase url.here no need
-                  newThumb.path,
-                  "thumbUrl",
-                  pref.pin.toString(),
-                  )
-              .then((onValue) {
-            print('updated to compressed vid path:$onValue');
-          }, onError: (e) {
-            print(
-                'Error while updating previous path of privateChat to desired path:$e');
-          });
-// f
-          // uplaod to fb
-          uploadVideo(
-                  widget.chatId,
-                  compressedVideoFile,
-                  '2',
-                  timestamp.toString(),
-                  pref.name,
-                  pref.phone.toString(),
-                  newThumb.path,
-                  pref.pin.toString(),
-                  )
-              .then((onValue) {
-            print('Video uploaded successfully');
-          }, onError: (e) {
-            print('Error while Video uploading :$e');
-          });
-        }, onError: (e) {
-          print('Error from cmprsMedia.CompressImage():$e');
-        });
-      }, onError: (e) {
-        print('err : $e');
-        Fluttertoast.showToast(msg: 'error while adding Img in Sqlite:$e');
+      // show loading
+      setState(() {
+        uploading = true;
+        uploadingTimestamp = timestamp;
       });
+
+      //3.add sender's msg as last msg to privatechatlisttable sqlite
+      Map<String, dynamic> obj = {
+        "chatId": widget.chatId,
+        "chatListLastMsg": 'Video',
+        "chatListSenderPhone": pref.phone.toString(),
+        "chatListLastMsgTime": timestamp.toString(),
+        "chatListMsgCount": '0',
+        "chatGroupName": widget.groupName,
+        "chatListSenderPin": pref.pin.toString()
+      };
+
+      await sqlQuery.addGroupChatList(obj);
+      // .then((onValue) {
+      //   print('entry added in sqflite addGroupChatList');
+      // }, onError: (e) {
+      //   print('show error message if addGroupChatList fails : $e');
+      // });
+
+      // 4.call compress function
+      dynamic compressedVideoFile = await cmprsMedia.compressVideo(vid,
+          '${extDir.path}/OyeYaaro/Media/Vid/.${widget.chatId}', '$timestamp');
+      // .then((compressedVideoFile) {
+      print('org img file path:${vid.path}');
+      print(
+          'compressedImageFile path :${compressedVideoFile.path}'); //compressed and copied to desired path
+
+      //5.change previous path of privateChat table with desire path
+      await sqlQuery.updateGroupChat(
+        widget.chatId,
+        pref.name,
+        compressedVideoFile.path, //new desired path(compressed)
+        pref.phone.toString(),
+        "2", //msgType
+        timestamp.toString(),
+        "0", //isUpload
+        "mediaUrl", //firebase url.here no need
+        newThumb.path,
+        "thumbUrl",
+        pref.pin.toString(),
+      );
+      //     .then((onValue) {
+      //   print('updated to compressed vid path:$onValue');
+      // }, onError: (e) {
+      //   print(
+      //       'Error while updating previous path of privateChat to desired path:$e');
+      // });
+// f
+      // uplaod to fb
+      await uploadVideo(
+        widget.chatId,
+        compressedVideoFile,
+        '2',
+        timestamp.toString(),
+        pref.name,
+        pref.phone.toString(),
+        newThumb.path,
+        pref.pin.toString(),
+      );
+
+      setState(() {
+        uploading = false;
+        uploadingTimestamp = 0;
+      });
+
+      //     .then((onValue) {
+      //   print('Video uploaded successfully');
+      // }, onError: (e) {
+      //   print('Error while Video uploading :$e');
+      // });
+      // }, onError: (e) {
+      //   print('Error from cmprsMedia.CompressImage():$e');
+      // });
+      // }, onError: (e) {
+      //   print('err : $e');
+      //   Fluttertoast.showToast(msg: 'error while adding Img in Sqlite:$e');
+      // });
     } catch (e) {
-      print('error while uploading imge: $e');
+      print('error in sendVid(): $e');
     }
   }
 
   Future uploadImage(
-    String chatId,
-    String imgPath,
-    String type,
-    String timestamp,
-    String senderName,
-    String senderPhone,
-    String senderPin
-  ) async {
+      String chatId,
+      String imgPath,
+      String type,
+      String timestamp,
+      String senderName,
+      String senderPhone,
+      String senderPin) async {
     try {
       setState(() {
         uploading = true;
@@ -3098,14 +3131,25 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 "thumburl",
                 widget.groupName,
                 members,
-                admin,senderPin)
+                admin,
+                senderPin)
             .then((sent) {
           print('img path uploaded to fb');
 
           //now update query for isUploaded = 1 on this chatId row
           sqlQuery
-              .updateGroupChat(widget.chatId, senderName, imgPath, senderPhone,
-                  type, timestamp, '1', firebaseUrl.toString(), "", "",senderPin)
+              .updateGroupChat(
+                  widget.chatId,
+                  senderName,
+                  imgPath,
+                  senderPhone,
+                  type,
+                  timestamp,
+                  '1',
+                  firebaseUrl.toString(),
+                  "",
+                  "",
+                  senderPin)
               .then((onValue) async {
             print('updated data timestamp: $timestamp');
           }, onError: (e) {
@@ -3114,7 +3158,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
           //add image as last msg to fb chatlist
           fbGroupChatList(widget.chatId, senderPhone, 'Image', timestamp, "1",
-                  widget.groupName, members, admin,senderPin)
+                  widget.groupName, members, admin, senderPin)
               .then((sent) {
             print('entry added in fb fbGroupChatList');
           });
@@ -3127,98 +3171,113 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     }
   }
 
-  Future uploadVideo(String chatId, File vidFile, String type, String timestamp,
-      String senderName, String senderPhone, String thumbPath,String senderPin) async {
+  Future uploadVideo(
+      String chatId,
+      File vidFile,
+      String type,
+      String timestamp,
+      String senderName,
+      String senderPhone,
+      String thumbPath,
+      String senderPin) async {
+    Completer _c = Completer();
+
     try {
       setState(() {
         uploading = true;
         uploadingTimestamp = int.parse(timestamp);
       });
 
-      Future.delayed(const Duration(seconds: 30), () {
-        setState(() {
-          uploading = false;
-          uploadingTimestamp = 0;
-        });
-      });
+      // Future.delayed(const Duration(seconds: 30), () {
+      //   setState(() {
+      //     uploading = false;
+      //     uploadingTimestamp = 0;
+      //   });
+      // });
 
       //call firebase storage
       //get thumb url
       String thumbUrl =
           await storage.uploadImage(timestamp.toString(), File(thumbPath));
 
-      storage.uploadVideo(timestamp.toString(), vidFile).then((firebaseUrl) {
-        setState(() {
-          uploading = false;
-          uploadingTimestamp = 0;
-        });
+      dynamic firebaseUrl =
+          await storage.uploadVideo(timestamp.toString(), vidFile);
+      //  .then((firebaseUrl) {
+      // setState(() {
+      //   uploading = false;
+      //   uploadingTimestamp = 0;
+      // });
 
-        //add url to fb
-        addGroupChatFb(
-                senderName,
-                vidFile.path,
-                senderPhone,
-                type,
-                timestamp,
-                '1',
-                firebaseUrl.toString(),
-                thumbPath,
-                thumbUrl,
-                widget.groupName,
-                members,
-                admin,senderPin)
-            .then((sent) {
-          print('vid path uploaded to fb:$thumbPath');
-          //now update query for isUploaded = 1 on this chatId row
-          sqlQuery
-              .updateGroupChat(
-                  widget.chatId,
-                  senderName,
-                  vidFile.path,
-                  senderPhone,
-                  type,
-                  // receiverPhone,
-                  timestamp,
-                  '1',
-                  firebaseUrl.toString(),
-                  thumbPath,
-                  thumbUrl,senderPin)
-              .then((onValue) async {
-            print('updated data vid timestamp: $timestamp');
-          }, onError: (e) {
-            print('error while updating chat: $e'); //show UI msg ex.toast
-          });
+      //add url to fb
+      await addGroupChatFb(
+          senderName,
+          vidFile.path,
+          senderPhone,
+          type,
+          timestamp,
+          '1',
+          firebaseUrl.toString(),
+          thumbPath,
+          thumbUrl,
+          widget.groupName,
+          members,
+          admin,
+          senderPin);
+      // .then((sent) {
+      print('vid path uploaded to fb:$thumbPath');
+      //now update query for isUploaded = 1 on this chatId row
+      await sqlQuery.updateGroupChat(
+          widget.chatId,
+          senderName,
+          vidFile.path,
+          senderPhone,
+          type,
+          // receiverPhone,
+          timestamp,
+          '1',
+          firebaseUrl.toString(),
+          thumbPath,
+          thumbUrl,
+          senderPin);
+      //     .then((onValue) async {
+      //   print('updated data vid timestamp: $timestamp');
+      // }, onError: (e) {
+      //   print('error while updating chat: $e'); //show UI msg ex.toast
+      // });
 
-          // add to fb chatlist
-          fbGroupChatList(widget.chatId, senderPhone, 'Video', timestamp, "1",
-                  widget.groupName, members, admin,senderPin)
-              .then((sent) {
-            print('entry added in fb fbGroupChatList');
-          });
-        });
-      }, onError: (e) {
-        print('error while uploading to fb_storage : $e');
-      });
+      // add to fb chatlist
+      await fbGroupChatList(widget.chatId, senderPhone, 'Video', timestamp, "1",
+          widget.groupName, members, admin, senderPin);
+
+      _c.complete('succees');
+      //     .then((sent) {
+      //   print('entry added in fb fbGroupChatList');
+      // });
+      // });
+      // }, onError: (e) {
+      //   print('error while uploading to fb_storage : $e');
+      // });
     } catch (e) {
       print('Err in getCameraImage: ' + e);
+      _c.completeError(e);
     }
+    return _c.future;
   }
 
   Future addGroupChatFb(
-    senderName,
-    messageText,
-    senderPhone,
-    type,
-    timestamp,
-    isUploaded,
-    mediaUrl,
-    thumbPath,
-    thumbUrl,
-    gName,
-    List member,
-    admin,
-    String senderPin
-  ) async {
+      senderName,
+      messageText,
+      senderPhone,
+      type,
+      timestamp,
+      isUploaded,
+      mediaUrl,
+      thumbPath,
+      thumbUrl,
+      gName,
+      List member,
+      admin,
+      String senderPin) async {
     // print('toSet: ${member.toSet()}');
     //make common
     _groupMessagesreference.push().set(<String, dynamic>{
@@ -3237,7 +3296,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       'members': member.toSet().toList(),
       'admin': admin,
       // 'profileUrl': pref.profileUrl
-      "senderPin":senderPin
+      "senderPin": senderPin
     });
   }
 
@@ -3250,8 +3309,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       String gName,
       List members,
       String adminPhone,
-      String senderPin
-      ) async {
+      String senderPin) async {
     // print('in FbGroupChatList():');
     DatabaseReference groupChatRef =
         database.reference().child('groupChatList').child(chatId);
@@ -3265,7 +3323,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       "groupName": gName,
       "members": members.toSet().toList(),
       "admin": adminPhone,
-      "senderPin":senderPin
+      "senderPin": senderPin
     };
     try {
       // privateChatRef.update(data);

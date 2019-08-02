@@ -2,7 +2,7 @@
 // import 'dart:io';
 
 // import 'package:oye_yaaro_pec/Components/loader.dart';
-// import 'package:oye_yaaro_pec/Models/sharedPref.dart';
+ 
 // import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
 // import 'package:oye_yaaro_pec/cameraModule/controllers/commonFunctions.dart';
 // import 'package:oye_yaaro_pec/cameraModule/views/audioList.dart';
@@ -110,7 +110,6 @@
 //                     child: BottomAppBar(
 //                       shape: CircularNotchedRectangle(),
 //                       elevation: 2.5,
-//                       // color: Colors.indigoAccent,
 //                       color: Theme.of(context).primaryColor,
 //                       child: Row(
 //                         mainAxisSize: MainAxisSize.max,

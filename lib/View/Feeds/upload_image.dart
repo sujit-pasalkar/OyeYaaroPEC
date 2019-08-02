@@ -79,17 +79,14 @@ class _UploadImage extends State<UploadImage> {
                       border: Border.all(color: Color(0xffb00bae3), width: 2.0),
                       color: Colors.grey[300],
                       shape: BoxShape.circle,
-                      // image: DecorationImage(
-                      //   fit: BoxFit.cover,
-                      //   image: NetworkImage(pref.profileUrl),
-                      // ),
                     ),
                     height: 50.0,
                     width: 50.0,
                     child: ClipOval(
                       child: CachedNetworkImage(
                         fit: BoxFit.cover,
-                        imageUrl: pref.profileUrl,
+                        imageUrl: 
+                            'http://54.200.143.85:4200/profiles/now/${pref.pin.toString()}.jpg',
                         placeholder: (context, url) => Center(
                           child: SizedBox(
                               height: 20.0,
@@ -97,9 +94,11 @@ class _UploadImage extends State<UploadImage> {
                               child:
                                   CircularProgressIndicator(strokeWidth: 1.0)),
                         ),
-                        errorWidget: (context, url, error) => Icon(
-                          Icons.person,
-                          color: Colors.white,
+                        errorWidget: (context, url, error) =>
+                            FadeInImage.assetNetwork(
+                          placeholder: 'assets/loading.gif',
+                          image:
+                              'http://54.200.143.85:4200/profiles/then/${pref.pin.toString()}.jpg',
                         ),
                       ),
                     ),
@@ -439,8 +438,8 @@ class _UploadImage extends State<UploadImage> {
       //   print('same file');
       // }
 
-      String mediaUrl = await storage.uploadImage(
-          timestamp.toString(), file, true);
+      String mediaUrl =
+          await storage.uploadImage(timestamp.toString(), file, true);
 
       print("mediaUrl: " + mediaUrl);
 

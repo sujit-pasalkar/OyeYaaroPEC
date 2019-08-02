@@ -10,38 +10,49 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^0.1.2
-  firebase_database: ^3.0.4
+  firebase_database: ^3.0.5
   firebase_auth: ^0.11.1+10
+  # new 0.14.0
   cloud_firestore: ^0.12.7 
+  # new 0.12.9
   firebase_storage: ^3.0.3
+  # new 3.0.4
   firebase_messaging: ^5.1.1
+  # new 5.1.2
   firebase_core: ^0.4.0+6
   permission_handler: ^3.2.0
   shared_preferences: 0.4.3
+  # new 0.5.3+4
   sqlcool: ^2.0.0
+  # 3.2.0
   fluttertoast: ^3.1.0
   http: ^0.12.0
-  path_provider: ^1.1.2
+  path_provider: ^1.2.0
   intl: ^0.15.7
   image_picker: ^0.6.0+17
   contacts_service: ^0.2.8
   photo_view: ^0.4.2
-  share: ^0.6.2+1 
-    # 0.5.3 
+  # share: ^0.6.2+1 
+  share_extend: "^1.0.9"
   audioplayers: ^0.13.1
   thumbnails: ^1.0.1
   chewie: ^0.9.6
   image : ^2.0.7
+  # new 2.1.4
   flutter_native_image:
    git: https://github.com/btastic/flutter_native_image.git
+  #   0.0.4
   cached_network_image: ^1.1.1 
   flutter_staggered_grid_view: ^0.3.0
   flutter_ffmpeg: ^0.2.7
-  camera: ^0.5.2+1
+  camera: ^0.5.2+2
   gradient_bottom_navigation_bar: ^1.0.0+4
-  # multi_image_picker: ^4.3.5
+  multi_image_picker: ^4.3.6
   vibrate: ^0.0.4
+  # vibration 1.1.0 use this
   flutter_launcher_icons: ^0.7.2+1
+  path: ^1.6.2
+  # 1.6.4 
 
 flutter_icons:
   image_path: "assets/icon.png" 

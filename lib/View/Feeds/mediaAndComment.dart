@@ -195,37 +195,27 @@ class _MediaAndCommentState extends State<MediaAndComment> {
                                 shape: BoxShape.circle,
                               ),
                               child:
-                                  // CircleAvatar(
-                                  //   child: Icon(
-                                  //     Icons.person,
-                                  //     color: Colors.white,
-                                  //     size: 20,
-                                  //   ),
-                                  //   backgroundColor: Colors.grey[300],
-                                  //   radius: 25,
-                                  // ),
-
-                                  CachedNetworkImage(
+                                  ClipOval(
+                                    child: CachedNetworkImage(
                                 fit: BoxFit.cover,
                                 imageUrl:
-                                    'http://54.200.143.85:4200/profiles/now/${widget.postOwner}.jpg',
+                                      'http://54.200.143.85:4200/profiles/now/${widget.postOwner}.jpg',
                                 placeholder: (context, url) => Center(
-                                  child: SizedBox(
-                                    height: 40.0,
-                                    width: 40.0,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2.0),
-                                  ),
+                                    child: SizedBox(
+                                      height: 40.0,
+                                      width: 40.0,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2.0),
+                                    ),
                                 ),
                                 errorWidget: (context, url, error) =>
                                  FadeInImage.assetNetwork(
                                 placeholder: 'assets/loading.gif',
                                 image:
-                                    'http://54.200.143.85:4200/profiles/then/${widget.postOwner}.jpg',
-                              )
-                                //  Image.network(
-                                //     'http://54.200.143.85:4200/profiles/then/${widget.postOwner}.jpg'),
+                                      'http://54.200.143.85:4200/profiles/then/${widget.postOwner}.jpg',
                               ),
+                              ),
+                                  ),
                             ),
                     ),
                   ),
@@ -366,22 +356,24 @@ class Comment extends StatelessWidget {
                     print('avatar:$avatarUrl');
                     print('userId:$userId');
                   },
-                  child: CircleAvatar(
-                    radius: 20.0,
-                    backgroundColor: Colors.grey[300],
-                    child: CachedNetworkImage(
-                      fit: BoxFit.cover,
-                      imageUrl:
-                          'http://54.200.143.85:4200/profiles/now/$userId.jpg',
-                      placeholder: (context, url) => Center(
-                        child: SizedBox(
-                          height: 10.0,
-                          width: 10.0,
-                          child: CircularProgressIndicator(strokeWidth: 2.0),
+                  child: ClipOval(
+                    child: CircleAvatar(
+                      radius: 20.0,
+                      backgroundColor: Colors.grey[300],
+                      child: CachedNetworkImage(
+                        fit: BoxFit.cover,
+                        imageUrl:
+                            'http://54.200.143.85:4200/profiles/now/$userId.jpg',
+                        placeholder: (context, url) => Center(
+                          child: SizedBox(
+                            height: 10.0,
+                            width: 10.0,
+                            child: CircularProgressIndicator(strokeWidth: 2.0),
+                          ),
                         ),
+                        errorWidget: (context, url, error) => Image.network(
+                            'http://54.200.143.85:4200/profiles/then/$userId.jpg'),
                       ),
-                      errorWidget: (context, url, error) => Image.network(
-                          'http://54.200.143.85:4200/profiles/then/$userId.jpg'),
                     ),
                   ),
                 ),

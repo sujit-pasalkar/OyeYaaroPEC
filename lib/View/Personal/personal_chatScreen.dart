@@ -557,81 +557,83 @@ class _ChatScreenState extends State<ChatScreen> {
                           onTap: () {
                             audioPlayer.stop();
                             print(snap['msgMedia']);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ImageViewer(
-                                  imageUrl: snap['msgMedia'],
+                            if (File(snap['msgMedia']).existsSync()) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ImageViewer(
+                                    imageUrl: snap['msgMedia'],
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                           child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: <Widget>[
-                                FutureBuilder<String>(
-                                  future: Common.getTime(
-                                      int.parse(snap['timestamp'])),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<String> snapshot) {
-                                    switch (snapshot.connectionState) {
-                                      case ConnectionState.none:
-                                        return Text(
-                                            DateFormat('dd MMM kk:mm').format(
-                                                DateTime
-                                                    .fromMillisecondsSinceEpoch(
-                                                        int.parse(snap[
-                                                            'timestamp']))),
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 10.0,
-                                                fontStyle: FontStyle.normal));
-                                      case ConnectionState.active:
-                                      case ConnectionState.waiting:
-                                        return Text(
-                                            DateFormat('dd MMM kk:mm').format(
-                                                DateTime
-                                                    .fromMillisecondsSinceEpoch(
-                                                        int.parse(snap[
-                                                            'timestamp']))),
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 10.0,
-                                                fontStyle: FontStyle.normal));
-                                      case ConnectionState.done:
-                                        if (snapshot.hasError)
-                                          return Text(
-                                              DateFormat('dd MMM kk:mm').format(
-                                                  DateTime
-                                                      .fromMillisecondsSinceEpoch(
-                                                          int.parse(snap[
-                                                              'timestamp']))),
-                                              style: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 10.0,
-                                                  fontStyle: FontStyle.normal));
-                                        return Text(
-                                          snapshot.data,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              FutureBuilder<String>(
+                                future: Common.getTime(
+                                    int.parse(snap['timestamp'])),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<String> snapshot) {
+                                  switch (snapshot.connectionState) {
+                                    case ConnectionState.none:
+                                      return Text(
+                                          DateFormat('dd MMM kk:mm').format(
+                                              DateTime
+                                                  .fromMillisecondsSinceEpoch(
+                                                      int.parse(
+                                                          snap['timestamp']))),
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontSize: 10.0,
-                                              fontStyle: FontStyle.normal),
-                                        );
-                                    }
-                                    return Text(
-                                        DateFormat('dd MMM kk:mm').format(
-                                            DateTime.fromMillisecondsSinceEpoch(
-                                                int.parse(snap['timestamp']))),
+                                              fontStyle: FontStyle.normal));
+                                    case ConnectionState.active:
+                                    case ConnectionState.waiting:
+                                      return Text(
+                                          DateFormat('dd MMM kk:mm').format(
+                                              DateTime
+                                                  .fromMillisecondsSinceEpoch(
+                                                      int.parse(
+                                                          snap['timestamp']))),
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 10.0,
+                                              fontStyle: FontStyle.normal));
+                                    case ConnectionState.done:
+                                      if (snapshot.hasError)
+                                        return Text(
+                                            DateFormat('dd MMM kk:mm').format(
+                                                DateTime
+                                                    .fromMillisecondsSinceEpoch(
+                                                        int.parse(snap[
+                                                            'timestamp']))),
+                                            style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 10.0,
+                                                fontStyle: FontStyle.normal));
+                                      return Text(
+                                        snapshot.data,
                                         style: TextStyle(
                                             color: Colors.grey,
                                             fontSize: 10.0,
-                                            fontStyle: FontStyle
-                                                .normal)); // unreachable
-                                  },
-                                ),
-                                Stack(
-                                  children: <Widget>[
-                                    Container(
+                                            fontStyle: FontStyle.normal),
+                                      );
+                                  }
+                                  return Text(
+                                      DateFormat('dd MMM kk:mm').format(
+                                          DateTime.fromMillisecondsSinceEpoch(
+                                              int.parse(snap['timestamp']))),
+                                      style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 10.0,
+                                          fontStyle:
+                                              FontStyle.normal)); // unreachable
+                                },
+                              ),
+                            File(snap['msgMedia']).existsSync() ?  Stack(
+                                children: <Widget>[
+                                  Container(
                                       width: (width / 2) + 50,
                                       height: (width / 2) - 10,
                                       margin: EdgeInsets.fromLTRB(
@@ -647,78 +649,93 @@ class _ChatScreenState extends State<ChatScreen> {
                                               FileImage(File(snap['msgMedia'])),
                                         ),
                                       ),
-                                    ),
-                                    snap['isUploaded'] == '0'
-                                        ? Positioned(
-                                            bottom: 20,
-                                            right: 15,
-                                            child: Icon(
-                                              Icons.schedule,
-                                              color: Colors.white,
-                                              size: 15,
-                                            ))
-                                        : SizedBox(height: 0, width: 0),
-                                    snap['isUploaded'] == '0' &&
-                                            uploading == true &&
-                                            uploadingTimestamp ==
-                                                int.parse(snap['timestamp'])
-                                        ? Positioned(
-                                            left: 0,
-                                            top: 0,
-                                            right: 0,
-                                            bottom: 0,
-                                            child: Center(
-                                              child: CircularProgressIndicator(
-                                                  strokeWidth: 5.0),
-                                            ))
-                                        : snap['isUploaded'] == '0'
-                                            ? Positioned(
-                                                left: 0,
-                                                top: 0,
-                                                right: 0,
-                                                bottom: 0,
-                                                child: Center(
-                                                  child: RaisedButton(
-                                                    //user animatedbutton
-                                                    color: Colors.black
-                                                        .withOpacity(0.5),
-                                                    textColor: Colors.white,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        30.0)),
-                                                    child: Text('RETRY'),
-                                                    onPressed: () {
-                                                      uploadImage(
-                                                              widget.chatId,
-                                                              snap['msgMedia'],
-                                                              '1',
-                                                              snap['timestamp'],
-                                                              pref.name,
-                                                              pref.phone
-                                                                  .toString(),
-                                                              widget
-                                                                  .receiverPhone
-                                                                  .toString(),
-                                                              pref.pin
-                                                                  .toString(),
-                                                              widget.recPin)
-                                                          .then((onValue) {
-                                                        print(
-                                                            'image uploaded successfully');
-                                                      }, onError: (e) {
-                                                        print(
-                                                            'Error while image uploading :$e');
-                                                      });
-                                                    },
-                                                  ),
-                                                ))
-                                            : SizedBox(height: 0, width: 0),
-                                  ],
-                                )
-                              ]))
+                                      // child: File(snap['msgMedia']).existsSync()
+                                      //     ? Text('Image not available')
+                                      //     : SizedBox(),
+                                          ),
+                                  snap['isUploaded'] == '0'
+                                      ? Positioned(
+                                          bottom: 20,
+                                          right: 15,
+                                          child: Icon(
+                                            Icons.schedule,
+                                            color: Colors.white,
+                                            size: 15,
+                                          ))
+                                      : SizedBox(height: 0, width: 0),
+                                  snap['isUploaded'] == '0' &&
+                                          uploading == true &&
+                                          uploadingTimestamp ==
+                                              int.parse(snap['timestamp'])
+                                      ? Positioned(
+                                          left: 0,
+                                          top: 0,
+                                          right: 0,
+                                          bottom: 0,
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 5.0),
+                                          ))
+                                      : snap['isUploaded'] == '0'
+                                          ? Positioned(
+                                              left: 0,
+                                              top: 0,
+                                              right: 0,
+                                              bottom: 0,
+                                              child: Center(
+                                                child: RaisedButton(
+                                                  //user animatedbutton
+                                                  color: Colors.black
+                                                      .withOpacity(0.5),
+                                                  textColor: Colors.white,
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              30.0)),
+                                                  child: Text('RETRY'),
+                                                  onPressed: () {
+                                                    uploadImage(
+                                                            widget.chatId,
+                                                            snap['msgMedia'],
+                                                            '1',
+                                                            snap['timestamp'],
+                                                            pref.name,
+                                                            pref.phone
+                                                                .toString(),
+                                                            widget.receiverPhone
+                                                                .toString(),
+                                                            pref.pin.toString(),
+                                                            widget.recPin)
+                                                        .then((onValue) {
+                                                      print(
+                                                          'image uploaded successfully');
+                                                    }, onError: (e) {
+                                                      print(
+                                                          'Error while image uploading :$e');
+                                                    });
+                                                  },
+                                                ),
+                                              ))
+                                          : SizedBox(height: 0, width: 0),
+                                ],
+                              )
+                              :
+                              Container(
+                                      width: (width / 2) + 50,
+                                      height: (width / 2) - 10,
+                                      margin: EdgeInsets.fromLTRB(
+                                          2.0, 1.0, 2.0, 15.0),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius:
+                                            BorderRadius.circular(25.0),
+                                        color: Colors.white,
+                                      ),
+                                      child: Center(child: Text('Image not available'))
+                                          ),
+                            ],
+                          ),
+                        )
                       //video
                       : snap['msgType'] == '2' &&
                               (pref.hideMedia == false ||
@@ -1273,7 +1290,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ? SizedBox(
                       width: 35,
                     )
-                    // add in gesure detectore//
+                  // add in gesure detectore//
                   : Container(
                       margin: EdgeInsets.only(right: 8),
                       padding: EdgeInsets.all(1.0),
@@ -1297,12 +1314,12 @@ class _ChatScreenState extends State<ChatScreen> {
                                     CircularProgressIndicator(strokeWidth: 1.0),
                               ),
                             ),
-                            errorWidget: (context, url, error) => 
-                              FadeInImage.assetNetwork(
-                                placeholder: 'assets/loading.gif',
-                                image:
-                                    'http://54.200.143.85:4200/profiles/then/${widget.recPin}.jpg',
-                              ),
+                            errorWidget: (context, url, error) =>
+                                FadeInImage.assetNetwork(
+                              placeholder: 'assets/loading.gif',
+                              image:
+                                  'http://54.200.143.85:4200/profiles/then/${widget.recPin}.jpg',
+                            ),
                           ),
                         ),
                       ),
@@ -2203,9 +2220,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: (){
+                        onTap: () {
                           Navigator.pop(context);
-                        },                        child: Column(
+                        },
+                        child: Column(
                           children: <Widget>[
                             Container(
                               padding: EdgeInsets.all(15),
@@ -2297,7 +2315,7 @@ class _ChatScreenState extends State<ChatScreen> {
               builder: (context) => ConfirmSendVid(
                     img: vid,
                   )));
-      // print('im back with images*************:$val');
+      print('im back with galleryVideo*************:$val');
       if (val == 'ok') {
         sendVid(vid);
       }
@@ -2590,8 +2608,8 @@ class _ChatScreenState extends State<ChatScreen> {
   //send video
   void sendVid(File vid) async {
     try {
-      print('org path :${vid.path}');
       int timestamp = DateTime.now().millisecondsSinceEpoch;
+      print('org path :${vid.path}');
       print('sendVid timestamp: $timestamp');
 
 //vid thum folder
@@ -2609,105 +2627,85 @@ class _ChatScreenState extends State<ChatScreen> {
       );
       print('sendVid thumbPath(rename): ${newThumb.path}'); //same
 
-// 2.add in chat
-      sqlQuery
-          .addPrivateChat(
-              widget.chatId,
-              vid.path,
-              '2',
-              timestamp.toString(),
-              pref.name,
-              pref.phone.toString(),
-              widget.receiverPhone.toString(),
-              '0',
-              "mediaUrl",
-              newThumb.path,
-              "thumbUrl",
-              pref.pin.toString(),
-              widget.recPin)
-          .then((onValue) {
-        // show loading
-        setState(() {
-          uploading = true;
-          uploadingTimestamp = timestamp;
-        });
-        //3.add sender's msg as last msg to privatechatlisttable sqlite
-        sqlQuery
-            .addPrivateChatList(
-                widget.chatId,
-                'Video',
-                pref.phone.toString(),
-                widget.receiverPhone,
-                timestamp.toString(),
-                '0',
-                pref.pin.toString(),
-                widget.recPin)
-            .then((onValue) {
-          print('entry added in sqflite addchatlist');
-        }, onError: (e) {
-          print('show error message if addChatlist fails : $e');
-        });
+      // 2.add in chat
+      await sqlQuery.addPrivateChat(
+          widget.chatId,
+          vid.path,
+          '2',
+          timestamp.toString(),
+          pref.name,
+          pref.phone.toString(),
+          widget.receiverPhone.toString(),
+          '0',
+          "mediaUrl",
+          newThumb.path,
+          "thumbUrl",
+          pref.pin.toString(),
+          widget.recPin);
+      print('2.org video added to addPrivateChat*');
 
-        // 4.call compress function
-        cmprsMedia
-            .compressVideo(
-                vid,
-                '${extDir.path}/OyeYaaro/Media/Vid/.${widget.chatId}',
-                '$timestamp')
-            .then((compressedVideoFile) {
-          print('org img file path:${vid.path}');
-          print(
-              'compressedImageFile path :${compressedVideoFile.path}'); //compressed and copied to desired path
+      // show loading
+      setState(() {
+        uploading = true;
+        uploadingTimestamp = timestamp;
+      });
 
-          //5.change previous path of privateChat table with desire path
-          sqlQuery
-              .updatePrivateChat(
-                  widget.chatId,
-                  pref.name,
-                  compressedVideoFile.path, //new desired path(compressed)
-                  pref.phone.toString(),
-                  "2", //msgType
-                  widget.receiverPhone.toString(),
-                  timestamp.toString(),
-                  "0", //isUpload
-                  "mediaUrl", //firebase url.here no need
-                  newThumb.path,
-                  "thumburl",
-                  pref.pin.toString(),
-                  widget.recPin)
-              .then((onValue) {
-            print('updated to compressed vid path:$onValue');
-          }, onError: (e) {
-            print(
-                'Error while updating previous path of privateChat to desired path:$e');
-          });
+      //3.add sender's msg as last msg to privatechatlisttable sqlite
+      await sqlQuery.addPrivateChatList(
+          widget.chatId,
+          'Video',
+          pref.phone.toString(),
+          widget.receiverPhone,
+          timestamp.toString(),
+          '0',
+          pref.pin.toString(),
+          widget.recPin);
+      print('3.video added to addPrivateChatList*');
 
-          // uplaod to fb
-          uploadVideo(
-                  widget.chatId,
-                  compressedVideoFile,
-                  '2',
-                  timestamp.toString(),
-                  pref.name,
-                  pref.phone.toString(),
-                  widget.receiverPhone.toString(),
-                  newThumb.path,
-                  pref.pin.toString(),
-                  widget.recPin)
-              .then((onValue) {
-            print('Video uploaded successfully');
-          }, onError: (e) {
-            print('Error while Video uploading :$e');
-          });
-        }, onError: (e) {
-          print('Error from cmprsMedia.CompressImage():$e');
-        });
-      }, onError: (e) {
-        print('err : $e');
-        Fluttertoast.showToast(msg: 'error while adding Img in Sqlite:$e');
+      // 4.call compress function
+      print('calling compressVideo function()....');
+      dynamic compressedVideoFile = await cmprsMedia.compressVideo(vid,
+          '${extDir.path}/OyeYaaro/Media/Vid/.${widget.chatId}', '$timestamp');
+      print('4.video is compressed now*');
+      print('org img file path:${vid.path}');
+      print('compressedImageFile path :${compressedVideoFile.path}');
+
+      //5.change previous path of privateChat table with desire path
+      await sqlQuery.updatePrivateChat(
+          widget.chatId,
+          pref.name,
+          compressedVideoFile.path, //new desired path(compressed)
+          pref.phone.toString(),
+          "2", //msgType
+          widget.receiverPhone.toString(),
+          timestamp.toString(),
+          "0", //isUpload
+          "mediaUrl", //firebase url.here no need
+          newThumb.path,
+          "thumburl",
+          pref.pin.toString(),
+          widget.recPin);
+      print('5.updated new compressed video to PrivateChatList*');
+
+      // uplaod to fb
+      await uploadVideo(
+          widget.chatId,
+          compressedVideoFile,
+          '2',
+          timestamp.toString(),
+          pref.name,
+          pref.phone.toString(),
+          widget.receiverPhone.toString(),
+          newThumb.path,
+          pref.pin.toString(),
+          widget.recPin);
+      print('6.compressed video uploaded to firebase*');
+      setState(() {
+        uploading = false;
+        uploadingTimestamp = 0;
       });
     } catch (e) {
-      print('error while uploading imge: $e');
+      print('error in sendVid(): $e');
     }
   }
 
@@ -2806,18 +2804,19 @@ class _ChatScreenState extends State<ChatScreen> {
       String thumbPath,
       String senderPin,
       String recPin) async {
+    Completer _c = Completer();
     try {
       setState(() {
         uploading = true;
         uploadingTimestamp = int.parse(timestamp);
       });
 
-      Future.delayed(const Duration(seconds: 30), () {
-        setState(() {
-          uploading = false;
-          uploadingTimestamp = 0;
-        });
-      });
+      // Future.delayed(const Duration(seconds: 30), () {
+      //   setState(() {
+      //     uploading = false;
+      //     uploadingTimestamp = 0;
+      //   });
+      // });
 
       // File videoFile = new File(vidPath);
       // show in chatscreen //to add text below the image redirect path to new screen and write get text logic
@@ -2827,67 +2826,76 @@ class _ChatScreenState extends State<ChatScreen> {
       String thumbUrl =
           await storage.uploadImage(timestamp.toString(), File(thumbPath));
 
-      print('videos thumbUrl : $thumbUrl ................');
-      storage.uploadVideo(timestamp.toString(), vidFile).then((firebaseUrl) {
-        print('firebase VideoUrl : $firebaseUrl');
+      print('1.videos thumbUrl : $thumbUrl');
+      dynamic firebaseUrl =
+          await storage.uploadVideo(timestamp.toString(), vidFile);
+      // .then((firebaseUrl) {
+      print('2.firebase VideoUrl : $firebaseUrl');
 
-        setState(() {
-          uploading = false;
-          uploadingTimestamp = 0;
-        });
+      // setState(() {
+      //   uploading = false;
+      //   uploadingTimestamp = 0;
+      // });
 
-        //add url to fb
-        addChatFb(
-                senderName,
-                vidFile.path,
-                senderPhone,
-                type,
-                receiverPhone,
-                timestamp,
-                '1',
-                firebaseUrl.toString(),
-                thumbPath,
-                thumbUrl,
-                senderPin,
-                recPin)
-            .then((sent) {
-          print('vid path uploaded to fb:$thumbPath');
-          //now update query for isUploaded = 1 on this chatId row
-          sqlQuery
-              .updatePrivateChat(
-                  widget.chatId,
-                  senderName,
-                  vidFile.path,
-                  senderPhone,
-                  type,
-                  receiverPhone,
-                  timestamp,
-                  '1',
-                  firebaseUrl.toString(),
-                  thumbPath,
-                  thumbUrl,
-                  senderPin,
-                  recPin)
-              .then((onValue) async {
-            print('updated data vid timestamp: $timestamp');
-          }, onError: (e) {
-            print('error while updating chat: $e'); //show UI msg ex.toast
-          });
+      //add url to fb
+      await addChatFb(
+          senderName,
+          vidFile.path,
+          senderPhone,
+          type,
+          receiverPhone,
+          timestamp,
+          '1',
+          firebaseUrl.toString(),
+          thumbPath,
+          thumbUrl,
+          senderPin,
+          recPin);
 
-          // add to fb chatlist
-          addChatFbChatList(widget.chatId, senderPhone, 'Video', timestamp,
-                  receiverPhone, "1", senderPin, recPin)
-              .then((sent) {
-            print('entry added in fb addchatlist');
-          });
-        });
-      }, onError: (e) {
-        print('error while uploading to fb_storage : $e');
-        // throw e//change whole send video function structure with completer
-      });
+      // .then((sent) {
+      print('3.thumburl added to fb:addChatFb()');
+      //now update query for isUploaded = 1 on this chatId row
+      await sqlQuery.updatePrivateChat(
+          widget.chatId,
+          senderName,
+          vidFile.path,
+          senderPhone,
+          type,
+          receiverPhone,
+          timestamp,
+          '1',
+          firebaseUrl.toString(),
+          thumbPath,
+          thumbUrl,
+          senderPin,
+          recPin);
+      print('4.chat updated with urls:updatePrivateChat()');
+
+      //     .then((onValue) async {
+      //   print('updated data vid timestamp: $timestamp');
+      // }, onError: (e) {
+      //   print('error while updating chat: $e'); //show UI msg ex.toast
+      // });
+
+      // add to fb chatlist
+      await addChatFbChatList(widget.chatId, senderPhone, 'Video', timestamp,
+          receiverPhone, "1", senderPin, recPin);
+      print('5.fb chat list updated.');
+
+      _c.complete('success');
+      //     .then((sent) {
+      //   print('entry added in fb addchatlist');
+      // });
+      // });
+      // }, onError: (e) {
+      //   print('error while uploading to fb_storage : $e');
+      //   // throw e//change whole send video function structure with completer
+      // });
     } catch (e) {
       print('Err in getCameraImage: ' + e);
+      _c.completeError(e);
     }
+    return _c.future;
   }
 
 // put this fun in provider to make common for Pchat and sharedVideo

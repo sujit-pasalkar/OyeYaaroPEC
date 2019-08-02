@@ -38,9 +38,10 @@ class CompressMedia {
 
   Future compressVideo(File vid, String finalDirPath, String timestamp) async {
     // compressing and coping to desired path
-    print(
-        'in compressVideo()****************************************************');
+    print('in compressVideo()**********');
+    print('vid path:$vid');
     print('final dir:$finalDirPath');
+
     Completer _c = new Completer();
     try {
       final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
@@ -52,21 +53,21 @@ class CompressMedia {
 
       String finalFilePath = finalDirPath + "/" + timestamp + ".mp4";
 
-      bool isExist = await File(finalFilePath).exists();
-      if (!isExist) {
-        print('compressedVideo file not exist..');
-        File(finalFilePath).createSync(recursive: true);
-      }
-      else{
-        print('file already exist');
-      }
+      // bool isExist = await File(finalFilePath).exists();
+      // if (!isExist) {
+      //   print('compressedVideo file not exist..');
+      //   File(finalFilePath).createSync(recursive: true);
+      //   print('so created.');
+      // }
+      // else{
+      //   print('file already exist');
+      // }
 
-     int rc = await _flutterFFmpeg
-          .execute(
-              '-y -i ${vid.path} -c:v libx264 -crf 34 -preset superfast -c:a copy -b:v 700k $finalFilePath');
+      int rc = await _flutterFFmpeg.execute(
+          '-y -i ${vid.path} -c:v libx264 -crf 34 -preset superfast -c:a copy -b:v 700k $finalFilePath');
       //     .then((rc) {
-        print("FFmpeg process exited with rc $rc");
-      //   _c.complete(File(finalFilePath));
+      print("FFmpeg process exited with rc $rc....");
+        _c.complete(File(finalFilePath));
       // }, onError: (e) {
       //   print("Error in compressing _flutterFFmpeg.execute() Video $e");
       //   throw e;

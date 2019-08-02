@@ -46,10 +46,10 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
             icon: Icon(Icons.search),
             onPressed: () => _onMenuItemSelect('Search'),
           ),
-          // IconButton(
-          //   icon: Icon(Icons.filter_list),
-          //   onPressed: () => _onMenuItemSelect('Filters'),
-          // ),
+          IconButton(
+            icon: Icon(Icons.filter_list),
+            onPressed: () => _onMenuItemSelect('Filters'),
+          ),
           _menuBuilder(),
         ],
         flexibleSpace:FlexAppbar()
@@ -109,10 +109,12 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
           ),
         );
         break;
+
+        case 'Filters':
+        // print('call filter');
+        _filterPost();
     }
   }
-
-  
 
   Widget buildFeedBody() {
     return RefreshIndicator(
@@ -357,10 +359,10 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
     });
 
     for (Map<String, dynamic> postData in originalData) {
-      // if (postData['visibility'] == currentUser.filterActive ||
-      //     currentUser.filterActive == "All") {
+      if (postData['visibility'] == pref.filterActive ||
+          pref.filterActive == "All") {
       listOfPosts.add(FeedBuilder.fromJSON(postData));
-      // }
+      }
     }
 
     setState(() {
@@ -369,107 +371,107 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
     });
   }
 
-  // Future _filterPost() {
-  //   return showModalBottomSheet(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Container(
-  //         padding: EdgeInsets.all(15.0),
-  //         child: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: <Widget>[
-  //             Container(
-  //               alignment: Alignment.centerLeft,
-  //               padding: EdgeInsets.only(bottom: 10.0),
-  //               child: Text(
-  //                 "See post of...",
-  //                 style: TextStyle(
-  //                   fontSize: 16.0,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ),
-  //             FlatButton(
-  //               padding: EdgeInsets.symmetric(vertical: 10.0),
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Text("All Posts"),
-  //                   currentUser.filterActive == "All"
-  //                       ? Text('  (active)')
-  //                       : SizedBox(),
-  //                   Spacer(),
-  //                   Icon(Icons.filter_none),
-  //                 ],
-  //               ),
-  //               onPressed: () async {
-  //                 Navigator.pop(context);
-  //                 await currentUser.changeFilter('All');
-  //                 _generateFeed(silent: false);
-  //               },
-  //             ),
-  //             Divider(),
-  //             FlatButton(
-  //               padding: EdgeInsets.symmetric(vertical: 10.0),
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Text("Class"),
-  //                   currentUser.filterActive == currentUser.groupId
-  //                       ? Text('  (active)')
-  //                       : SizedBox(),
-  //                   Spacer(),
-  //                   Icon(Icons.group),
-  //                 ],
-  //               ),
-  //               onPressed: () async {
-  //                 Navigator.pop(context);
-  //                 await currentUser.changeFilter(currentUser.groupId);
-  //                 _generateFeed(silent: false);
-  //               },
-  //             ),
-  //             Divider(),
-  //             FlatButton(
-  //               padding: EdgeInsets.symmetric(vertical: 10.0),
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Text("College"),
-  //                   currentUser.filterActive == currentUser.collegeName
-  //                       ? Text('  (active)')
-  //                       : SizedBox(),
-  //                   Spacer(),
-  //                   Icon(Icons.location_city),
-  //                 ],
-  //               ),
-  //               onPressed: () async {
-  //                 Navigator.pop(context);
-  //                 await currentUser.changeFilter(currentUser.collegeName);
-  //                 _generateFeed(silent: false);
-  //               },
-  //             ),
-  //             Divider(),
-  //             FlatButton(
-  //               padding: EdgeInsets.symmetric(vertical: 10.0),
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Text("Public"),
-  //                   currentUser.filterActive == 'Public'
-  //                       ? Text('  (active)')
-  //                       : SizedBox(),
-  //                   Spacer(),
-  //                   Icon(Icons.public),
-  //                 ],
-  //               ),
-  //               onPressed: () async {
-  //                 Navigator.pop(context);
-  //                 await currentUser.changeFilter('Public');
-  //                 _generateFeed(silent: false);
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+  Future _filterPost() {
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(bottom: 10.0),
+                child: Text(
+                  "See post of...",
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  children: <Widget>[
+                    Text("All Posts"),
+                    pref.filterActive == "All"
+                        ? Text('  (active)')
+                        : SizedBox(),
+                    Spacer(),
+                    Icon(Icons.filter_none),
+                  ],
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await pref.changeFilter('All');
+                  _generateFeed(silent: false);
+                },
+              ),
+              Divider(),
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  children: <Widget>[
+                    Text("Class"),
+                    pref.filterActive == pref.groupId
+                        ? Text('  (active)')
+                        : SizedBox(),
+                    Spacer(),
+                    Icon(Icons.group),
+                  ],
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await pref.changeFilter(pref.groupId);
+                  _generateFeed(silent: false);
+                },
+              ),
+              Divider(),
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  children: <Widget>[
+                    Text("College"),
+                    pref.filterActive == pref.collegeName
+                        ? Text('  (active)')
+                        : SizedBox(),
+                    Spacer(),
+                    Icon(Icons.location_city),
+                  ],
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await pref.changeFilter(pref.collegeName);
+                  _generateFeed(silent: false);
+                },
+              ),
+              Divider(),
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  children: <Widget>[
+                    Text("Public"),
+                    pref.filterActive == 'Public'
+                        ? Text('  (active)')
+                        : SizedBox(),
+                    Spacer(),
+                    Icon(Icons.public),
+                  ],
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await pref.changeFilter('Public');
+                  _generateFeed(silent: false);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   // Widget _menuBuilder() {
   //   return PopupMenuButton<String>(

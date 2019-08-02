@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Provider/Firebase/realtime_database_operation.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
@@ -48,7 +49,7 @@ class _GroupInfoState extends State<GroupInfo> {
             stream: bloc.items,
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.hasData) {
-                print('data:${snapshot.hasData}');
+                print('data:${snapshot.data}');
                 return memberGrid(snapshot.data);
               } else {
                 return Center(child: Text(''));
@@ -75,17 +76,17 @@ class _GroupInfoState extends State<GroupInfo> {
         return GestureDetector(
           onTap: () {
             print('show profile');
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => MyProfile(
-            //           phone: int.parse(snapshot[position]['memberPhone']),
-            //         ),
-            //   ),
-            // );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MyProfile(
+                  pin: int.parse(snapshot[position]['memberPin']),
+                ),
+              ),
+            );
           },
-          onLongPress: widget.admin == pref.phone.toString() &&
-                  snapshot[position]['memberPhone'] != widget.admin
+          onLongPress: widget.admin == pref.pin.toString() &&
+                  snapshot[position]['memberPin'] != widget.admin
               ? () {
                   // print('long press..');
                   vibrate();
@@ -100,7 +101,7 @@ class _GroupInfoState extends State<GroupInfo> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    snapshot[position]['profileUrl'] == ''
+                    snapshot[position]['memberPhone'] == ''
                         ? CircleAvatar(
                             child: Icon(
                               Icons.person,
@@ -110,16 +111,32 @@ class _GroupInfoState extends State<GroupInfo> {
                             backgroundColor: Colors.grey[300],
                             radius: 55,
                           )
-                        : CircleAvatar(
-                            backgroundImage:
-                                NetworkImage(snapshot[position]['profileUrl']),
-                            backgroundColor: Colors.grey[300],
-                            radius: 50,
+                        : ClipOval(
+                            child: CircleAvatar(
+                              // backgroundImage:NetworkImage(snapshot[position]['profileUrl']),
+                              backgroundColor: Colors.grey[300],
+                              radius: 50,
+                              child: CachedNetworkImage(
+                                fit: BoxFit.cover,
+                                imageUrl:
+                                    'http://54.200.143.85:4200/profiles/now/${snapshot[position]['memberPin']}.jpg',
+                                placeholder: (context, url) => Center(
+                                  child: SizedBox(
+                                    height: 20.0,
+                                    width: 20.0,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 1.0),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    FadeInImage.assetNetwork(
+                                  placeholder: 'assets/loading.gif',
+                                  image:
+                                      'http://54.200.143.85:4200/profiles/then/${snapshot[position]['memberPin']}.jpg',
+                                ),
+                              ),
+                            ),
                           ),
-//                           FadeInImage.memoryNetwork(
-//   placeholder: kTransparentImage,
-//   image: 'https://picsum.photos/250?image=9',
-// );
                     Center(
                       child: Text(
                         snapshot[position]['memberName'],

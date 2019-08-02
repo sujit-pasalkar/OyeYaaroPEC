@@ -20,6 +20,7 @@ class FirebaseStorageOperations {
         firebaseStorageRef =
             FirebaseStorage.instance.ref().child('$timestamp.jpg');
       }
+      print('uploading img');
 
       final StorageUploadTask uploadTask = firebaseStorageRef.putFile(imgFile);
       String firebaseUrl =
@@ -36,7 +37,7 @@ class FirebaseStorageOperations {
     Completer _c = new Completer();
     StorageReference firebaseStorageRef;
     try {
-      print('in uploadVideo() try');
+      print('in uploadVideo() ');
       print('feedsImage:$feedsImage');
 
       if (feedsImage == true) {

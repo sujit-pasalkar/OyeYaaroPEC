@@ -1,12 +1,11 @@
 // flutter
 import 'dart:async';
-import 'package:oye_yaaro_pec/View/Profile/profile.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 //pages
 import './Theme/theme.dart';
 import './View/Login/login.dart';
@@ -32,7 +31,6 @@ class MyApp extends StatelessWidget {
         home: MainPage(),
         routes: <String, WidgetBuilder>{
           '/loginpage': (BuildContext context) => LoginPage(),
-          // '/profile': (BuildContext context) => Profile(),
           '/home': (BuildContext context) => HomePage(),
         });
   }
@@ -46,15 +44,14 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  static const platform =
-      const MethodChannel('com.plmlogix.contacts_chat/platform');
+  // static const platform = MethodChannel('com.plmlogix.contacts_chat/platform');
   bool isLoggedIn = false;
   bool permissionButton = true;
   Map<PermissionGroup, PermissionStatus> permissions;
   var _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  DatabaseReference _onlineStatusReference;
-  StreamSubscription<Event> _onlineStatusSubscription;
+  // DatabaseReference _onlineStatusReference;
+  // StreamSubscription<Event> _onlineStatusSubscription;
 
   @override
   void initState() {
@@ -66,16 +63,16 @@ class _MainPageState extends State<MainPage> {
       });
     });
 
-    _onlineStatusReference = database.reference().child('.info/connected');
-    _onlineStatusSubscription =
-        _onlineStatusReference.onValue.listen((Event event) {
-      print('EVENT has occured:${event.snapshot.value}');
-      // pref.connectionListener = event.snapshot.value;
-      // connection listener
-      // event.snapshot.value
-      //     ? Fluttertoast.showToast(msg: 'you are online')
-      //     : Fluttertoast.showToast(msg: 'you are offline');
-    });
+    // _onlineStatusReference = database.reference().child('.info/connected');
+    // _onlineStatusSubscription =
+    //     _onlineStatusReference.onValue.listen((Event event) {
+    //   print('EVENT has occured:${event.snapshot.value}');
+    //   // pref.connectionListener = event.snapshot.value;
+    //   // connection listener
+    //   // event.snapshot.value
+    //   //     ? Fluttertoast.showToast(msg: 'you are online')
+    //   //     : Fluttertoast.showToast(msg: 'you are offline');
+    // });
 
     super.initState();
   }
@@ -144,16 +141,16 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  Future<bool> registerusersinch() async {
-    var sendMap = <String, dynamic>{
-      'from': pref.phone.toString().replaceAll('+91', '').replaceAll('+1', ''),
-    };
-    String result;
-    try {
-      result = await platform.invokeMethod('registersinch', sendMap);
-    } on PlatformException catch (e) {}
-    return true;
-  }
+  // Future<bool> registerusersinch() async {
+  //   var sendMap = <String, dynamic>{
+  //     'from': pref.phone.toString().replaceAll('+91', '').replaceAll('+1', ''),
+  //   };
+  //   String result;
+  //   try {
+  //     result = await platform.invokeMethod('registersinch', sendMap);
+  //   } on PlatformException catch (e) {}
+  //   return true;
+  // }
 
   @override
   Widget build(BuildContext context) {

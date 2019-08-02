@@ -83,12 +83,12 @@ class _RecordClipState extends State<RecordClip> with TickerProviderStateMixin {
 
   getPermissions() async {}
   initializeDir() async {
-    commonDir = (await getApplicationDocumentsDirectory()).path;
+    commonDir = (await getExternalStorageDirectory()).path;
     filePath = '$commonDir${Config.videoRecordTempPath}/$filename.mp4';
-    (await getApplicationDocumentsDirectory())
+    (await getExternalStorageDirectory())
         .list(recursive: true, followLinks: false)
         .listen((FileSystemEntity entity) {
-      print(entity.path);
+      // print(entity.path);
     });
   }
 
@@ -345,6 +345,7 @@ class _RecordClipState extends State<RecordClip> with TickerProviderStateMixin {
   }
 
   void onVideoRecordButtonPressed() {
+    print('started recording........');
     startVideoRecording().then((String filePath) {
       if (mounted) setState(() {});
     });
@@ -352,12 +353,13 @@ class _RecordClipState extends State<RecordClip> with TickerProviderStateMixin {
 
   Future<String> startVideoRecording() async {
     if (!controller.value.isInitialized) {
+      print('!controller.value.isInitialized');
       CommonFunctions.showSnackbar(context, 'Error: select a camera first.');
       return null;
     }
 
     if (controller.value.isRecordingVideo) {
-      // A recording is already started, do nothing.
+      print('A recording is already started, do nothing.');
       return null;
     }
     startCountdown();
@@ -368,8 +370,10 @@ class _RecordClipState extends State<RecordClip> with TickerProviderStateMixin {
     });
 
     try {
+      print('ok start recording....');
       await controller.startVideoRecording(filePath);
     } on CameraException catch (e) {
+      print('camera exception :$e');
       CommonFunctions.showSnackbar(context, e.description);
       return null;
     }
@@ -377,8 +381,10 @@ class _RecordClipState extends State<RecordClip> with TickerProviderStateMixin {
   }
 
   Future<void> audioplay() async {
+      print('play audio....');
     if (audioFile != null && audioFile != "") {
       audioPlayer.play(audioFile, isLocal: true);
+      print('playing audio.....');
       await audioPlayer.setReleaseMode(ReleaseMode.LOOP);
     }
   }
@@ -388,6 +394,7 @@ class _RecordClipState extends State<RecordClip> with TickerProviderStateMixin {
   }
 
   startCountdown() async {
+    print('start count down');
     setState(() {
       kStartValue = _duration;
       kEndValue = 0;

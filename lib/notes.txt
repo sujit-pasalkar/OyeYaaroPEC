@@ -59,3 +59,8 @@ PEC web configuration
 // PEC
 1.MyProfile navigator in create_newGroup.dart
 2.addGroupChatListHistory() method in sqlquery need to change /update
+
+pin info
+1.me jio = 610953 = 7972241516
+2.me airtel = 138628
+3.snehal = 414069 = 8554851417

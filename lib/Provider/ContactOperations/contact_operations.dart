@@ -1,20 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Models/url.dart';
-// import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
 import 'package:contacts_service/contacts_service.dart';
-// import 'package:firebase_database/firebase_database.dart';
+import 'package:share_extend/share_extend.dart';
 
-ContactOperation co = new ContactOperation();
+ContactOperation co = ContactOperation();
 
 class ContactOperation {
   Future getContacts() async {
     print('in contact operation');
-    Completer _c = new Completer();
+    Completer _c = Completer();
     try {
       Iterable<Contact> contacts =
           await ContactsService.getContacts(withThumbnails: false);
@@ -70,7 +68,7 @@ class ContactOperation {
   }
 
   Future updateRegisteredContacts() async {
-    // print('in updateRegisteredContacts :');
+    print('in updateRegisteredContacts :');
     Completer _c = new Completer();
     try {
       List<Map<String, dynamic>> row = await sqlQuery.getPhonesfromContact();
@@ -80,7 +78,6 @@ class ContactOperation {
       });
       // print('after for:${contactsList.length}');
 
-      // need changes in service response res = [{phone:'',pin:''}]
       http.Response res = await http.post('${url.api}matchPhoneContacts',
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({"contacts": contactsList}));
@@ -101,7 +98,7 @@ class ContactOperation {
           };
           await sqlQuery.updateContactRow(update);
         }
-        _c.complete('res');
+        _c.complete('success');
       } else
         _c.completeError('res failed');
     } catch (e) {
@@ -109,5 +106,11 @@ class ContactOperation {
       _c.completeError(e);
     }
     return _c.future;
+  }
+
+  static sharePin(String phone) {
+    ShareExtend.share(
+        "You are invited to join OyeYaaro. Download this App using following url http://oyeyaaro.plmlogix.com/download",
+        "text");
   }
 }

@@ -16,7 +16,8 @@ class CommonFunctions {
   }
 
   static void createdirectories() async {
-    final Directory extDir = await getApplicationDocumentsDirectory();
+    final Directory extDir = await getExternalStorageDirectory();
+    // getApplicationDocumentsDirectory();
     List<String> allDirs = [];
     print("reached here");
     allDirs.add(Config.musicDownloadFolderPath);
@@ -38,7 +39,7 @@ class CommonFunctions {
     String tempPath = (await getTemporaryDirectory()).path;
     File a = new File(videoFilename);
     String basename = path.basename(a.path);
-    String dir = (await getApplicationDocumentsDirectory()).path;
+    String dir = (await getExternalStorageDirectory() /* getApplicationDocumentsDirectory() */).path;
     String processedfilename = '$dir${Config.videoRecordEdit}/$basename';
     print('$processedfilename--Hi');
     if (audioFilename == null || audioFilename == '') {
