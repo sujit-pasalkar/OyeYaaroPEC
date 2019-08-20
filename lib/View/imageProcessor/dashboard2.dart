@@ -103,7 +103,9 @@ class _ImageProcessorState extends State<ImageProcessor> {
                         ),
                         Expanded(
                           child: FlatButton(
-                            onPressed: loadAssets,
+                            onPressed: () {
+                              loadAssets();
+                            },
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
@@ -133,14 +135,26 @@ class _ImageProcessorState extends State<ImageProcessor> {
                   : images.length > 0
                       ? GridView.count(
                           crossAxisCount: 3,
-                          crossAxisSpacing: 5.0,
-                          mainAxisSpacing: 5.0,
-                          childAspectRatio: 1,
-                          children: List.generate(
-                              images.length,
-                              (index) => AssetView(UniqueKey(), images[index],
-                                  () => delete(index))),
+                          children: List.generate(images.length, (index) {
+                            Asset asset = images[index];
+                            return AssetThumb(
+                              asset: asset,
+                              width: 300,
+                              height: 300,
+                            );
+                          }),
                         )
+
+                      // GridView.count(
+                      //     crossAxisCount: 3,
+                      //     crossAxisSpacing: 5.0,
+                      //     mainAxisSpacing: 5.0,
+                      //     childAspectRatio: 1,
+                      //     children: List.generate(
+                      //         images.length,
+                      //         (index) => AssetView(UniqueKey(), images[index],
+                      //             () => delete(index))),
+                      //   )
                       : Center(
                           child: Center(
                             child: FlatButton(
@@ -174,7 +188,9 @@ class _ImageProcessorState extends State<ImageProcessor> {
                                   ),
                                 ],
                               ),
-                              onPressed: loadAssets,
+                              onPressed: () {
+                                loadAssets();
+                              },
                             ),
                           ),
                         ),
@@ -201,39 +217,42 @@ class _ImageProcessorState extends State<ImageProcessor> {
   //   });
   // }
 
-  delete(int index) async{
+  delete(int index) async {
     images.removeAt(index);
     setState(() {});
-  //  var res =  await images[index].name();
-   print(images[index].name);
+    //  var res =  await images[index].name();
+    print(images[index].name);
   }
 
   Future<void> loadAssets() async {
-    List<Asset> resultList;
-    String error;
+    List<Asset> resultList = List<Asset>();
+    String error = 'no error';
 
     try {
       resultList = await MultiImagePicker.pickImages(
-          maxImages: 100,
-          enableCamera: false,
-          selectedAssets: images,
-          cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
-          materialOptions: MaterialOptions(
-            actionBarColor: "#28aaeb", //Color(0xffb4fcce0),
-            actionBarTitle: "Select Images",
-            allViewTitle: "All Photos",
-            useDetailsView: false,
-            selectCircleStrokeColor: "#28aaeb",
-          ));
+        maxImages: 100,
+        enableCamera: false,
+        selectedAssets: images,
+        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
+        materialOptions: MaterialOptions(
+          actionBarColor: "#28aaeb",
+          actionBarTitle: "Select Images",
+          allViewTitle: "All Photos",
+          useDetailsView: false,
+          selectCircleStrokeColor: "#28aaeb",
+          backButtonDrawable: "ic_back_arrow",
+        ),
+      );
 
-          // print("resultList:$resultList");
-    } on PlatformException catch (e) {
-      error = e.message;
+      // for (var r in resultList) {
+      //   var t = await r.filePath;
+      //   print('paths:$t');
+      // }
+    } on Exception catch (e) {
+      print('got error :: $e');
+      error = e.toString();
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) return;
 
     setState(() {
@@ -274,7 +293,6 @@ class _ImageProcessorState extends State<ImageProcessor> {
       tempProcessingDir.createSync(recursive: true);
       List<Future> futures = List<Future>();
       for (int count = 0; count < images.length; count++) {
-
         if (images[count].name.endsWith(".jpg") ||
             images[count].name.endsWith(".JPG")) {
           await File(images[count].name)

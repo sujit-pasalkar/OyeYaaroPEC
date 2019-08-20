@@ -56,15 +56,15 @@ class _HomePageState extends State<HomePage> {
         const IosNotificationSettings(sound: true, badge: true, alert: true));
 
     _firebaseMessaging.getToken().then((token) {
-      print('${pref.phone}:$token added.');
+      print('${pref.pin}:$token added.');
       var documentReference = Firestore.instance
           .collection('userTokens')
-          .document(pref.phone.toString());
+          .document(pref.pin.toString());
 
       Firestore.instance.runTransaction((transaction) async {
         await transaction.set(
           documentReference,
-          {'token': token, 'id': pref.phone},
+          {'token': token, 'id': pref.pin},
         );
       });
     });

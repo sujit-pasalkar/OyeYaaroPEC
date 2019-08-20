@@ -1,4 +1,4 @@
-﻿ok1.make componenet folder and add reusable widget their.
+1.make componenet folder and add reusable widget their.
 like im using logout function in 2 tabs pages.
 make logout widget as gaurav created.
 

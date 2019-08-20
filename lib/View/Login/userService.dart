@@ -67,19 +67,6 @@ class UserService {
     return c.future;
   }
 
-// functionality not working well
-  // static Future<bool> registerusersinch() async {
-  //   var sendMap = <String, dynamic>{
-  //     'from': pref.phone.toString(),
-  //   };
-  //   try {
-  //     String result = await platform.invokeMethod('registersinch', sendMap);
-  //   } on PlatformException catch (e) {
-  //     print(e);
-  //   }
-  //   return true;
-  // }
-
  static setUserToken(result,String pin) async {
     pref.setPin(int.parse(pin));
     pref.setName(result['data'][0]['Name']);

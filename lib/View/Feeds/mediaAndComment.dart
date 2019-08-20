@@ -43,7 +43,7 @@ class _MediaAndCommentState extends State<MediaAndComment> {
         "/OyeYaaro/.posts/" +
         widget.timestamp.toString() +
         ".jpg");
-    print('f:${f.path}');
+    // print('f:${f.path}');
   }
 
   @override
@@ -181,54 +181,74 @@ class _MediaAndCommentState extends State<MediaAndComment> {
                                 color: Color(0xffb00bae3),
                                 shape: BoxShape.circle,
                               ),
-                              child: CircleAvatar(
-                                backgroundImage: NetworkImage(pref.profileUrl),
-                                backgroundColor: Colors.grey[300],
-                                radius: 18,
-                                // child: Text('${pref.profileUrl}'),
+                              child: ClipOval(
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  child: CachedNetworkImage(
+                                    fit: BoxFit.cover,
+                                    imageUrl:
+                                        'http://54.200.143.85:4200/profiles/now/${widget.postOwner}.jpg',
+                                    placeholder: (context, url) => Center(
+                                      child: SizedBox(
+                                        height: 40.0,
+                                        width: 40.0,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2.0),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        FadeInImage.assetNetwork(
+                                      placeholder: 'assets/loading.gif',
+                                      image:
+                                          'http://54.200.143.85:4200/profiles/then/${widget.postOwner}.jpg',
+                                    ),
+                                  ),
+                                ),
                               ),
                             )
                           : Container(
                               padding: EdgeInsets.all(1.0),
-                              decoration: new BoxDecoration(
+                              decoration:  BoxDecoration(
                                 color: Color(0xffb00bae3),
                                 shape: BoxShape.circle,
                               ),
-                              child:
-                                  ClipOval(
-                                    child: CachedNetworkImage(
-                                fit: BoxFit.cover,
-                                imageUrl:
-                                      'http://54.200.143.85:4200/profiles/now/${widget.postOwner}.jpg',
-                                placeholder: (context, url) => Center(
-                                    child: SizedBox(
-                                      height: 40.0,
-                                      width: 40.0,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2.0),
+                              child: ClipOval(
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  child: CachedNetworkImage(
+                                    fit: BoxFit.cover,
+                                    imageUrl:
+                                        'http://54.200.143.85:4200/profiles/now/${widget.postOwner}.jpg',
+                                    placeholder: (context, url) => Center(
+                                      child: SizedBox(
+                                        height: 40.0,
+                                        width: 40.0,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2.0),
+                                      ),
                                     ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                 FadeInImage.assetNetwork(
-                                placeholder: 'assets/loading.gif',
-                                image:
-                                      'http://54.200.143.85:4200/profiles/then/${widget.postOwner}.jpg',
-                              ),
-                              ),
+                                    errorWidget: (context, url, error) =>
+                                        FadeInImage.assetNetwork(
+                                      placeholder: 'assets/loading.gif',
+                                      image:
+                                          'http://54.200.143.85:4200/profiles/then/${widget.postOwner}.jpg',
+                                    ),
                                   ),
+                                ),
+                              ),
                             ),
                     ),
                   ),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding:  EdgeInsets.all(8.0),
                       child: Text('${widget.description}'),
                     ),
                   )
                 ]),
           widget.description == '' ? SizedBox() : Divider(height: 0.0),
           Container(
-            margin: const EdgeInsets.all(2),
+            margin:  EdgeInsets.all(2),
             child: Row(
               children: <Widget>[
                 Flexible(
@@ -276,7 +296,6 @@ class _MediaAndCommentState extends State<MediaAndComment> {
   }
 
   _textMessageSubmitted(String text) {
-    // print('send comment : $text');
     addComment(_commentController.text.trim());
     setState(() {
       _isComposingMessage = false;
@@ -350,16 +369,15 @@ class Comment extends StatelessWidget {
                   color: Color(0xffb00bae3),
                   shape: BoxShape.circle,
                 ),
-                child: 
-                GestureDetector(
-                  onTap: (){
+                child: GestureDetector(
+                  onTap: () {
                     print('avatar:$avatarUrl');
                     print('userId:$userId');
                   },
                   child: ClipOval(
                     child: CircleAvatar(
                       radius: 20.0,
-                      backgroundColor: Colors.grey[300],
+                      backgroundColor: Colors.white,
                       child: CachedNetworkImage(
                         fit: BoxFit.cover,
                         imageUrl:
