@@ -39,7 +39,9 @@ class CommonFunctions {
     String tempPath = (await getTemporaryDirectory()).path;
     File a = new File(videoFilename);
     String basename = path.basename(a.path);
-    String dir = (await getExternalStorageDirectory() /* getApplicationDocumentsDirectory() */).path;
+    String dir =
+        (await getExternalStorageDirectory() /* getApplicationDocumentsDirectory() */)
+            .path;
     String processedfilename = '$dir${Config.videoRecordEdit}/$basename';
     print('$processedfilename--Hi');
     if (audioFilename == null || audioFilename == '') {
@@ -109,69 +111,66 @@ class CommonFunctions {
         videoFile: videoFile,
         imageType: ThumbFormat.PNG,
         quality: 30);
-        print('before return:$thumb');
+    print('before return:$thumb');
 
     return finalfilepath;
   }
 
-  Future<String> compressVideo(String videoFilePath) async{
+  Future<String> compressVideo(String videoFilePath) async {
     File f = new File(videoFilePath);
     String dir = (await getExternalStorageDirectory()).path;
     String fname = path.basename(f.path);
-     String finaldir = '$dir/OyeYaaro/sent';
+    String finaldir = '$dir/OyeYaaro/sent';
 
     if (!Directory(finaldir).existsSync()) {
       Directory(finaldir).createSync(recursive: true);
     }
-    String finalfilepath = '$finaldir/VID_${new DateTime.now().millisecondsSinceEpoch}_$fname';
-    await _flutterFFmpeg.execute(
+    String finalfilepath =
+        '$finaldir/VID_${new DateTime.now().millisecondsSinceEpoch}_$fname';
+    await _flutterFFmpeg
+        .execute(
             '-y -i $videoFilePath -c:v libx264 -crf 34 -preset superfast -c:a copy -b:v 700k $finalfilepath')
-     //await _flutterFFmpeg.execute(
-     //       '-y -i $videoFilePath $finalfilepath')
+        //await _flutterFFmpeg.execute(
+        //       '-y -i $videoFilePath $finalfilepath')
         .then((rc) => print("FFmpeg process exited with rc $rc"));
-        return finalfilepath;
+    return finalfilepath;
   }
 
-Future<bool> createMovieusingImages(String imgdir, Duration songDur, String songPath, int len) async{
-  print('in createMovieusingImages.............');
-  
-  double imgDur = songDur.inSeconds / len;
-  int imgdursec = imgDur.round();
-  String time = new DateTime.now().millisecondsSinceEpoch.toString();
-  String filename = 'vid_$time.mp4'; 
-  String dirafterAudio = (await getExternalStorageDirectory()).path;
-  String finaldirafteraudio = '$dirafterAudio/OyeYaaro/Videos/$filename';
-  String dir = (await getTemporaryDirectory()).path;
-  String mergedir = '$dir/mergedViddir';
-  Directory md = new Directory(mergedir);
-  md.createSync(recursive: true);
-  String finaldir = '$mergedir/$filename';
- 
-  await _flutterFFmpeg
-         //.execute(
-         //   '-y -i -r 60 -i $imgdir/image_%01d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p $finaldir')
-         //.then((rc) => print("FFmpeg process exited with rc $rc"));
+  Future<bool> createMovieusingImages(
+      String imgdir, Duration songDur, String songPath, int len) async {
+    print('in createMovieusingImages.............');
 
-        //.execute(
-        //     '-framerate 1/5 -i $imgdir/image_%01d.png -i $songPath -acodec aac -c:v libx264 -r 30 -pix_fmt yuv420p $finaldir')
-        // .then((rc) => print("FFmpeg process exited with rc $rc"));
-        // .execute(
-        //     '-framerate 1/5 -i $imgdir/image_%01d.png -c:v libx264 -r 30 -pix_fmt yuv420p $finaldir')
-        //  .then((rc) => print("FFmpeg process exited with rc $rc"));
+    try {
+      double imgDur = songDur.inSeconds / len;
+      int imgdursec = imgDur.round();
+      String time = new DateTime.now().millisecondsSinceEpoch.toString();
+      String filename = 'vid_$time.mp4';
+      String dirafterAudio = (await getExternalStorageDirectory()).path;
+      String finaldirafteraudio = '$dirafterAudio/OyeYaaro/Videos/$filename';
+      String dir = (await getTemporaryDirectory()).path;
+      String mergedir = '$dir/mergedViddir';
+      Directory md = new Directory(mergedir);
+      md.createSync(recursive: true);
+      String finaldir = '$mergedir/$filename';
 
+      await _flutterFFmpeg
           .execute(
-             '-y -framerate 1/$imgdursec -i $imgdir/%01d.jpg -r 30 -c:v libx264 -pix_fmt yuv420p $finaldir')
+              '-y -framerate 1/$imgdursec -i $imgdir/%01d.jpg -r 30 -c:v libx264 -pix_fmt yuv420p $finaldir')
           .then((rc) => print("FFmpeg process exited with rc $rc"));
 
-           await _flutterFFmpeg
-        .execute(
-            '-y -i $finaldir -i $songPath -acodec aac -vcodec copy $finaldirafteraudio')
-        .then((rc) => print("FFmpeg process exited with rc $rc"));
+      await _flutterFFmpeg
+          .execute(
+              '-y -i $finaldir -i $songPath -acodec aac -vcodec copy $finaldirafteraudio')
+          .then((rc) => print("FFmpeg process exited with rc $rc"));
 
-       String  th = await createThumbnail(finaldirafteraudio,filename);
-       print('th:$th....................');
-        md.deleteSync(recursive: true);
-  return true;
-}
-  
+          print('finaldirafteraudio: $finaldirafteraudio AND filename: $filename');
+
+      String th = await createThumbnail(finaldirafteraudio, filename);
+      print('th:$th....................');
+      md.deleteSync(recursive: true);
+      return true;
+    } catch (e) {
+      return e;
+    }
+  }
 }

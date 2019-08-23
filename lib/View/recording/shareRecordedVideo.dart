@@ -40,7 +40,6 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
 
   @override
   void initState() {
-    print('video array : ${widget.selectedIndexes}');
     getDir();
 
     this.groupChatListBlock = SelectBloc(
@@ -68,60 +67,65 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
 
   @override
   void dispose() {
-    print('shareing dispose');
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Share with'),
-          flexibleSpace: FlexAppbar(),
-        ),
-        body: Stack(
-          children: <Widget>[
-            Column(
-              children: <Widget>[
-                Container(
-                    width: double.maxFinite,
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.group,
-                        color: Colors.blue,
-                        size: 35,
-                      ),
-                      title: Text('Groups',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                    )),
-                Divider(
-                  height: 0.0,
+      appBar: AppBar(
+        title: Text('Share with'),
+        flexibleSpace: FlexAppbar(),
+      ),
+      body: Stack(
+        children: <Widget>[
+          ListView(
+            physics: ClampingScrollPhysics(),
+            children: <Widget>[
+              Container(
+                width: double.maxFinite,
+                child: ListTile(
+                  leading: Icon(
+                    Icons.group,
+                    color: Colors.blue,
+                    size: 35,
+                  ),
+                  title: Text(
+                    'Groups',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                StreamBuilder<List<Map>>(
-                  stream: groupChatListBlock.items,
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.hasData) {
-                      if (snapshot.data.length == 0) {
-                        return Container(
-                            width: double.maxFinite,
-                            padding: const EdgeInsets.all(8.0),
-                            child: ListTile(
-                              leading: Icon(
-                                Icons.error,
-                                color: Colors.red[200],
-                              ),
-                              title: Text('No groups found !',
-                                  style: TextStyle(
-                                    fontSize: 17,
-                                  )),
-                              subtitle: Text('Group\'s list will appear here..',
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontStyle: FontStyle.italic)),
-                            ));
-                      } else
-                        return ListView.builder(
+              ),
+              Divider(
+                height: 0.0,
+              ),
+              StreamBuilder<List<Map>>(
+                stream: groupChatListBlock.items,
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData) {
+                    if (snapshot.data.length == 0) {
+                      return Container(
+                          width: double.maxFinite,
+                          padding: EdgeInsets.all(8.0),
+                          child: ListTile(
+                            leading: Icon(
+                              Icons.error,
+                              color: Colors.red[200],
+                            ),
+                            title: Text('No groups found !',
+                                style: TextStyle(
+                                  fontSize: 17,
+                                )),
+                            subtitle: Text('Group\'s list will appear here..',
+                                style: TextStyle(
+                                    fontSize: 15, fontStyle: FontStyle.italic)),
+                          ));
+                    } else
+                      return Container(
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height / 3,
+                        ),
+                        child: ListView.builder(
                             reverse: false,
                             shrinkWrap: true,
                             itemCount: snapshot.data.length,
@@ -129,125 +133,139 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
                               var item = snapshot
                                   .data[(snapshot.data.length - 1) - index];
                               return _buildGroupList(item);
-                            });
-                    } else {
-                      return Container(
-                        height: 200,
-                        width: double.maxFinite,
-                        alignment: Alignment.center,
-                        child: CircularProgressIndicator(),
+                            }),
                       );
-                    }
-                  },
-                ),
-                Container(
-                    width: double.maxFinite,
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.person,
-                        color: Colors.blue,
-                        size: 35,
-                      ),
-                      title: Text('Contact chat',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                    )),
-                Divider(
-                  height: 0.0,
-                ),
-                StreamBuilder<List<Map>>(
-                  stream: privateChatListBloc.items,
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.hasData) {
-                      if (snapshot.data.length == 0) {
-                        return ListTile(
-                          leading: Icon(
-                            Icons.error,
-                            color: Colors.red[200],
-                          ),
-                          title: Text('No Contact\'s chat found !',
-                              style: TextStyle(
-                                fontSize: 17,
-                              )),
-                          subtitle: Text(
-                              'Your one-one chat\'s list will appear here..',
-                              style: TextStyle(
-                                  fontSize: 15, fontStyle: FontStyle.italic)),
-                        );
-                      } else
-                        return Expanded(
-                          child: ListView.builder(
-                              reverse: false,
-                              itemCount: snapshot.data.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                var item = snapshot
-                                    .data[(snapshot.data.length - 1) - index];
-                                return _buildContactList(item);
-                              }),
-                        );
-                    } else {
-                      return Container(
-                        height: 200,
-                        width: double.maxFinite,
-                        alignment: Alignment.center,
-                        child: CircularProgressIndicator(),
+                  } else {
+                    return Container(
+                      height: 200,
+                      width: double.maxFinite,
+                      alignment: Alignment.center,
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                },
+              ),
+              Container(
+                  width: double.maxFinite,
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.person,
+                      color: Colors.blue,
+                      size: 35,
+                    ),
+                    title: Text('Contact chat',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                  )),
+              Divider(
+                height: 0.0,
+              ),
+              StreamBuilder<List<Map>>(
+                stream: privateChatListBloc.items,
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData) {
+                    if (snapshot.data.length == 0) {
+                      return ListTile(
+                        leading: Icon(
+                          Icons.error,
+                          color: Colors.red[200],
+                        ),
+                        title: Text('No Contact\'s chat found !',
+                            style: TextStyle(
+                              fontSize: 17,
+                            )),
+                        subtitle: Text(
+                            'Your one-one chat\'s list will appear here..',
+                            style: TextStyle(
+                                fontSize: 15, fontStyle: FontStyle.italic)),
                       );
-                    }
-                  },
-                ),
-              ],
-            ),
-            isLoading
-                ? Container(
-                    decoration:
-                        BoxDecoration(color: Colors.black.withOpacity(0.5)),
-                    child: Center(
-                      child: Container(
-                        height: 110,
-                        child: Card(
-                          margin: EdgeInsets.all(15),
-                          child: Row(
-                            children: <Widget>[
-                              Container(
-                                  padding: EdgeInsets.all(20),
-                                  child: CircularProgressIndicator()),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Container(
-                                    width:
-                                        MediaQuery.of(context).size.width / 2,
-                                    padding: EdgeInsets.only(left: 10),
-                                    child: Text(
-                                      'Sending to $to',
-                                      softWrap: true,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold),
-                                    ),
+                    } else
+                      return
+                          // Column(
+                          //   children: <Widget>[
+                          //     Flexible(
+                          //       flex:snapshot.data.length,
+                          //       child:
+                          Container(
+                        constraints: BoxConstraints(
+                            maxHeight:
+                                MediaQuery.of(context).size.height / 2.5),
+                        child: ListView.builder(
+                          reverse: false,
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            var item = snapshot
+                                .data[(snapshot.data.length - 1) - index];
+                            return _buildContactList(item);
+                          },
+                        ),
+                      );
+                    //     ),
+                    //   ],
+                    // );
+                  } else {
+                    return Container(
+                      height: 200,
+                      width: double.maxFinite,
+                      alignment: Alignment.center,
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+          isLoading
+              ? Container(
+                  decoration:
+                      BoxDecoration(color: Colors.black.withOpacity(0.5)),
+                  child: Center(
+                    child: Container(
+                      height: 110,
+                      child: Card(
+                        margin: EdgeInsets.all(15),
+                        child: Row(
+                          children: <Widget>[
+                            Container(
+                                padding: EdgeInsets.all(20),
+                                child: CircularProgressIndicator()),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                  width: MediaQuery.of(context).size.width / 2,
+                                  padding: EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    'Sending to $to',
+                                    softWrap: true,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
                                   ),
-                                  Container(
-                                    padding: EdgeInsets.only(left: 10),
-                                    child: Text(
-                                      'Sending $uploaded / ${widget.selectedIndexes.length}',
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.normal,
-                                          fontStyle: FontStyle.italic),
-                                    ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    'Sending $uploaded / ${widget.selectedIndexes.length}',
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.normal,
+                                        fontStyle: FontStyle.italic),
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  )
-                : SizedBox()
-          ],
-        ));
+                  ),
+                )
+              : SizedBox()
+        ],
+      ),
+    );
   }
 
 // GroupList view

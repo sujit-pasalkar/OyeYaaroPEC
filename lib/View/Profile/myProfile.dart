@@ -32,8 +32,8 @@ class MyProfile extends StatefulWidget {
 }
 
 class _ProfileState extends State<MyProfile> {
-  static const platform =
-      const MethodChannel('com.plmlogix.oye_yaaro_pec/platform');
+  // static const platform =
+  //     const MethodChannel('com.plmlogix.oye_yaaro_pec/platform');
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   TextEditingController _textEditingController = new TextEditingController();
@@ -105,10 +105,8 @@ class _ProfileState extends State<MyProfile> {
                         try {
                           // get contact name
                           row = await sqlQuery.getContactName(phone);
-                          // print('name res:${row[0]['contactsName']}');
                           chat(row[0]['contactsName']);
                         } catch (e) {
-                          // print('i dont have this number :$e');
                           chat(phone);
                         }
                       },

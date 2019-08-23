@@ -12,7 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // page
 import '../View/Personal/chat_list.dart';
 import '../View/Group/group_list.dart';
-import 'imageProcessor/dashboard2.dart';
+import 'imageProcessor/dashboard.dart';
 
 // mvp
 import '../Models/sharedPref.dart';
