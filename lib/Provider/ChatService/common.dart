@@ -60,10 +60,10 @@ class Common {
     String s1;
     if (type == '3') {
       s1 = url.replaceAll('http://oyeyaaroapi.plmlogix.com/AudioChat/', '');
-      print('song 3: $s1 ');
+      // print('song 3: $s1 ');
     } else {
       s1 = url.replaceAll('http://oyeyaaroapi.plmlogix.com/Audio/', '');
-      print('song 4: $s1 ');
+      // print('song 4: $s1 ');
     }
 
     try {

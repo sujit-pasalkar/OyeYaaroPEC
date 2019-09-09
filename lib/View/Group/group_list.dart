@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Provider/ChatService/common.dart';
 import 'package:oye_yaaro_pec/Provider/ChatService/group.dart';
+// import 'package:oye_yaaro_pec/Provider/ChatService/group.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
 import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
@@ -44,10 +45,10 @@ class _GroupListState extends State<GroupList> {
 
     _groupListChildChangedSubscription =
         _groupListReference.onChildChanged.listen((Event event) {
-      print('in onChildChanged:');
+      // print('in onChildChanged:');
 
-      print(
-          'onChildChanged : ${event.snapshot.value['members']} and me : ${pref.phone}');
+      // print(
+      //     'onChildChanged : ${event.snapshot.value['members']} and me : ${pref.phone}');
       if (event.snapshot.value['members'].contains(pref.pin.toString())) {
         //chek condition
         // print('conatains');
@@ -62,19 +63,19 @@ class _GroupListState extends State<GroupList> {
         };
 
         sqlQuery.addGroupChatList(obj).then((onValue) {
-          print('entry added in sqflite addchatlist');
+          // print('entry added in sqflite addchatlist');
         }, onError: (e) {
           print('show error message if addChatlist fails : $e');
         });
       } else {
-        print('this msg is not for me');
+        // print('this msg is not for me');
       }
     });
 
 // group created
     _groupListChildCreatedSubscription =
         _groupListReference.onChildAdded.listen((Event event) {
-      print('in onChildAdded:');
+      // print('in onChildAdded:');
 
       if (event.snapshot.value['members'].contains(pref.pin.toString()) ||
           event.snapshot.value['admin'] == pref.pin.toString()) {

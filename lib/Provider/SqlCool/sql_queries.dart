@@ -13,7 +13,7 @@ class SqlQuery {
           where: "contactsPhone=${row['contactsPhone']}");
       if (exists) {
         if (isRegistered) {
-          print('${row['contactsPhone']} exist and reg');
+          // print('${row['contactsPhone']} exist and reg');
           int val = await db.update(
               table: "contactsTable",
               row: row,
@@ -24,7 +24,7 @@ class SqlQuery {
           _c.complete(1);
         }
       } else {
-        print('${row['contactsPhone']} not exist');
+        // print('${row['contactsPhone']} not exist');
         val = await db.insert(table: "contactsTable", row: row, verbose: false);
         _c.complete(val);
       }

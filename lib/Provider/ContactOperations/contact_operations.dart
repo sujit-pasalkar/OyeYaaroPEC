@@ -27,7 +27,7 @@ class ContactOperation {
 
   Future _populateContacts(Iterable<Contact> contacts) async {
     Completer _c = new Completer();
-    print('in _pop');
+    // print('in _pop');
     try {
       for (int c = 0; c < contacts.toList().length; c++) {
         if (contacts.toList()[c].displayName != null &&

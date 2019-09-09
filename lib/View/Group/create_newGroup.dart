@@ -33,8 +33,8 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
   void initState() {
     super.initState();
     print(pref.pin);
-    print('addInGroup :${widget.addMembers}');
-    print('membs :${widget.checkAddMembers}');
+    // print('addInGroup :${widget.addMembers}');
+    // print('membs :${widget.checkAddMembers}');
   }
 
   @override

@@ -1,3 +1,4 @@
+// not used
 import 'dart:async';
 import 'dart:convert';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
@@ -8,7 +9,7 @@ class Group {
   static Future fetchGroupChat() async {
     Completer _c = new Completer();
     var arr = [];
-    print('you are in fetch GroupChat: ${pref.phone.toString()} ');
+    // print('you are in fetch GroupChat: ${pref.phone.toString()} ');
     var body = jsonEncode({"senderPhone": "${pref.pin.toString()}"});
 
     try {

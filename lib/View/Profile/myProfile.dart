@@ -521,18 +521,17 @@ class _ProfileState extends State<MyProfile> {
         var res = jsonDecode(response.body)["data"][0];
         var chatId = res["chat_id"];
 
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => ChatScreen(
-        //         chatId: chatId,
-        //         chatType: 'private',
-        //         receiverName: name,
-        //         receiverPhone: widget.phone.toString(),
-        //         // profileUrl: firebaseUrl
-        //         receiverPin: widget.pin),
-        //   ),
-        // );
+        Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(
+              chatId: chatId,
+              chatType: 'private',
+              receiverName: name,
+              receiverPhone: widget.pin.toString(),
+              // profileUrl: chatList['profileUrl']
+              recPin: widget.pin.toString()),
+        ));
 
         setState(() {
           _isLoading = false;

@@ -64,3 +64,10 @@ pin info
 1.me jio = 610953 = 7972241516
 2.me airtel = 138628
 3.snehal = 414069 = 8554851417
+
+//available groups
+PEC Mechanical 1965
+pins: 877333,982576,211557,828247,560006
+
+//group not found
+PEC Aeronautical 1981
