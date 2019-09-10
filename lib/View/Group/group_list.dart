@@ -11,6 +11,7 @@ import 'package:oye_yaaro_pec/View/Group/group_chatScreen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oye_yaaro_pec/View/New_createGroup/createGroup.dart';
 import 'package:sqlcool/sqlcool.dart';
 
 class GroupList extends StatefulWidget {
@@ -223,7 +224,8 @@ class _GroupListState extends State<GroupList> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ContactsGroup(),
+              builder: (context) => CreateGroup(),
+              // ContactsGroup(),
             ),
           );
         },
