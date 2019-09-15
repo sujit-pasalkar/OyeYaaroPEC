@@ -8,15 +8,15 @@ import 'package:async/async.dart';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Models/url.dart';
 import 'package:oye_yaaro_pec/Provider/MediaOperation/compressMedia.dart';
-import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
-import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
+// import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
+// import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
 import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
 import 'package:oye_yaaro_pec/View/Feeds/userFeedBuilder.dart';
 import 'package:oye_yaaro_pec/View/Personal/personal_chatScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
+// import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -313,7 +313,7 @@ class _ProfileState extends State<MyProfile> {
                           backgroundColor: Color(0xffb4fcce0),
                           radius: 55,
                           child: Image(
-                            image: new AssetImage("assets/GROUP.png"),
+                            image:  AssetImage("assets/GROUP.png"),
                             color: Colors.white,
                             width: 50.0,
                             height: 50.0,

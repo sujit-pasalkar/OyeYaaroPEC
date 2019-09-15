@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
 import 'joined.dart';
 import 'missed.dart';
 
@@ -67,7 +68,7 @@ class _GrpInfoTabsHomeState extends State<GrpInfoTabsHome>
         //     },
         //   ),
         // ],
-        backgroundColor: Color(0xffb00bae3),
+         flexibleSpace: FlexAppbar(),
       ),
       body:  TabBarView(
         controller: _tabController,

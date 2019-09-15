@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
 import 'package:oye_yaaro_pec/View/Group/create_newGroup.dart';
 import 'createNewGroupModel.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -63,14 +65,6 @@ class _CreateNewGroupState extends State<CreateNewGroup> {
                           style: TextStyle(color: Colors.white, fontSize: 18)),
                       onPressed: addInGroup.length != 0
                           ? () {
-                              print('addInGroup $addInGroup');
-
-                              // Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //       builder: (context) => CreateGroupWithName(
-                              //           addInGroup: addInGroup),
-                              //     ));
 
                               Navigator.push(
                               context,
@@ -105,11 +99,10 @@ class _CreateNewGroupState extends State<CreateNewGroup> {
                       })
               : SizedBox(height: 0, width: 0),
         ],
+         flexibleSpace: FlexAppbar(),
       ),
       body: !showLoading
           ?
-          // !create // no need 2 condtion
-          //     ?
           Column(children: <Widget>[
               Container(
                 margin: EdgeInsets.all(22.0),
@@ -206,10 +199,32 @@ class _CreateNewGroupState extends State<CreateNewGroup> {
                                       child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(40.0),
-                                          child: Image.network(
-                                            'http://oyeyaaroapi.plmlogix.com/getAvatarImageNow/${searchresult[index]['PinCode']}',
-                                            fit: BoxFit.cover,
-                                          )),
+                                          child: 
+                                        CachedNetworkImage(
+                                fit: BoxFit.cover,
+                                imageUrl:
+                                    'http://54.200.143.85:4200/profiles/now/${searchresult[index]['PinCode']}.jpg',
+                                placeholder: (context, url) => Center(
+                                  child: SizedBox(
+                                    height: 20.0,
+                                    width: 20.0,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 1.0),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    FadeInImage.assetNetwork(
+                                  placeholder: 'assets/loading.gif',
+                                  image:
+                                      'http://54.200.143.85:4200/profiles/then/${searchresult[index]['PinCode']}.jpg',
+                                ),
+                              ),
+
+                                          // Image.network(
+                                          //   'http://oyeyaaroapi.plmlogix.com/getAvatarImageNow/${searchresult[index]['PinCode']}',
+                                          //   fit: BoxFit.cover,
+                                          // ),
+                                          ),
                                     ),
                                   ),
                                 ),
