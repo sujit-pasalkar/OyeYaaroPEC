@@ -71,3 +71,9 @@ pins: 877333,982576,211557,828247,560006
 
 //group not found
 PEC Aeronautical 1981
+
+addInGroup : [121212, 844191]
+cl : [{name: Akshay jadhav. plmlogix, phone: 7020988762, pin: 121212}, {name: Gaurave. Plm Logix Jio, phone: 7020425434, pin: 844191}]
+
+add sender name filed  in group chat list, table
+pchat,pchatlist

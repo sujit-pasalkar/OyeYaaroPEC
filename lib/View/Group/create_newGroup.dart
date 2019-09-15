@@ -25,8 +25,8 @@ class CreateGroupWithName extends StatefulWidget {
 }
 
 class _CreateGroupWithNameState extends State<CreateGroupWithName> {
-  final globalKey = new GlobalKey<ScaffoldState>();
-  TextEditingController _groupName = new TextEditingController();
+  final globalKey =  GlobalKey<ScaffoldState>();
+  TextEditingController _groupName =  TextEditingController();
   bool showLoading = false;
 
   @override
@@ -86,14 +86,14 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
                         leading: GestureDetector(
                           onTap: () {
                             print(widget.addMembers);
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => MyProfile(
-                            //       pin: int.parse(widget.addMembers[i]['pin']),
-                            //     ),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MyProfile(
+                                  pin: int.parse(widget.addMembers[i]['pin']),
+                                ),
+                              ),
+                            );
                           },
                           child: Container(
                             padding: EdgeInsets.all(1),
@@ -144,7 +144,7 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   CircularProgressIndicator(
-                      valueColor: new AlwaysStoppedAnimation<Color>(
+                      valueColor:  AlwaysStoppedAnimation<Color>(
                           Color(0xffb00bae3))),
                   Padding(
                     padding: EdgeInsets.only(top: 10),
@@ -174,7 +174,7 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
   }
 
   Future addMemberInFbGroup(String chatId) {
-    Completer _c = new Completer();
+    Completer _c =  Completer();
     try {
       // add members[] in firebase groupId
       DatabaseReference groupMembersRef =

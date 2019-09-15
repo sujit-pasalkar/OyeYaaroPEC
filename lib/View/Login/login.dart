@@ -49,16 +49,16 @@ class _LoginPageState extends State<LoginPage> {
   void loadData() {
     _countryCodes = [];
     _countryCodes.add(
-      new DropdownMenuItem(
-          child: new Text(
+       DropdownMenuItem(
+          child:  Text(
             'India',
             style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
           ),
           value: '+91'),
     );
 
-    _countryCodes.add(new DropdownMenuItem(
-        child: new Text(
+    _countryCodes.add( DropdownMenuItem(
+        child:  Text(
           'United States',
           style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
         ),
@@ -66,7 +66,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void timer() {
-    // print('in timer');
     setState(() {
       _start = 45;
     });
@@ -79,7 +78,6 @@ class _LoginPageState extends State<LoginPage> {
             timer.cancel();
           } else {
             _start = _start - 1;
-            // print('time remain $_start');
           }
         },
       ),
@@ -100,7 +98,6 @@ class _LoginPageState extends State<LoginPage> {
       });
       _scaffoldKey.currentState.showSnackBar(SnackBar(
         content: Text('Verification Failed'
-            // authException.message
             ),
       ));
     };
@@ -112,7 +109,6 @@ class _LoginPageState extends State<LoginPage> {
         this.smsCodeSent = true;
         this.verificationId = verificationId;
       });
-      // print('verification id:$verificationId');
       timer();
     };
 
@@ -135,14 +131,12 @@ class _LoginPageState extends State<LoginPage> {
 
   void _signInWithPhoneNumber() async {
     try {
-      // print(verificationId);
 
       final AuthCredential credential = PhoneAuthProvider.getCredential(
         verificationId: verificationId,
         smsCode: smsCode,
       );
-      print('in signinwithphone-- code:$smsCode,id:$verificationId');
-      // print(' credential: $credential');
+      // print('in signinwithphone-- code:$smsCode,id:$verificationId');
 
       final FirebaseUser user =
           await FirebaseAuth.instance.signInWithCredential(credential);
@@ -156,12 +150,10 @@ class _LoginPageState extends State<LoginPage> {
           print('Successfully signed in');
           register();
         } else {
-          print('throw exception');
           throw Exception('We couldn\'t verify your code, please try again!');
         }
       });
     } catch (e) {
-      print('Error: $e');
       _scaffoldKey.currentState.showSnackBar(
           SnackBar(content: Text('Invalid OTP'), backgroundColor: Colors.redAccent));
       setState(() {
@@ -179,7 +171,7 @@ class _LoginPageState extends State<LoginPage> {
       pref.setPhone(int.parse(phoneNo));
       _timer.cancel();
       // set contacts
-      await co.getContacts();
+      // await co.getContacts();
        setState(() {
         this.loading = false;
         loadingMessage = '';
@@ -235,7 +227,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     loadData();
-    return new Scaffold(
+    return  Scaffold(
       key: _scaffoldKey,
       resizeToAvoidBottomPadding: true,
       body: WillPopScope(
@@ -427,7 +419,6 @@ class _LoginPageState extends State<LoginPage> {
                                           ),
                                           keyboardType: TextInputType.number,
                                           onChanged: (input) {
-                                            // print(input);
                                             if (input.length == 10) {
                                               setState(() {
                                                 verifybtn = true;
@@ -519,7 +510,7 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(top: 15.0),
+                            padding:  EdgeInsets.only(top: 15.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
@@ -559,7 +550,7 @@ class _LoginPageState extends State<LoginPage> {
                                       FirebaseAuth.instance
                                           .currentUser()
                                           .then((user) {
-                                        print('currentUser: $user');
+                                        // print('currentUser: $user');
                                         print(verificationId);
                                         if (user != null) {
                                           register();

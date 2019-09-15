@@ -1,4 +1,5 @@
 // share to private and group chatlist from video.dart page
+// add recName remainig
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -51,9 +52,9 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
     );
 
     this.privateChatListBloc = SelectBloc(
-      table: "contactsTable",
+      table: "privateChatListTable",//"contactsTable",
       columns: "*",
-      where: "contactRegistered='1'",
+      // where: "contactRegistered='1'",
       verbose: false,
       database: db,
       reactive: true,
@@ -316,7 +317,10 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => MyProfile(
-                    pin: int.parse(chatList['contactsPin']),
+                    pin: pref.pin.toString() == chatList['chatListSenderPin']? int.parse(chatList['chatListRecPin'])
+                    :
+                    int.parse(chatList['chatListSenderPin'])
+                    ,
                   ),
                 ),
               );
@@ -342,7 +346,9 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
                       ),
                     ),
                     errorWidget: (context, url, error) {
-                      String urlPin = chatList['contactsPin'];
+                      String urlPin = 
+                       pref.pin.toString() == chatList['chatListSenderPin']? chatList['chatListRecPin']:chatList['chatListSenderPin'];
+                      // chatList['contactsPin'];
                       return FadeInImage.assetNetwork(
                         placeholder: 'assets/loading.gif',
                         image:
@@ -354,8 +360,14 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
               ),
             ),
           ),
-          title: Text(chatList['contactsName']),
-          subtitle: Text(chatList['contactsPhone']),
+          title: Text(
+            // chatList['contactsName']
+            pref.pin.toString() == chatList['chatListSenderPin']? chatList['chatListRecName']:chatList['chatListSenderName']
+            ),
+          subtitle: Text(
+            pref.pin.toString() == chatList['chatListSenderPin']? chatList['chatListRecPin']:chatList['chatListSenderPin']
+            // chatList['contactsPhone']
+            ),
         ),
         Divider(height: 0.0, indent: 75.0)
       ],
@@ -681,15 +693,20 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
   sendToPrivate(Map<String, dynamic> chatList) async {
     setState(() {
       isLoading = true;
-      to = chatList['contactsName'];
+      to = pref.pin.toString() == chatList['chatListSenderPin']? chatList['chatListRecName']:chatList['chatListSenderName'];
+      // chatList['contactsName'];
     });
+    String toPin = pref.pin.toString() == chatList['chatListSenderPin']? chatList['chatListRecPin']:chatList['chatListSenderPin'];
+     String toPhone = pref.pin.toString() == chatList['chatListSenderPin']? chatList['chatListRecPhone']:chatList['chatListSenderPhone'];
+
     try {
       // 1.get chatId
       String body = jsonEncode({
         "senderPhone": pref.pin.toString(),
-        "receiverPhone": chatList['contactsPin'].toString()
+        "receiverPhone": pref.pin.toString() == chatList['chatListSenderPin']? chatList['chatListRecPin']:chatList['chatListSenderPin']
+        // chatList['contactsPin'].toString()
       });
-      print('recPin:${chatList['contactsPin']}');
+      // print('recPin:${chatList['contactsPin']}');
 
       var response = await http.post("${url.api}startChatToContacts",
           headers: {"Content-Type": "application/json"}, body: body);
@@ -727,14 +744,16 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
             timestamp.toString(),
             pref.name,
             pref.phone.toString(),
-            chatList['contactsPhone'],
+            toPhone,//chatList['contactsPhone'],
             '0',
             "mediaUrl", //firebaseUrl
             newThumb.path,
             "thumbUrl",
             // pref.profileUrl
             pref.pin.toString(),
-            chatList['contactsPin']);
+            toPin,
+            // chatList['contactsPin'],
+            to);
         print('4.addGroupChatValue passed:$addPrivateChatValue');
 
         //5.add sender's msg as last msg to privatechatlisttable sqlite
@@ -742,12 +761,14 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
             chatId,
             'Video',
             pref.phone.toString(),
-            chatList['contactsPhone'],
+           toPhone,// chatList['contactsPhone'],
             timestamp.toString(),
             '0',
             // chatList['profileUrl']
             pref.pin.toString(),
-            chatList['contactsPin']);
+           toPin,// chatList['contactsPin'],
+           pref.name,
+            to);
         print('5.addGroupChatListValue passed:$addPrivateChatListValue');
 
         // 6.call compress function
@@ -766,14 +787,16 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
             compressedVideoFile.path, //new desired path(compressed)
             pref.phone.toString(),
             "2", //msgType
-            chatList['contactsPhone'],
+            toPhone,//chatList['contactsPhone'],
             timestamp.toString(),
             "0", //isUpload
             "mediaUrl", //firebase url.here no need
             newThumb.path,
             "thumbUrl",
             pref.pin.toString(),
-            chatList['contactsPin']);
+            toPin,//chatList['contactsPin']
+            to
+            );
         print('7: updateGroupChatValue passed : $updatePrivateChatValue');
 
         //7.uplaod to fb
@@ -784,10 +807,12 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
             timestamp.toString(),
             pref.name,
             pref.phone.toString(),
-            chatList['contactsPhone'].toString(),
+            toPhone,//chatList['contactsPhone'].toString(),
             newThumb.path,
             pref.pin.toString(),
-            chatList['contactsPin']);
+            toPin,//chatList['contactsPin']
+            to
+            );
 
         print('8 end .Video uploaded successfully:$uploadVideoValue');
         setState(() {
@@ -842,7 +867,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
       String receiverPhone,
       String thumbPath,
       String senderPin,
-      String recPin) async {
+      String recPin,String recName) async {
     Completer _c = new Completer();
     try {
       print('8.1 status uploading started');
@@ -888,7 +913,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
           thumbPath,
           thumbUrl,
           senderPin,
-          recPin);
+          recPin,recName);
 
       print('8.5 updated data vid to groupchat sql: $updatePrivateChatVal');
 

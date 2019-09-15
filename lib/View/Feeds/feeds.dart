@@ -19,7 +19,7 @@ class Feeds extends StatefulWidget {
 
   Feeds({@required this.hideButtonController, Key key}) : super(key: key);
   @override
-  _FeedsState createState() => new _FeedsState();
+  _FeedsState createState() =>  _FeedsState();
 }
 
 class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
@@ -277,9 +277,9 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
     int loop = 0;
     for (int i = 0; i < count; i++) {
       if (i % 2 == 0) {
-        _staggeredTiles.add(new StaggeredTile.count(1, one));
+        _staggeredTiles.add( StaggeredTile.count(1, one));
       } else {
-        _staggeredTiles.add(new StaggeredTile.count(1, two));
+        _staggeredTiles.add( StaggeredTile.count(1, two));
       }
       loop = loop + 1;
     }

@@ -1,10 +1,17 @@
+// came from new chat floating button (for start new personal chat)
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Models/url.dart';
+import 'package:oye_yaaro_pec/Provider/ContactOperations/contact_operations.dart';
 import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
+import 'package:oye_yaaro_pec/View/Personal/personal_chatScreen.dart';
+import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
+
+// import 'createNewGroup.dart';
+import 'groupInfoTabsPage.dart';
 
 class CreateGroup extends StatefulWidget {
   @override
@@ -13,7 +20,7 @@ class CreateGroup extends StatefulWidget {
 
 class _CreateGroupState extends State<CreateGroup> {
   final formKey = GlobalKey<FormState>();
-  var _scaffoldKey =  GlobalKey<ScaffoldState>();
+  var _scaffoldKey = GlobalKey<ScaffoldState>();
 
   //service res
   String val = '';
@@ -21,9 +28,9 @@ class _CreateGroupState extends State<CreateGroup> {
   List<dynamic> branch;
 
 // search related vars
-  final globalKey =  GlobalKey<ScaffoldState>();
-  TextEditingController _controller =  TextEditingController();
-  TextEditingController _controllerCollege =  TextEditingController();
+  final globalKey = GlobalKey<ScaffoldState>();
+  TextEditingController _controller = TextEditingController();
+  TextEditingController _controllerCollege = TextEditingController();
 
   List<dynamic> collegelist;
   bool typing = false;
@@ -38,11 +45,11 @@ class _CreateGroupState extends State<CreateGroup> {
   List<DropdownMenuItem<String>> _branches = [];
   double opacity = 1.0;
   bool showLoading = false;
-  String _year = null;
-  String _branch = null;
+  String _year;
+  String _branch;
   bool openGrpButton;
 
-  String _check, token, groupName;
+  String token, groupName; //_check,
   int _count = 0;
 
   @override
@@ -51,11 +58,11 @@ class _CreateGroupState extends State<CreateGroup> {
     this.year = [];
     this.branch = [];
     values();
+    super.initState();
   }
 
   void values() async {
     collegelist = List();
-    ;
     String collegeName = pref.collegeName;
     //call getCollegeList Service
     collegelist.addAll([
@@ -71,6 +78,7 @@ class _CreateGroupState extends State<CreateGroup> {
 
   @override
   Widget build(BuildContext context) {
+    loadData();
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -152,19 +160,19 @@ class _CreateGroupState extends State<CreateGroup> {
                                       child: Container(
                                         width: 50.0,
                                         height: 50.0,
-                                        decoration: new BoxDecoration(
+                                        decoration:  BoxDecoration(
                                           color: Color(0xffb00bae3),
                                           shape: BoxShape.circle,
                                         ),
                                         child: Container(
                                           margin: EdgeInsets.all(2.5),
-                                          decoration: new BoxDecoration(
+                                          decoration:  BoxDecoration(
                                             color: Colors.white,
                                             shape: BoxShape.circle,
                                           ),
                                           child: Container(
                                               margin: EdgeInsets.all(1.0),
-                                              decoration: new BoxDecoration(
+                                              decoration:  BoxDecoration(
                                                 shape: BoxShape.circle,
                                                 color: Colors.grey[300],
                                               ),
@@ -179,15 +187,15 @@ class _CreateGroupState extends State<CreateGroup> {
                                         ),
                                       ),
                                       onTap: () {
-                                        // Navigator.push(
-                                        //   context,
-                                        //   MaterialPageRoute(
-                                        //     builder: (context) => ProfilePage(
-                                        //       userPin: searchresult[index]
-                                        //           ['PinCode'],
-                                        //     ),
-                                        //   ),
-                                        // );
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => MyProfile(
+                                              pin: int.parse(searchresult[index]
+                                                  ['PinCode']),
+                                            ),
+                                          ),
+                                        );
                                       }),
                                   title: searchresult[index]['Name'] == null
                                       ? Text(
@@ -215,11 +223,11 @@ class _CreateGroupState extends State<CreateGroup> {
                                               borderRadius:
                                                   BorderRadius.circular(30.0)),
                                           onPressed: () {
-                                            // chat(
-                                            //     context,
-                                            //     searchresult[index]['PinCode'],
-                                            //     searchresult[index]['Name'],
-                                            //     searchresult[index]['Mobile']);
+                                            print('nav to chat');
+                                            chat(
+                                                searchresult[index]['PinCode'],
+                                                searchresult[index]['Name'],
+                                                searchresult[index]['Mobile']);
                                           })
                                       : FlatButton(
                                           child: Text(
@@ -233,8 +241,8 @@ class _CreateGroupState extends State<CreateGroup> {
                                               borderRadius:
                                                   BorderRadius.circular(30.0)),
                                           onPressed: () {
-                                            // invite(
-                                            //     searchresult[index]['PinCode']);
+                                            invite(
+                                                searchresult[index]['PinCode']);
                                           },
                                         ),
                                 ),
@@ -305,18 +313,17 @@ class _CreateGroupState extends State<CreateGroup> {
                                         );
                                       },
                                     ),
-                                    new FormField(
+                                    FormField(
                                       builder: (FormFieldState state) {
                                         return InputDecorator(
                                           decoration: InputDecoration(
                                             labelText: 'Year',
                                           ),
-                                          child:
-                                              new DropdownButtonHideUnderline(
-                                            child: new DropdownButton(
+                                          child: DropdownButtonHideUnderline(
+                                            child: DropdownButton(
                                               value: _year,
                                               items: _years,
-                                              hint: new Text('Select year'),
+                                              hint: Text('Select year'),
                                               onChanged: (value) {
                                                 _year = value;
                                                 setState(() {
@@ -329,7 +336,7 @@ class _CreateGroupState extends State<CreateGroup> {
                                         );
                                       },
                                     ),
-                                    new Padding(
+                                    Padding(
                                       padding: const EdgeInsets.only(top: 60.0),
                                     ),
                                     SizedBox(
@@ -426,7 +433,7 @@ class _CreateGroupState extends State<CreateGroup> {
       showSearchGroupDropdown = true;
     });
     var body = jsonEncode({
-      "College": "$value",
+      "College": "PEC", //"$value",
     });
     http
         .post("http://oyeyaaroapi.plmlogix.com/yearAndBatch",
@@ -448,26 +455,28 @@ class _CreateGroupState extends State<CreateGroup> {
     // SharedPreferences prefs = await SharedPreferences.getInstance();
     // String userPin = prefs.getString('userPin');
 
-    http.Response response = await http.post("${url.api}/studentList",
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"college": '${this.val}', "userPin": pref.pin}));
+    http.Response response = await http.post(
+      "http://oyeyaaroapi.plmlogix.com/studentList",
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"college": '${this.val}', "userPin": pref.pin}),
+    );
     var res = jsonDecode(response.body);
-    this.collegeStudentList = res['data']; //.sort;
-    print('student list res:$collegeStudentList');
     setState(() {
+      this.collegeStudentList = res['data']; //.sort;
       showLoading = false;
     });
+    print('student list res:$collegeStudentList');
   }
 
   Future<void> _checkGroup() async {
     if (this._branch == null) {
-      // Fluttertoast.showToast(
-      //   msg: "Please Select branch",
-      // );
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text('Please Select branch'),
+      ));
     } else if (this._year == null) {
-      // Fluttertoast.showToast(
-      //   msg: "Please Select Year",
-      // );
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text('Please Select Year'),
+      ));
     } else if (formKey.currentState.validate()) {
       formKey.currentState.save();
       setState(() {
@@ -479,7 +488,7 @@ class _CreateGroupState extends State<CreateGroup> {
       print('$val,$_branch,$_year');
 
       var body3 = jsonEncode({
-        "clg": "$val",
+        "clg": "PEC",
         "branch": "$_branch",
         "year": "$_year",
       });
@@ -495,18 +504,18 @@ class _CreateGroupState extends State<CreateGroup> {
         });
         print("res len :$res['data'].length");
         if (res['data'] != null) {
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //       builder: (context) => GrpInfoTabsHome(
-          //           peerId: res['data']['dialog_id'],
-          //           chatType: 'group',
-          //           groupName: res['data']['name']),
-          //     ));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GrpInfoTabsHome(
+                    peerId: res['data']['dialog_id'],
+                    chatType: 'group',
+                    groupName: res['data']['name']),
+              ));
         } else {
-          // Fluttertoast.showToast(
-          //   msg: "Group not found.",
-          // );
+          _scaffoldKey.currentState.showSnackBar(SnackBar(
+            content: Text('Group not found.'),
+          ));
         }
       });
     }
@@ -535,4 +544,116 @@ class _CreateGroupState extends State<CreateGroup> {
       style: new TextStyle(color: Colors.white),
     );
   }
+
+  invite(userPin) {
+    ContactOperation.sharePin(userPin);
+    // Share.share(
+    //     'You are invited to join your classmates @OyeYaaro. Download this App using http://oyeyaaro.plmlogix.com/download use PIN #$userPin to login.See you in the room chat!');
+  }
+
+  // Future<void> chat(context, id, name, Mobile) async {
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // String userpin = prefs.getString('userPin');
+    // String userName = prefs.getString('userName');
+    // String userNumber = prefs.getString('userPhone');
+    // var bodyPMsg = jsonEncode({
+    //   "senderPin": userpin,
+    //   "receiverPin": id,
+    //   "senderName": userName,
+    //   "receiverName": name,
+    //   "senderNumber": userNumber,
+    //   "receiverNumber": Mobile
+    // });
+    // http
+    //     .post("http://oyeyaaroapi.plmlogix.com/startChat",
+    //         headers: {"Content-Type": "application/json"}, body: bodyPMsg)
+    //     .then((response) {
+    //   var res = jsonDecode(response.body);
+    //   print(res);
+    //   var chatId = res["data"][0]["chat_id"];
+    //   print(chatId);
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => ChatPrivate(
+    //         chatId: chatId,
+    //         chatType: 'private',
+    //         name: name,
+    //         receiverPin: id,
+    //         mobile: Mobile),
+    //   ),
+    // );
+    // });
+  // }
+
+  chat( recPin, name, phone) async {
+    setState(() {
+      showLoading = true;
+    });
+
+    try {
+      print('recPhone:$phone , name:$name , pin:$recPin');
+      String body = jsonEncode({
+        "senderPhone": pref.pin.toString(), 
+        "receiverPhone": recPin
+      });
+
+      http
+          .post("${url.api}startChatToContacts",
+              headers: {"Content-Type": "application/json"}, body: body)
+          .then((response) {
+        var res = jsonDecode(response.body)["data"][0];
+        var chatId = res["chat_id"];
+
+        Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(
+              chatId: chatId,
+              chatType: 'private',
+              receiverName: name,
+              receiverPhone: phone,
+              // profileUrl: chatList['profileUrl']
+              recPin: recPin),
+        ));
+
+        setState(() {
+          showLoading = false;
+        });
+      });
+    } catch (e) {
+      print('error while calling getchild');
+      setState(() {
+        showLoading = false;
+      });
+    }
+  }
+
+  // Widget _menuBuilder() {
+  //   return PopupMenuButton<String>(
+  //     icon: Icon(
+  //       Icons.more_vert,
+  //       color: Colors.white,
+  //     ),
+  //     tooltip: "Menu",
+  //     onSelected: _onMenuItemSelect,
+  //     itemBuilder: (BuildContext context) => [
+  //       PopupMenuItem<String>(
+  //         value: 'Create Group',
+  //         child: Text("Create New Group"),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  // _onMenuItemSelect(String option) {
+  //   switch (option) {
+  //     case 'Create Group':
+  //     Navigator.push(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => CreateNewGroup(),
+  //         ));
+  //   }
+  // }
 }

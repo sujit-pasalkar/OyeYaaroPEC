@@ -185,12 +185,12 @@ class _PinState extends State<Pin> {
                   // verify
                   try {
                     String res = await UserService.checkUser(pin);
-                    print('res:$res');
+                    // print('res:$res');
                     if (res == 'true') {
                       // here check only reg contacts (and use getcontacts along side phone auth )
-                     String val = await co.getContacts();
+                    //  String val = await co.getContacts();
                     
-                    await co.updateRegisteredContacts();
+                    // await co.updateRegisteredContacts();
                     print('go to home');
                       Navigator.pushReplacement(
                         context,

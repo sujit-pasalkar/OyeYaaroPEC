@@ -24,7 +24,8 @@ class DatabaseCreator {
       thumbPath TEXT,
       thumbUrl TEXT,
       senderPin TEXT NOT NULL,
-      receiverPin TEXT NOT NULL
+      receiverPin TEXT NOT NULL,
+      receiverName TEXT NOT NULL
    )""";
   //  get senderPhone and recPhone but dont use them directly
    
@@ -63,7 +64,9 @@ class DatabaseCreator {
       chatListLastMsgTime TEXT NOT NULL,
       chatListMsgCount TEXT NOT NULL,
       chatListSenderPin TEXT NOT NULL,
-      chatListRecPin TEXT NOT NULL
+      chatListRecPin TEXT NOT NULL,
+      chatListSenderName TEXT NOT NULL,
+      chatListRecName TEXT NOT NULL
    )""";
       // chatListProfile TEXT NOT NULL,
    
@@ -79,18 +82,20 @@ class DatabaseCreator {
    )""";
     //get logo from chatid.png url
 
-    String q6 = """CREATE TABLE contactsTable ( 
-      contactsPhone TEXT PRIMARY KEY NOT NULL,
-      contactsName TEXT NOT NULL,
-      contactRegistered TEXT NOT NULL,
-      profileUrl TEXT,
-      contactsPin TEXT
-   )""";
+  //   String q6 = """CREATE TABLE contactsTable ( 
+  //     contactsPhone TEXT PRIMARY KEY NOT NULL,
+  //     contactsName TEXT NOT NULL,
+  //     contactRegistered TEXT NOT NULL,
+  //     profileUrl TEXT,
+  //     contactsPin TEXT
+  //  )""";
   //  pr ok
 
     // the path is relative to the documents directory
     String dbpath = "data.sqlite";
-    List<String> queries = [q1, q2, q3, q4, q5, q6];
+    List<String> queries = [q1, q2, q3, q4, q5,
+    //  q6
+     ];
     db.init(path: dbpath, queries: queries, verbose: true).then((onValue) {
       print('SQLCOOL database successfully initialized create queries');
     }, onError: (e) {

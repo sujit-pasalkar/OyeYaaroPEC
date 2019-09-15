@@ -42,29 +42,29 @@ class _ImageFilesState extends State<ImageFiles> {
       bool fileExist = await downloadedFile.exists();
       print('isExist:$fileExist');
       if (fileExist) {
-        if (f['senderPhone'].toString() == pref.phone.toString()) {
+        if (f['senderPin'].toString() == pref.pin.toString()) {
           images.add({
             'timestamp': f['timestamp'].toString(),
             'path': f['msgMedia'],
             'senderName': 'You'
           });
         } else {
-          List<Map<String, dynamic>> data =
-              await sqlQuery.getContactName(f['senderPhone'].toString());
-          print('senderName:$data');
-          if (data.length == 0) {
-            images.add({
-              'timestamp': f['timestamp'].toString(),
-              'path': f['msgMedia'].toString(),
-              'senderName': f['senderPhone'].toString()
-            });
-          } else {
+          // List<Map<String, dynamic>> data =
+          //     await sqlQuery.getContactName(f['senderPhone'].toString());
+          // print('senderName:$data');
+          // if (data.length == 0) {
+          //   images.add({
+          //     'timestamp': f['timestamp'].toString(),
+          //     'path': f['msgMedia'].toString(),
+          //     'senderName': f['senderPhone'].toString()
+          //   });
+          // } else {
             images.add({
               'timestamp': f['timestamp'].toString(),
               'path': f['msgMedia'],
-              'senderName': data[0]['contactsName']
+              'senderName': f['senderName']
             });
-          }
+          // }
         }
         print(images.toString());
         all = images;

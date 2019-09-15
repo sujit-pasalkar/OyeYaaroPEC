@@ -4,7 +4,8 @@ import 'package:oye_yaaro_pec/Provider/ChatService/common.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
 import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
-import 'package:oye_yaaro_pec/View/Contacts/contactPage.dart';
+// import 'package:oye_yaaro_pec/View/Contacts/contactPage.dart';
+import 'package:oye_yaaro_pec/View/New_createGroup/createGroup.dart';
 import 'package:oye_yaaro_pec/View/Personal/personal_chatScreen.dart';
 import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -57,6 +58,8 @@ class _ChatListState extends State<ChatList> {
             event.snapshot.value['count'],
             event.snapshot.value['senderPin'],
             event.snapshot.value['recPin'],
+            event.snapshot.value['senderName'],
+            event.snapshot.value['receiverName'],
           );
         } else {
           print('onChildChanged:this msg is not for me');
@@ -87,6 +90,8 @@ class _ChatListState extends State<ChatList> {
               event.snapshot.value['count'],
               event.snapshot.value['senderPin'],
               event.snapshot.value['recPin'],
+            event.snapshot.value['senderName'],
+            event.snapshot.value['receiverName'],
             );
           }
         }
@@ -101,6 +106,8 @@ class _ChatListState extends State<ChatList> {
             event.snapshot.value['count'],
             event.snapshot.value['senderPin'],
             event.snapshot.value['recPin'],
+            event.snapshot.value['senderName'],
+            event.snapshot.value['receiverName'],
           );
         } else {
           print('onChildAdded: this added msg is not for me');
@@ -121,6 +128,8 @@ class _ChatListState extends State<ChatList> {
             event.snapshot.value['count'],
             event.snapshot.value['senderPin'],
             event.snapshot.value['recPin'],
+            event.snapshot.value['senderName'],
+            event.snapshot.value['receiverName'],
           );
         } else {
           print('onChildAdded: this added msg is not for me');
@@ -152,6 +161,7 @@ class _ChatListState extends State<ChatList> {
             stream: bloc.items,
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.hasData) {
+                print('chatList data:--------- ${snapshot.data}');
                 // the select query has not found anything
                 if (snapshot.data.length == 0) {
                   return Center(
@@ -160,7 +170,7 @@ class _ChatListState extends State<ChatList> {
                       // crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         Image(
-                          image: new AssetImage("assets/CHAT.png"),
+                          image:  AssetImage("assets/CHAT.png"),
                           width: 150.0,
                           height: 150.0,
                           fit: BoxFit.scaleDown,
@@ -222,12 +232,19 @@ class _ChatListState extends State<ChatList> {
             color: Colors.white,
           ),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Contacts(),
-              ),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => Contacts(),
+            //   ),
+            // );
+             Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CreateGroup(),
+              // ContactsGroup(),
+            ),
+          );
           },
         ));
   }
@@ -241,6 +258,7 @@ class _ChatListState extends State<ChatList> {
           },
           leading: GestureDetector(
             onTap: () {
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -251,6 +269,7 @@ class _ChatListState extends State<ChatList> {
                   ),
                 ),
               );
+
               // print(pref.pin.toString() == chatList['chatListSenderPin']
               //     ? 'http://54.200.143.85:4200/profiles/now/' +
               //         chatList['chatListRecPin'].toString() +
@@ -262,7 +281,7 @@ class _ChatListState extends State<ChatList> {
               //     pref.pin.toString() == chatList['chatListSenderPin']
               //         ? chatList['chatListRecPin']
               //         : chatList['chatListSenderPin'];
-              // print('http://54.200.143.85:4200/profiles/then/$urlPin.jpg');
+              print('$chatList');
             },
             child: Container(
                 padding: EdgeInsets.all(2),
@@ -310,42 +329,44 @@ class _ChatListState extends State<ChatList> {
                   ),
                 ),),
           ),
-          title: FutureBuilder<dynamic>(
-            future: sqlQuery.getContactName(
-                pref.pin.toString() == chatList['chatListSenderPin']
-                    ? chatList['chatListRecPhone']
-                    : chatList['chatListSenderPhone']),
-            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.none:
-                  return Text(
+          title:
+          //  FutureBuilder<dynamic>(
+          //   future: sqlQuery.getContactName(
+          //       pref.pin.toString() == chatList['chatListSenderPin']
+          //           ? chatList['chatListRecPhone']
+          //           : chatList['chatListSenderPhone']),
+          //   builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          //     switch (snapshot.connectionState) {
+          //       case ConnectionState.none:
+                  // return 
+                  Text(
                       pref.pin.toString() == chatList['chatListSenderPin']
-                          ? chatList['chatListRecPhone']
-                          : chatList['chatListSenderPhone']);
-                case ConnectionState.active:
-                case ConnectionState.waiting:
-                  return Text(
-                      pref.pin.toString() == chatList['chatListSenderPin']
-                          ? chatList['chatListRecPhone']
-                          : chatList['chatListSenderPhone']);
-                case ConnectionState.done:
-                  if (snapshot.hasError)
-                    return Text(
-                        pref.pin.toString() == chatList['chatListSenderPin']
-                            ? chatList['chatListRecPhone']
-                            : chatList['chatListSenderPhone']);
-                  return snapshot.data.length == 0
-                      ? Text(
-                          pref.pin.toString() == chatList['chatListSenderPin']
-                              ? chatList['chatListRecPhone']
-                              : chatList['chatListSenderPhone'])
-                      : Text('${snapshot.data[0]['contactsName']}'); //show
-              }
-              return Text(pref.pin.toString() == chatList['chatListSenderPin']
-                  ? chatList['chatListRecPhone']
-                  : chatList['chatListSenderPhone']); // unreachable
-            },
-          ),
+                          ? chatList['chatListRecName']
+                          : chatList['chatListSenderName']),
+          //       case ConnectionState.active:
+          //       case ConnectionState.waiting:
+          //         return Text(
+          //             pref.pin.toString() == chatList['chatListSenderPin']
+          //                 ? chatList['chatListRecPhone']
+          //                 : chatList['chatListSenderPhone']);
+          //       case ConnectionState.done:
+          //         if (snapshot.hasError)
+          //           return Text(
+          //               pref.pin.toString() == chatList['chatListSenderPin']
+          //                   ? chatList['chatListRecPhone']
+          //                   : chatList['chatListSenderPhone']);
+          //         return snapshot.data.length == 0
+          //             ? Text(
+          //                 pref.pin.toString() == chatList['chatListSenderPin']
+          //                     ? chatList['chatListRecPhone']
+          //                     : chatList['chatListSenderPhone'])
+          //             : Text('${snapshot.data[0]['contactsName']}'); //show
+          //     }
+          //     return Text(pref.pin.toString() == chatList['chatListSenderPin']
+          //         ? chatList['chatListRecPhone']
+          //         : chatList['chatListSenderPhone']); // unreachable
+          //   },
+          // ),
           subtitle: Text(chatList['chatListLastMsg'],
               overflow: TextOverflow.ellipsis),
           trailing: chatList['chatListLastMsgTime'] == ''
@@ -424,10 +445,11 @@ class _ChatListState extends State<ChatList> {
 
   chat(Map<String, dynamic> chatList) async {
     // print('opposite user profile pic url :${chatList['chatListProfile']}');
-    List<Map<String, dynamic>> data = await sqlQuery.getContactName(
-        pref.pin.toString() == chatList['chatListSenderPin']
-            ? chatList['chatListRecPhone']
-            : chatList['chatListSenderPhone']);
+    // List<Map<String, dynamic>> data = await sqlQuery.getContactName(
+    //     pref.pin.toString() == chatList['chatListSenderPin']
+    //         ? chatList['chatListRecPhone']
+    //         : chatList['chatListSenderPhone']);
+
     print('get data in chatlist: $chatList');
 
     Navigator.push(
@@ -436,18 +458,19 @@ class _ChatListState extends State<ChatList> {
         builder: (context) => ChatScreen(
           chatId: chatList['chatId'],
           chatType: 'private', //
-          receiverName: data.length == 0
-              ? pref.pin.toString() == chatList['chatListSenderPin']
-                  ? chatList['chatListRecPhone']
-                  : chatList['chatListSenderPhone']
-              : data[0]['contactsName'],
+          receiverName:
+          //  data.length == 0
+              // ? 
+              pref.pin.toString() == chatList['chatListSenderPin']
+                  ? chatList['chatListRecName']
+                  : chatList['chatListSenderName'],
+              // : data[0]['contactsName'],
           receiverPhone: pref.pin.toString() == chatList['chatListSenderPin']
               ? chatList['chatListRecPhone']
               : chatList['chatListSenderPhone'],
           recPin: pref.pin.toString() == chatList['chatListSenderPin']
               ? chatList['chatListRecPin']
               : chatList['chatListSenderPin'],
-          // profileUrl: chatList['chatListProfile']
         ),
       ),
     );

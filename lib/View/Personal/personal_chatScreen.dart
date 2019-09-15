@@ -61,8 +61,8 @@ class _ChatScreenState extends State<ChatScreen> {
   StreamSubscription<Event> _messagesSubscription;
 
   final TextEditingController _textEditingController =
-      new TextEditingController();
-  final ScrollController listScrollController = new ScrollController();
+       TextEditingController();
+  final ScrollController listScrollController =  ScrollController();
   bool _isComposingMessage = false;
   bool screenOpened = true;
   bool uploading = false;
@@ -73,8 +73,8 @@ class _ChatScreenState extends State<ChatScreen> {
   //#songList
   bool isSearching = false;
   bool isPlaying = false;
-  List searchresult = new List();
-  List songSearchresult2 = new List();
+  List searchresult =  List();
+  List songSearchresult2 =  List();
   List<dynamic> _songList1 = List();
   List<dynamic> _songList2 = List();
 
@@ -137,6 +137,7 @@ class _ChatScreenState extends State<ChatScreen> {
           event.snapshot.value['thumbUrl'],
           event.snapshot.value['senderPin'],
           event.snapshot.value['recPin'],
+          event.snapshot.value['receiverName'],
         )
             .then((onValue) {
           // print('after adding into sqlchat: $onValue');
@@ -172,6 +173,7 @@ class _ChatScreenState extends State<ChatScreen> {
             event.snapshot.value['thumbUrl'],
             event.snapshot.value['senderPin'],
             event.snapshot.value['recPin'],
+          event.snapshot.value['receiverName'],
           )
               .then((onValue) {}, onError: (e) {
             print('show error message if addChat fails: $e');
@@ -2371,7 +2373,8 @@ class _ChatScreenState extends State<ChatScreen> {
               "thumbpath",
               "thumburl",
               senderPin,
-              recPin)
+              recPin,
+              widget.receiverName)
           .then((onValue) {
         // setState(() {
         //   future = getAllChat(widget.chatId);
@@ -2379,7 +2382,7 @@ class _ChatScreenState extends State<ChatScreen> {
         //add sender's msg as last msg to privatechatlisttable sqlite
         sqlQuery
             .addPrivateChatList(widget.chatId, 'Audio', senderPhone,
-                receiverPhone, timestamp, '0', senderPin, recPin)
+                receiverPhone, timestamp, '0', senderPin, recPin,pref.name,widget.receiverName)
             .then((onValue) {
           print('entry added in sqlite addchatlist');
         }, onError: (e) {
@@ -2446,7 +2449,8 @@ class _ChatScreenState extends State<ChatScreen> {
               "thumbpath",
               "thumburl",
               senderPin,
-              recPin)
+              recPin,
+              widget.receiverName)
           .then((onValue) {
         // setState(() {
         //   future = getAllChat(widget.chatId);
@@ -2462,7 +2466,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 timestamp,
                 '0',
                 senderPin,
-                recPin)
+                recPin,
+                pref.name,
+                widget.receiverName)
             .then((onValue) {
           print('entry added in sqflite addchatlist');
         }, onError: (e) {
@@ -2519,7 +2525,8 @@ class _ChatScreenState extends State<ChatScreen> {
               "thumbpath",
               "thumburl",
               pref.pin.toString(),
-              widget.recPin)
+              widget.recPin,
+              widget.receiverName)
           .then((onValue) {
         print('senderName : ${pref.name}');
         //2.add privateChatListTable sqlite
@@ -2532,7 +2539,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 timestamp.toString(),
                 '0',
                 pref.pin.toString(),
-                widget.recPin)
+                widget.recPin,
+                pref.name,
+                widget.receiverName)
             .then((onValue) {
           print('entry added in sqflite addchatlist:img');
         }, onError: (e) {
@@ -2566,7 +2575,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     "thumbpath",
                     "thumburl",
                     pref.pin.toString(),
-                    widget.recPin)
+                    widget.recPin,
+                    widget.receiverName)
                 .then((onValue) {
               print('updated res:$onValue');
             }, onError: (e) {
@@ -2641,7 +2651,8 @@ class _ChatScreenState extends State<ChatScreen> {
           newThumb.path,
           "thumbUrl",
           pref.pin.toString(),
-          widget.recPin);
+          widget.recPin,
+          widget.receiverName);
       print('2.org video added to addPrivateChat*');
 
       // show loading
@@ -2659,7 +2670,9 @@ class _ChatScreenState extends State<ChatScreen> {
           timestamp.toString(),
           '0',
           pref.pin.toString(),
-          widget.recPin);
+          widget.recPin,
+          pref.name,
+          widget.receiverName);
       print('3.video added to addPrivateChatList*');
 
       // 4.call compress function
@@ -2684,7 +2697,7 @@ class _ChatScreenState extends State<ChatScreen> {
           newThumb.path,
           "thumburl",
           pref.pin.toString(),
-          widget.recPin);
+          widget.recPin,widget.receiverName);
       print('5.updated new compressed video to PrivateChatList*');
 
       // uplaod to fb
@@ -2771,7 +2784,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   "",
                   "",
                   senderPin,
-                  recPin)
+                  recPin,
+                  widget.receiverName)
               .then((onValue) async {
             print('updated data timestamp: $timestamp');
           }, onError: (e) {
@@ -2811,13 +2825,6 @@ class _ChatScreenState extends State<ChatScreen> {
         uploadingTimestamp = int.parse(timestamp);
       });
 
-      // Future.delayed(const Duration(seconds: 30), () {
-      //   setState(() {
-      //     uploading = false;
-      //     uploadingTimestamp = 0;
-      //   });
-      // });
-
       // File videoFile = new File(vidPath);
       // show in chatscreen //to add text below the image redirect path to new screen and write get text logic
 
@@ -2829,13 +2836,9 @@ class _ChatScreenState extends State<ChatScreen> {
       print('1.videos thumbUrl : $thumbUrl');
       dynamic firebaseUrl =
           await storage.uploadVideo(timestamp.toString(), vidFile);
-      // .then((firebaseUrl) {
       print('2.firebase VideoUrl : $firebaseUrl');
 
-      // setState(() {
-      //   uploading = false;
-      //   uploadingTimestamp = 0;
-      // });
+    
 
       //add url to fb
       await addChatFb(
@@ -2852,7 +2855,6 @@ class _ChatScreenState extends State<ChatScreen> {
           senderPin,
           recPin);
 
-      // .then((sent) {
       print('3.thumburl added to fb:addChatFb()');
       //now update query for isUploaded = 1 on this chatId row
       await sqlQuery.updatePrivateChat(
@@ -2868,14 +2870,10 @@ class _ChatScreenState extends State<ChatScreen> {
           thumbPath,
           thumbUrl,
           senderPin,
-          recPin);
+          recPin,
+          widget.receiverName);
       print('4.chat updated with urls:updatePrivateChat()');
 
-      //     .then((onValue) async {
-      //   print('updated data vid timestamp: $timestamp');
-      // }, onError: (e) {
-      //   print('error while updating chat: $e'); //show UI msg ex.toast
-      // });
 
       // add to fb chatlist
       await addChatFbChatList(widget.chatId, senderPhone, 'Video', timestamp,
@@ -2883,14 +2881,6 @@ class _ChatScreenState extends State<ChatScreen> {
       print('5.fb chat list updated.');
 
       _c.complete('success');
-      //     .then((sent) {
-      //   print('entry added in fb addchatlist');
-      // });
-      // });
-      // }, onError: (e) {
-      //   print('error while uploading to fb_storage : $e');
-      //   // throw e//change whole send video function structure with completer
-      // });
     } catch (e) {
       print('Err in getCameraImage: ' + e);
       _c.completeError(e);
@@ -2928,7 +2918,8 @@ class _ChatScreenState extends State<ChatScreen> {
       'thumbUrl': thumbUrl,
       'chatType': 'private',
       'senderPin': senderPin,
-      'recPin': recPin
+      'recPin': recPin,
+      'receiverName':widget.receiverName
     });
   }
 
@@ -2955,7 +2946,10 @@ class _ChatScreenState extends State<ChatScreen> {
       'recPhone': receiverPhone,
       "count": count,
       "senderPin": senderPin,
-      "recPin": recPin
+      "recPin": recPin,
+      "senderName":pref.name,
+      'receiverName':widget.receiverName
+
     };
     try {
       privateChatRef.set(data).then((onValue) {

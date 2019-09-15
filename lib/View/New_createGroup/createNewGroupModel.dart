@@ -1,0 +1,63 @@
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:async/async.dart';
+import 'package:oye_yaaro_pec/Models/sharedPref.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+
+final _CreateGroupModel createNewGroup = _CreateGroupModel();
+
+class _CreateGroupModel {
+  getStudentList() async {
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userPin = pref.pin.toString();
+
+    http.Response response = await http.post(
+        "http://oyeyaaroapi.plmlogix.com/studentList",
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"userPin": userPin}));
+    var res = jsonDecode(response.body);
+    return res['data'];
+  }
+
+  Future<bool> createGroup(g_nm, occ_id) async {
+    print('$g_nm, $occ_id');
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userPin =  pref.pin.toString();
+
+    http.Response response = await http.post(
+        "http://oyeyaaroapi.plmlogix.com/createGroup",
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "group_name": g_nm,
+          "occupants_ids": occ_id,
+          "admin_id": userPin
+        }));
+    var res = jsonDecode(response.body);
+    print('create group res :$res');
+    if (res['success']) {
+      return true;
+    } else
+      return false;
+  }
+
+  Future<String> addNewMembers(g_id, g_nm, occupants) async {
+    try {
+      print('$g_nm,| $g_id ,| $occupants');
+      http.Response response = await http.post(
+          "http://oyeyaaroapi.plmlogix.com/addMembers",
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            "dialog_id": g_id,
+            "group_name": g_nm,
+            "occupants_ids": occupants
+          }));
+      var res = jsonDecode(response.body);
+      print('create group res :$res');
+      return res['success'].toString();
+    } catch (e) {
+      return e.toString();
+    }
+  }
+}

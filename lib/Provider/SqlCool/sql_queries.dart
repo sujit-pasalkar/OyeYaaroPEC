@@ -4,36 +4,37 @@ import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
 SqlQuery sqlQuery = new SqlQuery();
 
 class SqlQuery {
-  Future addContacts(Map<String, dynamic> row, isRegistered) async {
-    Completer _c = Completer();
-    int val;
-    try {
-      bool exists = await db.exists(
-          table: "contactsTable",
-          where: "contactsPhone=${row['contactsPhone']}");
-      if (exists) {
-        if (isRegistered) {
-          // print('${row['contactsPhone']} exist and reg');
-          int val = await db.update(
-              table: "contactsTable",
-              row: row,
-              where: "contactsPhone=${row['contactsPhone']}",
-              verbose: false);
-          _c.complete(val);
-        } else {
-          _c.complete(1);
-        }
-      } else {
-        // print('${row['contactsPhone']} not exist');
-        val = await db.insert(table: "contactsTable", row: row, verbose: false);
-        _c.complete(val);
-      }
-    } catch (e) {
-      val = 1;
-      print('Exception in addContacts($row) : $e');
-      _c.complete(val);
-    }
-  }
+
+  // Future addContacts(Map<String, dynamic> row, isRegistered) async {
+  //   Completer _c = Completer();
+  //   int val;
+  //   try {
+  //     bool exists = await db.exists(
+  //         table: "contactsTable",
+  //         where: "contactsPhone=${row['contactsPhone']}");
+  //     if (exists) {
+  //       if (isRegistered) {
+  //         // print('${row['contactsPhone']} exist and reg');
+  //         int val = await db.update(
+  //             table: "contactsTable",
+  //             row: row,
+  //             where: "contactsPhone=${row['contactsPhone']}",
+  //             verbose: false);
+  //         _c.complete(val);
+  //       } else {
+  //         _c.complete(1);
+  //       }
+  //     } else {
+  //       // print('${row['contactsPhone']} not exist');
+  //       val = await db.insert(table: "contactsTable", row: row, verbose: false);
+  //       _c.complete(val);
+  //     }
+  //   } catch (e) {
+  //     val = 1;
+  //     print('Exception in addContacts($row) : $e');
+  //     _c.complete(val);
+  //   }
+  // }
 
   //deleteprivatechat table ids
   static Future<int> deletePrivateChatId(chatId) async {
@@ -116,7 +117,9 @@ class SqlQuery {
       String thumbPath,
       String thumbUrl,
       String senderPin,
-      String recPin) async {
+      String recPin,
+      String receiverName
+      ) async {
     Completer _completer = new Completer();
     try {
       Map<String, String> chatRow = {
@@ -132,7 +135,8 @@ class SqlQuery {
         "thumbPath": thumbPath,
         "thumbUrl": thumbUrl,
         "senderPin": senderPin,
-        "receiverPin": recPin
+        "receiverPin": recPin,
+        "receiverName":receiverName
       };
       print('in add private chat');
 
@@ -167,7 +171,8 @@ class SqlQuery {
       thumbPath,
       thumbUrl,
       senderPin,
-      recPin) async {
+      recPin,
+      recName) async {
     Completer _completer = new Completer();
     Map<String, String> chatRow = {
       "chatId": chatId,
@@ -182,7 +187,9 @@ class SqlQuery {
       "thumbPath": thumbPath,
       "thumbUrl": thumbUrl,
       "senderPin": senderPin,
-      "receiverPin": recPin
+      "receiverPin": recPin,
+      "receiverName":recName
+
     };
     try {
       int updated = await db.update(
@@ -210,7 +217,9 @@ class SqlQuery {
       String count,
       // String profileUrl.
       String senderPin,
-      String recPin) async {
+      String recPin,
+      String senderName,
+      String recName) async {
     Completer _completer = new Completer();
     try {
       Map<String, String> chatListRow = {
@@ -220,9 +229,10 @@ class SqlQuery {
         "chatListRecPhone": recPhone,
         "chatListLastMsgTime": timestamp,
         "chatListMsgCount": count,
-        // "chatListProfile": profileUrl,
         "chatListSenderPin": senderPin,
-        "chatListRecPin": recPin
+        "chatListRecPin": recPin,
+        "chatListSenderName":senderName,
+        "chatListRecName":recName
       };
       // print('in add private chat list');
 
@@ -247,63 +257,63 @@ class SqlQuery {
     return _completer.future;
   }
 
-  // add private chat list History
-  Future addPrivateChatListHistory(
-      String chatId,
-      String msg,
-      String senderPhone,
-      String recPhone,
-      String timestamp,
-      String count,
-      String profileUrl) async {
-    Completer _completer = new Completer();
-    try {
-      Map<String, String> chatListRow = {
-        "chatId": chatId,
-        "chatListLastMsg": msg,
-        "chatListSenderPhone": senderPhone,
-        "chatListRecPhone": recPhone,
-        "chatListLastMsgTime": timestamp,
-        "chatListMsgCount": count,
-        "chatListProfile": profileUrl
-      };
-      print('in add private chat list');
+  // // add private chat list History
+  // Future addPrivateChatListHistory(
+  //     String chatId,
+  //     String msg,
+  //     String senderPhone,
+  //     String recPhone,
+  //     String timestamp,
+  //     String count,
+  //     String profileUrl) async {
+  //   Completer _completer = new Completer();
+  //   try {
+  //     Map<String, String> chatListRow = {
+  //       "chatId": chatId,
+  //       "chatListLastMsg": msg,
+  //       "chatListSenderPhone": senderPhone,
+  //       "chatListRecPhone": recPhone,
+  //       "chatListLastMsgTime": timestamp,
+  //       "chatListMsgCount": count,
+  //       "chatListProfile": profileUrl
+  //     };
+  //     print('in add private chat list');
 
-      bool exists = await db.exists(
-          table: "privateChatListTable", where: "chatId='$chatId'");
+  //     bool exists = await db.exists(
+  //         table: "privateChatListTable", where: "chatId='$chatId'");
 
-      if (exists) {
-        print('chatExist');
-        final selectRes = await db.select(
-            table: "privateChatListTable",
-            columns: 'chatListProfile',
-            where: "chatId='$chatId'",
-            verbose: false);
-        print(
-            'selected privatechatlist profile result: ${selectRes[0]['chatListProfile']}');
-        if (selectRes[0]['chatListProfile'] != profileUrl) {
-          // print('profile url is not same so update new one');
-          int updated = await db.update(
-              table: "privateChatListTable",
-              row: chatListRow,
-              where: "chatId='$chatId'",
-              verbose: false);
-          // print('profile pic url updated in privatechatlist table : $updated');
-        } else {
-          // print('profile url is same so dont update');
-        }
-        _completer.complete('exist');
-      } else {
-        final result = await db.insert(
-            table: "privateChatListTable", row: chatListRow, verbose: false);
-        print('inserted result chatlist: $result');
-        _completer.complete('added');
-      }
-    } catch (e) {
-      _completer.completeError(e);
-    }
-    return _completer.future;
-  }
+  //     if (exists) {
+  //       print('chatExist');
+  //       final selectRes = await db.select(
+  //           table: "privateChatListTable",
+  //           columns: 'chatListProfile',
+  //           where: "chatId='$chatId'",
+  //           verbose: false);
+  //       print(
+  //           'selected privatechatlist profile result: ${selectRes[0]['chatListProfile']}');
+  //       if (selectRes[0]['chatListProfile'] != profileUrl) {
+  //         // print('profile url is not same so update new one');
+  //         int updated = await db.update(
+  //             table: "privateChatListTable",
+  //             row: chatListRow,
+  //             where: "chatId='$chatId'",
+  //             verbose: false);
+  //         // print('profile pic url updated in privatechatlist table : $updated');
+  //       } else {
+  //         // print('profile url is same so dont update');
+  //       }
+  //       _completer.complete('exist');
+  //     } else {
+  //       final result = await db.insert(
+  //           table: "privateChatListTable", row: chatListRow, verbose: false);
+  //       print('inserted result chatlist: $result');
+  //       _completer.complete('added');
+  //     }
+  //   } catch (e) {
+  //     _completer.completeError(e);
+  //   }
+  //   return _completer.future;
+  // }
 
   // delete empty chatlist from chatlist table
   Future deleteEmptyChatList(String chatId) async {
@@ -386,117 +396,117 @@ class SqlQuery {
   }
 
   //get phones name
-  Future getContactName(String phone) async {
-    Completer _completer = new Completer();
-    try {
-      print(phone);
-      List<Map<String, dynamic>> rows = await db.select(
-          table: "contactsTable",
-          columns: "contactsName",
-          where: "contactsPhone='$phone'",
-          verbose: false);
-      print('getcontactname:select contactsName from  contactsTable :$rows');
-      _completer.complete(rows);
-    } catch (e) {
-      _completer.completeError(e);
-      print('err while getting name :$e');
-    }
-    return _completer.future;
-  }
+  // Future getContactName(String phone) async {
+  //   Completer _completer = new Completer();
+  //   try {
+  //     print(phone);
+  //     List<Map<String, dynamic>> rows = await db.select(
+  //         table: "contactsTable",
+  //         columns: "contactsName",
+  //         where: "contactsPhone='$phone'",
+  //         verbose: false);
+  //     print('getcontactname:select contactsName from  contactsTable :$rows');
+  //     _completer.complete(rows);
+  //   } catch (e) {
+  //     _completer.completeError(e);
+  //     print('err while getting name :$e');
+  //   }
+  //   return _completer.future;
+  // }
 
-  //get conatcts row from num
-  Future getContactRow(String phone) async {
-    Completer _completer = new Completer();
-    try {
-      // check is phone exists logic(need to change wayfor groupInfo.dart and privatechatlist.dart)
-      List<Map<String, dynamic>> rows = await db.select(
-          table: "contactsTable",
-          columns: "*",
-          where: "contactsPhone='$phone'",
-          verbose: false);
-      // print('select contactsName from  contactsTable :$rows');
-      _completer.complete(rows);
-    } catch (e) {
-      _completer.completeError(e);
-      print('err while getting name :$e');
-    }
-    return _completer.future;
-  }
+  // //get conatcts row from num
+  // Future getContactRow(String phone) async {
+  //   Completer _completer = new Completer();
+  //   try {
+  //     // check is phone exists logic(need to change wayfor groupInfo.dart and privatechatlist.dart)
+  //     List<Map<String, dynamic>> rows = await db.select(
+  //         table: "contactsTable",
+  //         columns: "*",
+  //         where: "contactsPhone='$phone'",
+  //         verbose: false);
+  //     // print('select contactsName from  contactsTable :$rows');
+  //     _completer.complete(rows);
+  //   } catch (e) {
+  //     _completer.completeError(e);
+  //     print('err while getting name :$e');
+  //   }
+  //   return _completer.future;
+  // }
 
-  //get conatcts row from pin
-  Future getContactRowFromPin(String pin) async {
-    Completer _completer = new Completer();
-    try {
-      // check is phone exists logic(need to change wayfor groupInfo.dart and privatechatlist.dart)
-      List<Map<String, dynamic>> rows = await db.select(
-          table: "contactsTable",
-          columns: "*",
-          where: "contactsPin='$pin'",
-          verbose: false);
-      // print('select contactsName from  contactsTable :$rows');
-      _completer.complete(rows);
-    } catch (e) {
-      _completer.completeError(e);
-      print('err while getting name :$e');
-    }
-    return _completer.future;
-  }
+  // //get conatcts row from pin
+  // Future getContactRowFromPin(String pin) async {
+  //   Completer _completer = new Completer();
+  //   try {
+  //     // check is phone exists logic(need to change wayfor groupInfo.dart and privatechatlist.dart)
+  //     List<Map<String, dynamic>> rows = await db.select(
+  //         table: "contactsTable",
+  //         columns: "*",
+  //         where: "contactsPin='$pin'",
+  //         verbose: false);
+  //     // print('select contactsName from  contactsTable :$rows');
+  //     _completer.complete(rows);
+  //   } catch (e) {
+  //     _completer.completeError(e);
+  //     print('err while getting name :$e');
+  //   }
+  //   return _completer.future;
+  // }
 
-  //update conatcts row
-  Future updateContactRow(Map<String, dynamic> row) async {
-    Completer _completer = new Completer();
-    try {
-      int val = await db.update(
-          table: "contactsTable",
-          row: row,
-          where: "contactsPhone='${row['contactsPhone']}'",
-          verbose: false);
-      print('updated res-- :$val');
-      _completer.complete(1);
-    } catch (e) {
-      _completer.completeError(e);
-      print('err while updating conatct :$e');
-    }
-    return _completer.future;
-  }
+  // //update conatcts row
+  // Future updateContactRow(Map<String, dynamic> row) async {
+  //   Completer _completer = new Completer();
+  //   try {
+  //     int val = await db.update(
+  //         table: "contactsTable",
+  //         row: row,
+  //         where: "contactsPhone='${row['contactsPhone']}'",
+  //         verbose: false);
+  //     print('updated res-- :$val');
+  //     _completer.complete(1);
+  //   } catch (e) {
+  //     _completer.completeError(e);
+  //     print('err while updating conatct :$e');
+  //   }
+  //   return _completer.future;
+  // }
 
-  //get all conatcts
-  Future selectContact() async {
-    Completer _completer = new Completer();
-    try {
-      print('in select contact query');
-      List<Map<String, dynamic>> rows = await db.select(
-          table: "contactsTable",
-          columns: "*",
-          // where: "contactsPhone='$phone'",
-          orderBy: "contactsName",
-          verbose: false);
-      // print('select * from  contactsTable :$rows');
-      _completer.complete(rows);
-    } catch (e) {
-      _completer.completeError(e);
-      print('err while getting name :$e');
-    }
-    return _completer.future;
-  }
+  // //get all conatcts
+  // Future selectContact() async {
+  //   Completer _completer = new Completer();
+  //   try {
+  //     print('in select contact query');
+  //     List<Map<String, dynamic>> rows = await db.select(
+  //         table: "contactsTable",
+  //         columns: "*",
+  //         // where: "contactsPhone='$phone'",
+  //         orderBy: "contactsName",
+  //         verbose: false);
+  //     // print('select * from  contactsTable :$rows');
+  //     _completer.complete(rows);
+  //   } catch (e) {
+  //     _completer.completeError(e);
+  //     print('err while getting name :$e');
+  //   }
+  //   return _completer.future;
+  // }
 
-  // get only phones from contacts
-  Future getPhonesfromContact() async {
-    Completer _completer = new Completer();
-    try {
-      List<Map<String, dynamic>> rows = await db.select(
-          table: "contactsTable",
-          columns: "contactsPhone",
-          orderBy: "contactsName",
-          verbose: false);
-      // print('select * from  contactsTable :$rows');
-      _completer.complete(rows);
-    } catch (e) {
-      _completer.completeError(e);
-      print('err while getting name :$e');
-    }
-    return _completer.future;
-  }
+  // // get only phones from contacts
+  // Future getPhonesfromContact() async {
+  //   Completer _completer = new Completer();
+  //   try {
+  //     List<Map<String, dynamic>> rows = await db.select(
+  //         table: "contactsTable",
+  //         columns: "contactsPhone",
+  //         orderBy: "contactsName",
+  //         verbose: false);
+  //     // print('select * from  contactsTable :$rows');
+  //     _completer.complete(rows);
+  //   } catch (e) {
+  //     _completer.completeError(e);
+  //     print('err while getting name :$e');
+  //   }
+  //   return _completer.future;
+  // }
 
   //add into Groupchatlist table
   Future addGroupChatList(
@@ -577,10 +587,9 @@ class SqlQuery {
 
 //add into groupsMembers table
   Future addGroupsMember(Map<String, String> addMember) async {
-    Completer _completer = new Completer();
+    Completer _completer =  Completer();
     try {
-      print(
-          'in add group member():${addMember['chatId']}, ${addMember['memberPhone']}');
+      print('in add group member():${addMember['chatId']}, ${addMember['memberPhone']}');
 
       bool exists = await db.exists(
           table: "groupMembersTable",

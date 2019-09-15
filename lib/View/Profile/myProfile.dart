@@ -101,11 +101,11 @@ class _ProfileState extends State<MyProfile> {
                   ? IconButton(
                       icon: Icon(Icons.message),
                       onPressed: () async {
-                        List<Map<String, dynamic>> row;
+                        // List<Map<String, dynamic>> row;
                         try {
                           // get contact name
-                          row = await sqlQuery.getContactName(phone);
-                          chat(row[0]['contactsName']);
+                          // row = await sqlQuery.getContactName(phone);
+                          chat(name/* row[0]['contactsName'] */);
                         } catch (e) {
                           chat(phone);
                         }

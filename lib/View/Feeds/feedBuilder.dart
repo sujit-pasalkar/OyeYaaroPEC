@@ -1,6 +1,6 @@
 import 'package:oye_yaaro_pec/Components/feeds_image.dart';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
-import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
+// import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
 import 'package:oye_yaaro_pec/View/Feeds/mediaAndComment.dart';
 import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 import 'package:flutter/material.dart';
@@ -368,7 +368,7 @@ class _FeedBuilder extends State<FeedBuilder> {
               Container(
                 margin: EdgeInsets.fromLTRB(8, 2, 2, 2),
                 padding: EdgeInsets.all(1.0),
-                decoration: new BoxDecoration(
+                decoration:  BoxDecoration(
                   color: Color(0xffb00bae3),
                   shape: BoxShape.circle,
                 ),

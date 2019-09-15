@@ -67,7 +67,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   // StreamSubscription<Event> _membersSubscription;
 
   final TextEditingController _textEditingController = TextEditingController();
-  final ScrollController listScrollController = new ScrollController();
+  final ScrollController listScrollController = ScrollController();
   bool _isComposingMessage = false;
   bool screenOpened = true;
   bool uploading = false;
@@ -78,8 +78,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   //#songList
   bool isSearching = false;
   bool isPlaying = false;
-  List searchresult = new List();
-  List songSearchresult2 = new List();
+  List searchresult =  List();
+  List songSearchresult2 =  List();
   List<dynamic> _songList1 = List();
   List<dynamic> _songList2 = List();
 
@@ -92,7 +92,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   String playingSongInList;
 
   // members[]
-  List members = new List();
+  List members =  List();
   String admin;
 
   getDir() async {
@@ -333,8 +333,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
         members.toSet().toList().forEach((memb) {
           // get member details from sql contacts from pin.
-          sqlQuery.getContactRowFromPin(memb.toString()).then((onValue) {
-            if (onValue.length == 0) {
+          // sqlQuery.getContactRowFromPin(memb.toString()).then((onValue) {
+            // if (onValue.length == 0) {
               Map<String, String> addMember = {
                 'chatId': widget.chatId,
                 'memberPhone': memb.toString() == pref.pin.toString()
@@ -352,23 +352,23 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               }, onError: (e) {
                 print('!contact Error while adding group members in sql:$e');
               });
-            } else {
-              Map<String, String> addMember = {
-                'chatId': widget.chatId,
-                'memberPhone': onValue[0]['contactsPhone'],
-                'memberName': memb.toString() == pref.phone.toString()
-                    ? 'You'
-                    : onValue[0]['contactsName'],
-                'userType': memb.toString() == admin ? 'admin' : 'user',
-                'memberPin': memb.toString()
-              };
-              sqlQuery.addGroupsMember(addMember).then((onValue) {
-                // print('contact $memb added in group members sql');
-              }, onError: (e) {
-                print('contact Error while adding group members in sql:$e');
-              });
-            }
-          });
+            // } else {
+            //   Map<String, String> addMember = {
+            //     'chatId': widget.chatId,
+            //     'memberPhone': onValue[0]['contactsPhone'],
+            //     'memberName': memb.toString() == pref.phone.toString()
+            //         ? 'You'
+            //         : onValue[0]['contactsName'],
+            //     'userType': memb.toString() == admin ? 'admin' : 'user',
+            //     'memberPin': memb.toString()
+            //   };
+            //   sqlQuery.addGroupsMember(addMember).then((onValue) {
+            //     // print('contact $memb added in group members sql');
+            //   }, onError: (e) {
+            //     print('contact Error while adding group members in sql:$e');
+            //   });
+            // }
+          // });
         });
       } catch (e) {
         print('Error while Adding group Memebers to SQL Table');
@@ -417,8 +417,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       print('audioPlayer error : $msg');
       setState(() {
         playerState = PlayerState.stopped;
-        duration = new Duration(seconds: 0);
-        position = new Duration(seconds: 0);
+        duration =  Duration(seconds: 0);
+        position =  Duration(seconds: 0);
       });
     };
   }
@@ -1642,50 +1642,52 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    FutureBuilder<dynamic>(
-                                      future: sqlQuery
-                                          .getContactName(snap['senderPhone']),
-                                      builder: (BuildContext context,
-                                          AsyncSnapshot<dynamic> snapshot) {
-                                        switch (snapshot.connectionState) {
-                                          case ConnectionState.none:
-                                            return Text(snap['senderPhone'],
+                                    // FutureBuilder<dynamic>(
+                                    //   future: sqlQuery
+                                    //       .getContactName(snap['senderPhone']),
+                                    //   builder: (BuildContext context,
+                                    //       AsyncSnapshot<dynamic> snapshot) {
+                                    //     switch (snapshot.connectionState) {
+                                    //       case ConnectionState.none:
+                                            // return 
+                                            Text(snap['senderPhone'],
                                                 style: TextStyle(
                                                     fontSize: 12.0,
                                                     color: Colors.black,
                                                     fontWeight:
-                                                        FontWeight.bold));
-                                          case ConnectionState.active:
-                                          case ConnectionState.waiting:
-                                            return Text(snap['senderPhone'],
-                                                style: new TextStyle(
-                                                    fontSize: 12.0,
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold));
-                                          case ConnectionState.done:
-                                            if (snapshot.hasError)
-                                              return Text(snap['senderPhone']);
-                                            return snapshot.data.length == 0
-                                                ? Text(snap['senderPhone'],
-                                                    style: new TextStyle(
-                                                        fontSize: 12.0,
-                                                        color: Colors.black,
-                                                        fontWeight:
-                                                            FontWeight.bold))
-                                                : Text(
-                                                    '${snapshot.data[0]['contactsName']}',
-                                                    style: new TextStyle(
-                                                        fontSize: 12.0,
-                                                        color: Colors.black,
-                                                        fontWeight: FontWeight
-                                                            .bold)); //show
-                                        }
-                                        return Text(
-                                          snap['senderPhone'],
-                                        ); // unreachable
-                                      },
-                                    ),
+                                                        FontWeight.bold)),
+                                                        // ;
+                                    //       case ConnectionState.active:
+                                    //       case ConnectionState.waiting:
+                                    //         return Text(snap['senderPhone'],
+                                    //             style: new TextStyle(
+                                    //                 fontSize: 12.0,
+                                    //                 color: Colors.black,
+                                    //                 fontWeight:
+                                    //                     FontWeight.bold));
+                                    //       case ConnectionState.done:
+                                    //         if (snapshot.hasError)
+                                    //           return Text(snap['senderPhone']);
+                                    //         return snapshot.data.length == 0
+                                    //             ? Text(snap['senderPhone'],
+                                    //                 style: new TextStyle(
+                                    //                     fontSize: 12.0,
+                                    //                     color: Colors.black,
+                                    //                     fontWeight:
+                                    //                         FontWeight.bold))
+                                    //             : Text(
+                                    //                 '${snapshot.data[0]['contactsName']}',
+                                    //                 style: new TextStyle(
+                                    //                     fontSize: 12.0,
+                                    //                     color: Colors.black,
+                                    //                     fontWeight: FontWeight
+                                    //                         .bold)); //show
+                                    //     }
+                                    //     return Text(
+                                    //       snap['senderPhone'],
+                                    //     ); // unreachable
+                                    //   },
+                                    // ),
                                     Container(
                                       height: 60.0,
                                       width: 60.0,
@@ -1871,56 +1873,57 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: <Widget>[
-                                        FutureBuilder<dynamic>(
-                                          future: sqlQuery.getContactName(
-                                            snap['senderPhone'],
-                                          ),
-                                          builder: (BuildContext context,
-                                              AsyncSnapshot<dynamic> snapshot) {
-                                            switch (snapshot.connectionState) {
-                                              case ConnectionState.none:
-                                                return Text(snap['senderPhone'],
+                                        // FutureBuilder<dynamic>(
+                                        //   future: sqlQuery.getContactName(
+                                        //     snap['senderPhone'],
+                                        //   ),
+                                        //   builder: (BuildContext context,
+                                        //       AsyncSnapshot<dynamic> snapshot) {
+                                        //     switch (snapshot.connectionState) {
+                                        //       case ConnectionState.none:
+                                                // return
+                                                 Text(snap['senderPhone'],
                                                     style: TextStyle(
                                                         fontSize: 12.0,
                                                         color: Colors.black,
                                                         fontWeight:
-                                                            FontWeight.bold));
-                                              case ConnectionState.active:
-                                              case ConnectionState.waiting:
-                                                return Text(snap['senderPhone'],
-                                                    style: TextStyle(
-                                                        fontSize: 12.0,
-                                                        color: Colors.black,
-                                                        fontWeight:
-                                                            FontWeight.bold));
-                                              case ConnectionState.done:
-                                                if (snapshot.hasError)
-                                                  return Text(
-                                                      snap['senderPhone']);
-                                                return snapshot.data.length == 0
-                                                    ? Text(
-                                                        snap['senderPhone'],
-                                                        style: TextStyle(
-                                                            fontSize: 12.0,
-                                                            color: Colors.black,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      )
-                                                    : Text(
-                                                        '${snapshot.data[0]['contactsName']}',
-                                                        style: TextStyle(
-                                                            fontSize: 12.0,
-                                                            color: Colors.black,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ); //show
-                                            }
-                                            return Text(snap[
-                                                'senderPhone']); // unreachable
-                                          },
-                                        ),
+                                                            FontWeight.bold)),
+                                        //       case ConnectionState.active:
+                                        //       case ConnectionState.waiting:
+                                        //         return Text(snap['senderPhone'],
+                                        //             style: TextStyle(
+                                        //                 fontSize: 12.0,
+                                        //                 color: Colors.black,
+                                        //                 fontWeight:
+                                        //                     FontWeight.bold));
+                                        //       case ConnectionState.done:
+                                        //         if (snapshot.hasError)
+                                        //           return Text(
+                                        //               snap['senderPhone']);
+                                        //         return snapshot.data.length == 0
+                                        //             ? Text(
+                                        //                 snap['senderPhone'],
+                                        //                 style: TextStyle(
+                                        //                     fontSize: 12.0,
+                                        //                     color: Colors.black,
+                                        //                     fontWeight:
+                                        //                         FontWeight
+                                        //                             .bold),
+                                        //               )
+                                        //             : Text(
+                                        //                 '${snapshot.data[0]['contactsName']}',
+                                        //                 style: TextStyle(
+                                        //                     fontSize: 12.0,
+                                        //                     color: Colors.black,
+                                        //                     fontWeight:
+                                        //                         FontWeight
+                                        //                             .bold),
+                                        //               ); //show
+                                        //     }
+                                        //     return Text(snap[
+                                        //         'senderPhone']); // unreachable
+                                        //   },
+                                        // ),
                                         Container(
                                           height: 60.0,
                                           width: 60.0,

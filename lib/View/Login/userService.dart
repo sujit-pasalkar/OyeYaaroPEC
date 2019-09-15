@@ -19,7 +19,7 @@ class UserService {
 
       if (response.statusCode == 200) {
         var result = jsonDecode(response.body);
-        print('result:$result');
+        // print('result:$result');
         if (result['success'] == true) {
 
           //a.check invite == true

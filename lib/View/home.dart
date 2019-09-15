@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
         const IosNotificationSettings(sound: true, badge: true, alert: true));
 
     _firebaseMessaging.getToken().then((token) {
-      print('${pref.pin}:$token added.');
+      // print('${pref.pin}:$token added.');
       var documentReference = Firestore.instance
           .collection('userTokens')
           .document(pref.pin.toString());
@@ -70,7 +70,7 @@ class _HomePageState extends State<HomePage> {
     });
 
     _isBottomBarVisible = false;
-    hideButtonController = new ScrollController();
+    hideButtonController =  ScrollController();
     hideButtonController.addListener(() {
       if (hideButtonController.position.userScrollDirection ==
           ScrollDirection.reverse) {
@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    print('home dispose called');
+    // print('home dispose called');
     super.dispose();
   }
 
@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> {
         // 2
         BottomNavigationBarItem(
           icon: Image(
-            image: new AssetImage("assets/VIDEO_BACKGROUND.png"),
+            image:  AssetImage("assets/VIDEO_BACKGROUND.png"),
             color: Colors.white,
             width: 40.0,
             height: 40.0,
@@ -225,7 +225,7 @@ class _HomePageState extends State<HomePage> {
           //4
         BottomNavigationBarItem(
           icon: Image(
-            image: new AssetImage("assets/GROUP.png"),
+            image:  AssetImage("assets/GROUP.png"),
             color: Colors.white,
             width: 40.0,
             height: 40.0,
@@ -233,7 +233,7 @@ class _HomePageState extends State<HomePage> {
             alignment: Alignment.center,
           ),
           activeIcon: Image(
-            image: new AssetImage("assets/GROUP.png"),
+            image:  AssetImage("assets/GROUP.png"),
             color: Colors.black,
             width: 40.0,
             height: 40.0,

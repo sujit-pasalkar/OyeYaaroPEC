@@ -1,6 +1,6 @@
 // filter by name
 import 'dart:io';
-import 'package:oye_yaaro_pec/Components/imageViwer.dart';
+// import 'package:oye_yaaro_pec/Components/imageViwer.dart';
 import 'package:oye_yaaro_pec/Components/videoPlayer.dart';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
@@ -54,24 +54,24 @@ class _ImageFilesState extends State<VideoFiles> {
             'senderName': 'You'
           });
         } else {
-          List<Map<String, dynamic>> data =
-              await sqlQuery.getContactName(f['senderPhone'].toString());
-          print('senderName:$data');
-          if (data.length == 0) {
+          // List<Map<String, dynamic>> data =
+          //     await sqlQuery.getContactName(f['senderPhone'].toString());
+          // print('senderName:$data');
+          // if (data.length == 0) {
+          //   videos.add({
+          //     'timestamp': f['timestamp'].toString(),
+          //     'path': f['msgMedia'].toString(),
+          //     'thumb': f['thumbPath'].toString(),
+          //     'senderName': f['senderPhone'].toString()
+          //   });
+          // } else {
             videos.add({
               'timestamp': f['timestamp'].toString(),
               'path': f['msgMedia'].toString(),
               'thumb': f['thumbPath'].toString(),
-              'senderName': f['senderPhone'].toString()
+              'senderName': f['senderName']
             });
-          } else {
-            videos.add({
-              'timestamp': f['timestamp'].toString(),
-              'path': f['msgMedia'].toString(),
-              'thumb': f['thumbPath'].toString(),
-              'senderName': data[0]['contactsName']
-            });
-          }
+          // }
         }
         // print(videos.toString());
         all = videos;

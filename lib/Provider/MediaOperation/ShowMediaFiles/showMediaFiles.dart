@@ -63,15 +63,16 @@ class _MediaFilesState extends State<MediaFiles> {
                       icon: Icon(Icons.group_add),
                       onPressed: () {
                         // Navigator.push(context, route)
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AddMember(
-                                  chatId: widget.chatId,
-                                  name: widget.name,
-                                ),
-                          ),
-                        );
+                        print('modifi your add new memeber functionality');
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => AddMember(
+                        //           chatId: widget.chatId,
+                        //           name: widget.name,
+                        //         ),
+                        //   ),
+                        // );
                       },
                     )
                   : SizedBox()
