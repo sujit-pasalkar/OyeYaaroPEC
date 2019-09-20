@@ -308,7 +308,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
           contentPadding: EdgeInsets.all(5),
           onTap: () {
             // check contact in chat list if not then call startchat service
-            // print(chatList['contactsPin']);
+            print(chatList);
             sendToPrivate(chatList);
           },
           leading: GestureDetector(
@@ -846,7 +846,7 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
         futures.add(upload(index));
       }
       await Future.wait(futures);
-      // print('now got to private chat');
+      print('now got to private chat');
       goToPrivateChat(chatId, chatList);
 
       setState(() {
@@ -1031,17 +1031,20 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
   }
 
   goToPrivateChat(String chatId, Map<String, dynamic> chatList) async {
-    print('opposite user profile pic url :${chatList['profileUrl']}');
+    print('chatId:$chatId');
+    print('opposite user profile pic url :$chatList');
     Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => ChatScreen(
-              chatId: chatId,
+              chatId: chatList['chatId'],
               chatType: 'private',
-              receiverName: chatList['contactsName'],
-              receiverPhone: chatList['contactsPhone'],
-              // profileUrl: chatList['profileUrl']
-              recPin: chatList['contactsPin']),
-        ));
+              receiverName: chatList['chatListRecName'],
+              receiverPhone: chatList['chatListRecPhone'],
+              recPin: chatList['chatListSenderPin']),
+        ),);
+
+
+    // opposite user profile pic url :{chatId: da2dd2h4k0p1wa1f, chatListLastMsg: Hey, chatListSenderPhone: 7972241516, chatListRecPhone: 853056, chatListLastMsgTime: 1568911923112, chatListMsgCount: 0, chatListSenderPin: 877333, chatListRecPin: 853056, chatListSenderName: Abhey Yog Raj , chatListRecName: Desh Rattan }
   }
 }
