@@ -1,6 +1,6 @@
 // dart
 import 'package:oye_yaaro_pec/Components/logout.dart';
-import 'package:oye_yaaro_pec/View/Feeds/feeds.dart';
+// import 'package:oye_yaaro_pec/View/Feeds/feeds.dart';
 import 'package:oye_yaaro_pec/View/recording/video.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -12,7 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // page
 import '../View/Personal/chat_list.dart';
 import '../View/Group/group_list.dart';
-import 'imageProcessor/dashboard.dart';
+// import 'imageProcessor/dashboard.dart';
 
 // mvp
 import '../Models/sharedPref.dart';

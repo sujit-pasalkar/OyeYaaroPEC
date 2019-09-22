@@ -7,7 +7,7 @@ import 'package:path/path.dart' as path;
 import 'package:thumbnails/thumbnails.dart';
 
 class CommonFunctions {
-  final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+  final FlutterFFmpeg _flutterFFmpeg =  FlutterFFmpeg();
   static void showSnackbar(BuildContext _context, String _message) {
     final snackBar = SnackBar(
       content: Text(_message),
@@ -76,7 +76,8 @@ class CommonFunctions {
 
   Future<String> moveProcessedFile(String videoFileName) async {
     File f = new File(videoFileName);
-    String dir = (await getExternalStorageDirectory()).path;
+    String dir = '/storage/emulated/0/';
+    // (await getExternalStorageDirectory()).path;
     String fname = path.basename(f.path);
     String fnamewoext = path.basenameWithoutExtension(f.path);
     String finaldir = '$dir/OyeYaaro/Videos/';
