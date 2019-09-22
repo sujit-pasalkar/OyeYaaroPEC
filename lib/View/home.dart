@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
 
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
-  PageStorageKey feedsKey = PageStorageKey('Feeds');
+  // PageStorageKey feedsKey = PageStorageKey('Feeds');
   PageStorageKey personalKey = PageStorageKey('personalKey');
   PageStorageKey groupsKey = PageStorageKey('groupsKey');
   PageStorageKey recordingsKey = PageStorageKey('RecordingsKey');
@@ -70,7 +70,7 @@ class _HomePageState extends State<HomePage> {
     });
 
     _isBottomBarVisible = false;
-    hideButtonController =  ScrollController();
+    hideButtonController = ScrollController();
     hideButtonController.addListener(() {
       if (hideButtonController.position.userScrollDirection ==
           ScrollDirection.reverse) {
@@ -115,21 +115,14 @@ class _HomePageState extends State<HomePage> {
 
   buildBody() {
     switch (pref.currentIndex) {
-      case 0:
-        return Feeds(
-          hideButtonController: hideButtonController,
-          key: feedsKey,
-        );
-        break;
+      // case 0:
+      //   return Feeds(
+      //     hideButtonController: hideButtonController,
+      //     key: feedsKey,
+      //   );
+      //   break;
 
-      case 1:
-        return RecordedVideoScreen(
-          hideButtonController: hideButtonController,
-          key: recordingsKey,
-        );
-        break;
-
-      case 2:
+      case 0: //0
         return ChatList(
           hideButtonController: hideButtonController,
           key: personalKey,
@@ -137,16 +130,24 @@ class _HomePageState extends State<HomePage> {
         );
         break;
 
-      case 3:
+      case 1:
         return GroupList(
           hideButtonController: hideButtonController,
           key: groupsKey,
         );
         break;
 
-      case 4:
-        return ImageProcessor();
+      case 2:
+        return RecordedVideoScreen(
+          hideButtonController: hideButtonController,
+          key: recordingsKey,
+        );
+
         break;
+
+      // case 4:
+      //   return ImageProcessor();
+      //   break;
     }
   }
 
@@ -170,43 +171,21 @@ class _HomePageState extends State<HomePage> {
       },
       items: <BottomNavigationBarItem>[
         // 1
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.home,
-            color: Colors.white,
-          ),
-          activeIcon: Icon(
-            Icons.home,
-            color: Colors.black,
-          ),
-          title: SizedBox(
-            height: 0.0,
-            width: 0.0,
-          ),
-        ),
-        // 2
-        BottomNavigationBarItem(
-          icon: Image(
-            image:  AssetImage("assets/VIDEO_BACKGROUND.png"),
-            color: Colors.white,
-            width: 40.0,
-            height: 40.0,
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-          ),
-          activeIcon: Image(
-            image: AssetImage("assets/VIDEO_BACKGROUND.png"),
-            color: Colors.black,
-            width: 40.0,
-            height: 40.0,
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-          ),
-          title: SizedBox(
-            height: 0.0,
-            width: 0.0,
-          ),
-        ),
+        // BottomNavigationBarItem(
+        //   icon: Icon(
+        //     Icons.home,
+        //     color: Colors.white,
+        //   ),
+        //   activeIcon: Icon(
+        //     Icons.home,
+        //     color: Colors.black,
+        //   ),
+        //   title: SizedBox(
+        //     height: 0.0,
+        //     width: 0.0,
+        //   ),
+        // ),
+
         // 3
         BottomNavigationBarItem(
           icon: Icon(
@@ -222,10 +201,10 @@ class _HomePageState extends State<HomePage> {
             width: 0.0,
           ),
         ),
-          //4
+        //4
         BottomNavigationBarItem(
           icon: Image(
-            image:  AssetImage("assets/GROUP.png"),
+            image: AssetImage("assets/GROUP.png"),
             color: Colors.white,
             width: 40.0,
             height: 40.0,
@@ -233,7 +212,7 @@ class _HomePageState extends State<HomePage> {
             alignment: Alignment.center,
           ),
           activeIcon: Image(
-            image:  AssetImage("assets/GROUP.png"),
+            image: AssetImage("assets/GROUP.png"),
             color: Colors.black,
             width: 40.0,
             height: 40.0,
@@ -245,15 +224,38 @@ class _HomePageState extends State<HomePage> {
             width: 0.0,
           ),
         ),
-          //5
+        //5
+        // BottomNavigationBarItem(
+        //   icon: Icon(
+        //     Icons.movie_filter,
+        //     color: Colors.white,
+        //   ),
+        //   activeIcon: Icon(
+        //     Icons.movie_filter,
+        //     color: Colors.black,
+        //   ),
+        //   title: SizedBox(
+        //     height: 0.0,
+        //     width: 0.0,
+        //   ),
+        // ),
+        // 2
         BottomNavigationBarItem(
-          icon: Icon(
-            Icons.movie_filter,
+          icon: Image(
+            image: AssetImage("assets/VIDEO_BACKGROUND.png"),
             color: Colors.white,
+            width: 40.0,
+            height: 40.0,
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
           ),
-          activeIcon: Icon(
-            Icons.movie_filter,
+          activeIcon: Image(
+            image: AssetImage("assets/VIDEO_BACKGROUND.png"),
             color: Colors.black,
+            width: 40.0,
+            height: 40.0,
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
           ),
           title: SizedBox(
             height: 0.0,

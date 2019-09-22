@@ -77,3 +77,7 @@ cl : [{name: Akshay jadhav. plmlogix, phone: 7020988762, pin: 121212}, {name: Ga
 
 add sender name filed  in group chat list, table
 pchat,pchatlist
+
+//download urls invite
+download1 ==conatact
+download2 == PEC

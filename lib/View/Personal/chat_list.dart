@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Provider/ChatService/common.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
@@ -150,12 +151,137 @@ class _ChatListState extends State<ChatList> {
     pref.setPrivateChatHistory(true);
   }
 
+  _onMenuItemSelect(String option) {
+    switch (option) {
+      case 'Logout':
+        logout();
+        break;
+    }
+  }
+
+  logout() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            contentPadding:
+                EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
+            children: <Widget>[
+              Container(
+                color: Color(0xffb00bae3),
+                margin: EdgeInsets.all(0.0),
+                padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
+                height: 80.0,
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      'Logout',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 10),
+                    ),
+                    Text(
+                      'Are you sure to logout from app?',
+                      style: TextStyle(color: Colors.white70, fontSize: 14.0),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                height: 50,
+                child: Row(
+                  children: <Widget>[
+                    SimpleDialogOption(
+                      onPressed: () {
+                        Navigator.pop(context, 0);
+                      },
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            child: Icon(
+                              Icons.cancel,
+                              color: Color(0xffb00bae3),
+                            ),
+                            margin: EdgeInsets.only(right: 10.0),
+                          ),
+                          Text(
+                            'CANCEL',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
+                    ),
+                    SimpleDialogOption(
+                      onPressed: () {
+                        FirebaseAuth.instance.signOut().then((action) {
+                          pref.clearUser();
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                              '/loginpage', (Route<dynamic> route) => false);
+                        });
+                      },
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            child: Icon(
+                              Icons.check_circle,
+                              color: Color(0xffb00bae3),
+                            ),
+                            margin: EdgeInsets.only(right: 10.0),
+                          ),
+                          Text(
+                            'YES',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          );
+        });
+  }
+
+  Widget _menuBuilder() {
+    return PopupMenuButton<String>(
+      icon: Icon(
+        Icons.more_vert,
+        color: Colors.white,
+      ),
+      tooltip: "Menu",
+      onSelected: _onMenuItemSelect,
+      itemBuilder: (BuildContext context) => [
+        PopupMenuItem<String>(
+          value: 'Logout',
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0),
+            child: Row(
+              children: <Widget>[
+                Text("Logout"),
+                Spacer(),
+                Icon(Icons.power_settings_new),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: Text("Oye Yaaro"),
           flexibleSpace: FlexAppbar(),
+          actions: <Widget>[
+            _menuBuilder()
+          ],
         ),
         body: StreamBuilder<List<Map>>(
             stream: bloc.items,

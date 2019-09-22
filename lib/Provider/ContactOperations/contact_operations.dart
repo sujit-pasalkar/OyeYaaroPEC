@@ -1,17 +1,16 @@
 // not needed in Last PEC app(cybage)
-import 'dart:async';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:oye_yaaro_pec/Models/sharedPref.dart';
-import 'package:oye_yaaro_pec/Models/url.dart';
-import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
-import 'package:contacts_service/contacts_service.dart';
+// import 'dart:async';
+// import 'dart:convert';
+// import 'package:http/http.dart' as http;
+// import 'package:oye_yaaro_pec/Models/sharedPref.dart';
+// import 'package:oye_yaaro_pec/Models/url.dart';
+// import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
+// import 'package:contacts_service/contacts_service.dart';
 import 'package:share_extend/share_extend.dart';
 
 ContactOperation co = ContactOperation();
 
 class ContactOperation {
-
   // Future getContacts() async {
   //   print('in contact operation');
   //   Completer _c = Completer();
@@ -110,9 +109,11 @@ class ContactOperation {
   //   return _c.future;
   // }
 
-  static sharePin(String phone) {
+  static sharePin(String pin) {
     ShareExtend.share(
-        "You are invited to join OyeYaaro. Download this App using following url http://oyeyaaro.plmlogix.com/download",
+        "You are invited to join your classmates @OyeYaaro. Download this App using http://oyeyaaro.plmlogix.com/download2 use PIN #$pin to login.See you in the room chat!",
+
+        // "You are invited to join OyeYaaro. Download this App using following url http://oyeyaaro.plmlogix.com/download",
         "text");
   }
 }

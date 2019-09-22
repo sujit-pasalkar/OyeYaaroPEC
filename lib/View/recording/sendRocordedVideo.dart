@@ -4,6 +4,7 @@ import 'package:oye_yaaro_pec/Provider/MediaOperation/confirmSendVid.dart';
 import 'package:oye_yaaro_pec/View/recording/video.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:path_provider/path_provider.dart';
 
 typedef SendCallback = void Function(File recorderVideo);
 
@@ -16,7 +17,7 @@ class SendRecordedVideo extends StatefulWidget {
 }
 
 class _SendRecordedVideoState extends State<SendRecordedVideo> {
-  Directory directory = new Directory('/storage/emulated/0/OyeYaaro/Videos');
+  Directory directory; //=  Directory('/storage/emulated/0/OyeYaaro/Videos');
   List<String> videos = [];
 
   @override
@@ -26,15 +27,20 @@ class _SendRecordedVideoState extends State<SendRecordedVideo> {
   }
 
   Future getVideos() async {
-    var exists = await directory.exists();
+    directory = await getExternalStorageDirectory();
+    print('directory:$directory');
+    Directory vidDir = Directory(directory.path + "/OyeYaaro/Videos");
+
+    var exists = await vidDir.exists();
 
     if (exists) {
-      directory.listSync(recursive: true, followLinks: true).forEach((f) {
+      vidDir.listSync(recursive: true, followLinks: true).forEach((f) {
         if (f.path.toString().endsWith('.mp4')) {
           videos.add(f.path);
         }
       });
     }
+    print('video length:${videos.length}');
   }
 
   @override
@@ -75,8 +81,8 @@ class _SendRecordedVideoState extends State<SendRecordedVideo> {
                       color: Colors.white,
                     ),
                   ),
-                  onPressed: () async{
-                  await  Navigator.push(
+                  onPressed: () async {
+                    await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => RecordedVideoScreen()));
@@ -84,7 +90,8 @@ class _SendRecordedVideoState extends State<SendRecordedVideo> {
                   },
                 )
               ],
-            ))
+            ),
+          )
         : Container(
             height: 140,
             child: ListView.builder(
@@ -95,14 +102,13 @@ class _SendRecordedVideoState extends State<SendRecordedVideo> {
               itemBuilder: (BuildContext context, int i) {
                 return GestureDetector(
                   onTap: () async {
-                    print('path:${videos[i]}');
                     String val = await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => ConfirmSendVid(
                                   img: File(videos[i]),
                                 )));
-                    print('nav : $val');
+                    // print('nav : $val');
                     if (val == 'ok') {
                       Navigator.pop(context);
                       widget.sendRecordedVideo(File(videos[i]));
@@ -114,7 +120,7 @@ class _SendRecordedVideoState extends State<SendRecordedVideo> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: FileImage(
-                          File('/storage/emulated/0/OyeYaaro/Thumbnails/' +
+                          File('/${directory.path}/OyeYaaro/Thumbnails/' +
                               videos[i]
                                   .split("/")
                                   .last

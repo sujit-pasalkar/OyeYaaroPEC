@@ -22,7 +22,7 @@ class RecordedVideoScreen extends StatefulWidget {
 class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
   ScrollController _scrollController = ScrollController();
   Directory directory; 
-  Directory thumbailDirectory;
+  // Directory thumbnailDirectory;
 
   List<bool> showShareVideoCheckBox = <bool>[];
   File videoFile;

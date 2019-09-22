@@ -2214,7 +2214,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             Padding(
                               padding: const EdgeInsets.only(top: 5.0),
                               child: Text(
-                                'Recorder \n Video',
+                                'Recorded \n Video',
                                 style: TextStyle(color: Colors.grey[700]),
                               ),
                             ),
