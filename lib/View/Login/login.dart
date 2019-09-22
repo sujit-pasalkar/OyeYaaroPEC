@@ -26,7 +26,11 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _phone = TextEditingController();
 
   List<DropdownMenuItem<String>> _countryCodes = [];
-  String phoneNo, smsCode = '', verificationId, _countryCode,loadingMessage = '';
+  String phoneNo,
+      smsCode = '',
+      verificationId,
+      _countryCode,
+      loadingMessage = '';
   bool userVerified = false,
       loading = false,
       smsCodeSent = false,
@@ -49,16 +53,16 @@ class _LoginPageState extends State<LoginPage> {
   void loadData() {
     _countryCodes = [];
     _countryCodes.add(
-       DropdownMenuItem(
-          child:  Text(
+      DropdownMenuItem(
+          child: Text(
             'India',
             style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
           ),
           value: '+91'),
     );
 
-    _countryCodes.add( DropdownMenuItem(
-        child:  Text(
+    _countryCodes.add(DropdownMenuItem(
+        child: Text(
           'United States',
           style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
         ),
@@ -85,6 +89,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _verifyPhoneNumber() async {
+    print('in');
     final PhoneVerificationCompleted verificationCompleted =
         (AuthCredential phoneAuthCredential) {
       FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
@@ -97,10 +102,10 @@ class _LoginPageState extends State<LoginPage> {
         this.loading = false;
       });
       _scaffoldKey.currentState.showSnackBar(SnackBar(
-        content: Text('Verification Failed'
-            ),
+        content: Text('Verification Failed'),
       ));
     };
+    // print('fail');
 
     final PhoneCodeSent codeSent =
         (String verificationId, [int forceResendingToken]) async {
@@ -111,6 +116,7 @@ class _LoginPageState extends State<LoginPage> {
       });
       timer();
     };
+    print('codesent:$codeSent');
 
     final PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
         (String verificationId) {
@@ -131,31 +137,30 @@ class _LoginPageState extends State<LoginPage> {
 
   void _signInWithPhoneNumber() async {
     try {
-
       final AuthCredential credential = PhoneAuthProvider.getCredential(
         verificationId: verificationId,
         smsCode: smsCode,
       );
-      // print('in signinwithphone-- code:$smsCode,id:$verificationId');
+      print('in signinwithphone-- code:$smsCode,id:$verificationId');
 
       final FirebaseUser user =
           await FirebaseAuth.instance.signInWithCredential(credential);
       print('user: $user');
       final FirebaseUser currentUser =
           await FirebaseAuth.instance.currentUser();
-      print('currentUser: $currentUser');
+      // print('currentUser: $currentUser');
       assert(user.uid == currentUser.uid);
       setState(() {
         if (user != null) {
-          print('Successfully signed in');
+          // print('Successfully signed in');
           register();
         } else {
           throw Exception('We couldn\'t verify your code, please try again!');
         }
       });
     } catch (e) {
-      _scaffoldKey.currentState.showSnackBar(
-          SnackBar(content: Text('Invalid OTP'), backgroundColor: Colors.redAccent));
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text('Invalid OTP'), backgroundColor: Colors.redAccent));
       setState(() {
         this.loading = false;
       });
@@ -163,29 +168,27 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> register() async {
-     setState(() {
-        this.loading = true;
-        loadingMessage = 'wait a while...';
-      });
+    _scaffoldKey.currentState.showSnackBar(SnackBar(
+      content: Text(
+        '$_countryCode $phoneNo Verified Successfully.',
+        style: TextStyle(color: Colors.white),
+      ),
+      duration: Duration(seconds: 2),
+      backgroundColor: Colors.green[400],
+    ));
+    setState(() {
+      this.loading = true;
+      loadingMessage = ''; //wait a while...
+    });
     try {
       pref.setPhone(int.parse(phoneNo));
       _timer.cancel();
       // set contacts
       // await co.getContacts();
-       setState(() {
+      setState(() {
         this.loading = false;
         loadingMessage = '';
       });
-
-
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
-        content: Text(
-          '$_countryCode $phoneNo Verified Successfully.',
-          style: TextStyle(color: Colors.white),
-        ),
-        duration: Duration(seconds: 2),
-        backgroundColor: Colors.green[400],
-      ));
 
       Navigator.pushReplacement(
         context,
@@ -193,6 +196,7 @@ class _LoginPageState extends State<LoginPage> {
           builder: (context) => Pin(),
         ),
       );
+      // 4089217242
     } catch (e) {
       _scaffoldKey.currentState.showSnackBar(SnackBar(
         content: Text(
@@ -203,6 +207,10 @@ class _LoginPageState extends State<LoginPage> {
         backgroundColor: Colors.red[400],
       ));
     }
+    setState(() {
+      this.loading = false;
+      loadingMessage = '';
+    });
   }
 
   phoneConfirmAlert() async {
@@ -227,7 +235,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     loadData();
-    return  Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
       resizeToAvoidBottomPadding: true,
       body: WillPopScope(
@@ -510,7 +518,7 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                           Padding(
-                            padding:  EdgeInsets.only(top: 15.0),
+                            padding: EdgeInsets.only(top: 15.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
@@ -595,11 +603,14 @@ class _LoginPageState extends State<LoginPage> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30.0)),
                     onPressed: () {
+                      // print('$verifybtn');
                       if (verifybtn == null) {
+                        // print('null');
                         setState(() {
                           verifybtn = false;
                         });
                       } else if (verifybtn) {
+                        // print('j');
                         phoneConfirmAlert();
                       }
                     },

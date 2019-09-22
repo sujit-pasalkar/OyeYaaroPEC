@@ -21,7 +21,7 @@ class RecordedVideoScreen extends StatefulWidget {
 
 class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
   ScrollController _scrollController = ScrollController();
-  Directory directory; 
+  Directory directory;
   // Directory thumbnailDirectory;
 
   List<bool> showShareVideoCheckBox = <bool>[];
@@ -58,7 +58,8 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
 
     // if (exists) {
     vidDir.listSync(recursive: true, followLinks: true).forEach((f) {
-      if (f.path.toString().endsWith('.mp4')) {// || f.path.toString().endsWith('.mkv')
+      if (f.path.toString().endsWith('.mp4')) {
+        // || f.path.toString().endsWith('.mkv')
         videos.add(f.path);
         showShareVideoCheckBox.add(false);
       }
@@ -429,5 +430,7 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
       context,
       MaterialPageRoute(builder: (context) => RecordClip()),
     );
+    // final Directory extDir = await getExternalStorageDirectory();
+    // print('getExternalStorageDirectory:${extDir.path}');
   }
 }

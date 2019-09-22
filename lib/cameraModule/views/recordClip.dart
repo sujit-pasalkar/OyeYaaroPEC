@@ -138,13 +138,13 @@ class _RecordClipState extends State<RecordClip> with TickerProviderStateMixin {
       return Container(
         child: Stack(
           children: <Widget>[
-              new Transform.scale(
+               Transform.scale(
                 scale: 1.1/ controller.value.aspectRatio,
                 child: 
-                new Center(
-                  child: new AspectRatio(
+                 Center(
+                  child:  AspectRatio(
                       aspectRatio:controller.value.aspectRatio,
-                      child: new CameraPreview(controller)),
+                      child:  CameraPreview(controller)),
                 ),
               ),
             Align(
@@ -347,13 +347,14 @@ class _RecordClipState extends State<RecordClip> with TickerProviderStateMixin {
   void onVideoRecordButtonPressed() {
     print('started recording........');
     startVideoRecording().then((String filePath) {
+      print('*********************path:$filePath');
       if (mounted) setState(() {});
     });
   }
 
   Future<String> startVideoRecording() async {
     if (!controller.value.isInitialized) {
-      print('!controller.value.isInitialized');
+      // print('!controller.value.isInitialized');
       CommonFunctions.showSnackbar(context, 'Error: select a camera first.');
       return null;
     }
