@@ -17,7 +17,8 @@ import '../../Models/sharedPref.dart';
 // provider
 import '../../Provider/SqlCool/database_creator.dart';
 import '../../Provider/SqlCool/sql_queries.dart';
-import '../../Provider/chatservice/common.dart';
+// import '../../Provider/chatservice/common.dart';
+import '../../Provider/ChatService/common.dart';
 // plugin
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
