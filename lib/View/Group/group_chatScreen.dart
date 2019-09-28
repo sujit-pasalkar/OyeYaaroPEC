@@ -1450,15 +1450,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 )
               : GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MyProfile(
-                          pin: pref.pin,
-                          // phone: pref.phone,
-                        ),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => MyProfile(
+                    //       pin: pref.pin,
+                    //       // phone: pref.phone,
+                    //     ),
+                    //   ),
+                    // );
                   },
                   child: Container(
                     margin: EdgeInsets.only(right: 8),

@@ -12,7 +12,7 @@ import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
 import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
 import 'package:oye_yaaro_pec/View/Group/group_chatScreen.dart';
 import 'package:oye_yaaro_pec/View/Personal/personal_chatScreen.dart';
-import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
+// import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -313,16 +313,16 @@ class _ShareRecordedVideoState extends State<ShareRecordedVideo> {
           },
           leading: GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MyProfile(
-                    pin: pref.pin.toString() == chatList['chatListSenderPin']
-                        ? int.parse(chatList['chatListRecPin'])
-                        : int.parse(chatList['chatListSenderPin']),
-                  ),
-                ),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => MyProfile(
+              //       pin: pref.pin.toString() == chatList['chatListSenderPin']
+              //           ? int.parse(chatList['chatListRecPin'])
+              //           : int.parse(chatList['chatListSenderPin']),
+              //     ),
+              //   ),
+              // );
             },
             child: Container(
               padding: EdgeInsets.all(2),

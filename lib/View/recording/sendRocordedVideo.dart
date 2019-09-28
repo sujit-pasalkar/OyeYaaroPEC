@@ -17,7 +17,7 @@ class SendRecordedVideo extends StatefulWidget {
 }
 
 class _SendRecordedVideoState extends State<SendRecordedVideo> {
-  Directory directory; //=  Directory('/storage/emulated/0/OyeYaaro/Videos');
+  Directory directory=  Directory('/storage/emulated/0');
   List<String> videos = [];
 
   @override
@@ -27,7 +27,7 @@ class _SendRecordedVideoState extends State<SendRecordedVideo> {
   }
 
   Future getVideos() async {
-    directory = await getExternalStorageDirectory();
+    // directory = await getExternalStorageDirectory();
     print('directory:$directory');
     Directory vidDir = Directory(directory.path + "/OyeYaaro/Videos");
 

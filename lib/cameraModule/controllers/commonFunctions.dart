@@ -37,7 +37,7 @@ class CommonFunctions {
 
   Future<String> mergeAudio(String videoFilename, String audioFilename) async {
     String tempPath = (await getTemporaryDirectory()).path;
-    File a = new File(videoFilename);
+    File a =  File(videoFilename);
     String basename = path.basename(a.path);
     String dir =
         (await getExternalStorageDirectory() /* getApplicationDocumentsDirectory() */)
@@ -92,7 +92,8 @@ class CommonFunctions {
   }
 
   Future<String> createThumbnail(String videoFile, String filename) async {
-    String dir = (await getExternalStorageDirectory()).path;
+    String dir = '/storage/emulated/0/';
+    // (await getExternalStorageDirectory()).path;
     String thumbs = '$dir/OyeYaaro/Thumbnails/';
     String finalfilepath = '$thumbs$filename.png';
 

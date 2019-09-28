@@ -187,15 +187,15 @@ class _CreateGroupState extends State<CreateGroup> {
                                         ),
                                       ),
                                       onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => MyProfile(
-                                              pin: int.parse(searchresult[index]
-                                                  ['PinCode']),
-                                            ),
-                                          ),
-                                        );
+                                        // Navigator.push(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (context) => MyProfile(
+                                        //       pin: int.parse(searchresult[index]
+                                        //           ['PinCode']),
+                                        //     ),
+                                        //   ),
+                                        // );
                                       }),
                                   title: searchresult[index]['Name'] == null
                                       ? Text(

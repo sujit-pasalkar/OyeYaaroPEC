@@ -21,7 +21,7 @@ class RecordedVideoScreen extends StatefulWidget {
 
 class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
   ScrollController _scrollController = ScrollController();
-  Directory directory;
+  Directory directory = Directory('/storage/emulated/0');
   // Directory thumbnailDirectory;
 
   List<bool> showShareVideoCheckBox = <bool>[];
@@ -45,7 +45,8 @@ class _VedioRecordingScreenState extends State<RecordedVideoScreen> {
 
   Future<List<String>> listDir() async {
     print('in listDir');
-    directory = await getExternalStorageDirectory();
+    // directory = 
+    // await getExternalStorageDirectory();
     print('directory:$directory');
 
     List<String> videos = <String>[];

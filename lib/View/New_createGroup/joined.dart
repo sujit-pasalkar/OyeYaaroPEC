@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 import 'package:oye_yaaro_pec/Models/url.dart';
 import 'package:oye_yaaro_pec/View/Personal/personal_chatScreen.dart';
-import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
+// import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 // import '../../HomePage/ChatPage/PrivateChatPage/privateChatePage.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 // import '../../ProfilePage/profile.dart';
@@ -143,14 +143,14 @@ class UsersList extends StatelessWidget {
                           ),
                         ),
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MyProfile(
-                                pin: int.parse(users[position].UserPin),
-                              ),
-                            ),
-                          );
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => MyProfile(
+                          //       pin: int.parse(users[position].UserPin),
+                          //     ),
+                          //   ),
+                          // );
                         }),
                     title: GestureDetector(
                       child: Text(

@@ -102,12 +102,12 @@ class _FeedsState extends State<Feeds> with SingleTickerProviderStateMixin {
         break;
 
         case 'My Profile':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MyProfile(pin: pref.pin,),
-          ),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => MyProfile(pin: pref.pin,),
+        //   ),
+        // );
         break;
 
         case 'Filters':

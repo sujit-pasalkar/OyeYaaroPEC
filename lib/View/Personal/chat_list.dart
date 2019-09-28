@@ -8,7 +8,7 @@ import 'package:oye_yaaro_pec/Theme/flexAppBar.dart';
 // import 'package:oye_yaaro_pec/View/Contacts/contactPage.dart';
 import 'package:oye_yaaro_pec/View/New_createGroup/createGroup.dart';
 import 'package:oye_yaaro_pec/View/Personal/personal_chatScreen.dart';
-import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
+// import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -385,16 +385,16 @@ class _ChatListState extends State<ChatList> {
           leading: GestureDetector(
             onTap: () {
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MyProfile(
-                    pin: pref.pin.toString() == chatList['chatListSenderPin']
-                        ? int.parse(chatList['chatListRecPin'])
-                        : int.parse(chatList['chatListSenderPin']),
-                  ),
-                ),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => MyProfile(
+              //       pin: pref.pin.toString() == chatList['chatListSenderPin']
+              //           ? int.parse(chatList['chatListRecPin'])
+              //           : int.parse(chatList['chatListSenderPin']),
+              //     ),
+              //   ),
+              // );
 
               // print(pref.pin.toString() == chatList['chatListSenderPin']
               //     ? 'http://54.200.143.85:4200/profiles/now/' +

@@ -86,14 +86,14 @@ class _CreateGroupWithNameState extends State<CreateGroupWithName> {
                         leading: GestureDetector(
                           onTap: () {
                             print(widget.addMembers);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MyProfile(
-                                  pin: int.parse(widget.addMembers[i]['pin']),
-                                ),
-                              ),
-                            );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => MyProfile(
+                            //       pin: int.parse(widget.addMembers[i]['pin']),
+                            //     ),
+                            //   ),
+                            // );
                           },
                           child: Container(
                             padding: EdgeInsets.all(1),

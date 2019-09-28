@@ -351,14 +351,14 @@ class _FeedBuilder extends State<UserFeedBuilder> {
                 child: widget.ownerId == pref.phone
                     ? GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MyProfile(
-                                pin: widget.ownerId,
-                              ),
-                            ),
-                          );
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => MyProfile(
+                          //       pin: widget.ownerId,
+                          //     ),
+                          //   ),
+                          // );
                         },
                         child: CircleAvatar(
                           backgroundImage: NetworkImage(pref.profileUrl),

@@ -98,6 +98,7 @@ class _LoginPageState extends State<LoginPage> {
 
     final PhoneVerificationFailed verificationFailed =
         (AuthException authException) {
+          print('Exc:${authException.message}');
       setState(() {
         this.loading = false;
       });
@@ -105,7 +106,6 @@ class _LoginPageState extends State<LoginPage> {
         content: Text('Verification Failed'),
       ));
     };
-    // print('fail');
 
     final PhoneCodeSent codeSent =
         (String verificationId, [int forceResendingToken]) async {

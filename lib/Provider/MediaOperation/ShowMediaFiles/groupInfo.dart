@@ -8,7 +8,7 @@ import 'package:oye_yaaro_pec/Models/url.dart';
 import 'package:oye_yaaro_pec/Provider/Firebase/realtime_database_operation.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/database_creator.dart';
 import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
-import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
+// import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sqlcool/sqlcool.dart';
@@ -80,14 +80,14 @@ class _GroupInfoState extends State<GroupInfo> {
         return GestureDetector(
           onTap: () {
             print('show profile');
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MyProfile(
-                  pin: int.parse(snapshot[position]['memberPin']),
-                ),
-              ),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => MyProfile(
+            //       pin: int.parse(snapshot[position]['memberPin']),
+            //     ),
+            //   ),
+            // );
           },
           onLongPress: widget.admin == pref.pin.toString() &&
                   snapshot[position]['memberPin'] != widget.admin

@@ -115,14 +115,14 @@ class PhotosList extends StatelessWidget {
                       ),
                     ),
                     onTap: () {
-                      Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MyProfile(
-                                pin: int.parse(users[position].UserPin),
-                              ),
-                            ),
-                          );
+                      // Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) => MyProfile(
+                      //           pin: int.parse(users[position].UserPin),
+                      //         ),
+                      //       ),
+                      //     );
                           
                       // Navigator.push(
                       //     context,

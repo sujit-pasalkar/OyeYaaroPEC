@@ -2,7 +2,7 @@ import 'package:oye_yaaro_pec/Components/feeds_image.dart';
 import 'package:oye_yaaro_pec/Models/sharedPref.dart';
 // import 'package:oye_yaaro_pec/Provider/SqlCool/sql_queries.dart';
 import 'package:oye_yaaro_pec/View/Feeds/mediaAndComment.dart';
-import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
+// import 'package:oye_yaaro_pec/View/Profile/myProfile.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/painting.dart';
@@ -375,14 +375,14 @@ class _FeedBuilder extends State<FeedBuilder> {
                 child: widget.ownerId == pref.phone
                     ? GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MyProfile(
-                                pin: widget.ownerId,
-                              ),
-                            ),
-                          );
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => MyProfile(
+                          //       pin: widget.ownerId,
+                          //     ),
+                          //   ),
+                          // );
                         },
                         child: CircleAvatar(
                           backgroundImage: NetworkImage(pref.profileUrl),
@@ -393,14 +393,14 @@ class _FeedBuilder extends State<FeedBuilder> {
                       )
                     : GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MyProfile(
-                                pin: widget.ownerId,
-                              ),
-                            ),
-                          );
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => MyProfile(
+                          //       pin: widget.ownerId,
+                          //     ),
+                          //   ),
+                          // );
                         },
                         child: ClipOval(
                           child: CircleAvatar(
